@@ -1,0 +1,30 @@
+# CI Workflow — delegates to mbl-actionhub reusable CI workflow
+#
+# Triggers:
+#   - push to main or development (full build)
+#   - workflow_call (invoked by publish.yml before every Maven publish)
+#
+# PRs are handled separately by pr-check.yml (fast gate, no iOS/Linux).
+
+name: CI
+
+on:
+  push:
+    branches: [ "main", "development" ]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    uses: MobileByteLabs/mbl-actionhub/.github/workflows/ci-kmp-library.yml@v1.6.1
+    with:
+      module-pattern: 'cmp-'
+      java-version: '21'
+      java-distribution: 'zulu'
+      run-quality: true
