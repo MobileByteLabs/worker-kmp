@@ -4,15 +4,25 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 }
 
 kotlin {
-    androidTarget()
+    androidLibrary {
+        namespace = "io.github.mobilebytelabs.worker.sample"
+        compileSdk =
+            libs.versions.android.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
+    }
 
-    jvm("desktop")
+    jvm()
 
     listOf(
         iosX64(),
@@ -35,10 +45,8 @@ kotlin {
                 outputFileName = "sampleApp.js"
                 devServer =
                     (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                        static {
-                            add(rootDirPath)
-                            add(projectDirPath)
-                        }
+                        static(rootDirPath)
+                        static(projectDirPath)
                     }
             }
         }
@@ -46,8 +54,6 @@ kotlin {
     }
 
     sourceSets {
-        val desktopMain by getting
-
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
         }
@@ -64,48 +70,9 @@ kotlin {
             implementation(project(":cmp-worker"))
         }
 
-        desktopMain.dependencies {
+        jvmMain.dependencies {
             implementation(libs.compose.desktop.currentOs)
         }
-    }
-}
-
-android {
-    namespace = "io.github.mobilebytelabs.worker.sample"
-    compileSdk =
-        libs.versions.android.compileSdk
-            .get()
-            .toInt()
-
-    defaultConfig {
-        applicationId = "io.github.mobilebytelabs.worker.sample"
-        minSdk =
-            libs.versions.android.minSdk
-                .get()
-                .toInt()
-        targetSdk =
-            libs.versions.android.targetSdk
-                .get()
-                .toInt()
-        versionCode = 1
-        versionName = "1.0"
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
