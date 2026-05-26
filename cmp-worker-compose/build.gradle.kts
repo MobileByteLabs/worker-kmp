@@ -14,10 +14,11 @@ version = providers.gradleProperty("worker.version").get()
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.github.mobilebytelabs.worker.compose"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+        withHostTestBuilder {}.configure {}
         compilerOptions { jvmTarget = JvmTarget.JVM_11 }
     }
     jvm("desktop") {
@@ -32,7 +33,7 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":cmp-worker-kmp"))
-                api(compose.runtime)
+                api(libs.compose.runtime)
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

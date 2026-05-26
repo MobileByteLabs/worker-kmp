@@ -12,7 +12,7 @@ version = providers.gradleProperty("worker.version").get()
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.github.mobilebytelabs.worker.android"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()

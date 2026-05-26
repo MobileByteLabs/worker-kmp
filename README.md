@@ -3,19 +3,23 @@
 A Kotlin Multiplatform background task scheduler — the `WorkManager` API you know from Android, available on every platform.
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp)](https://central.sonatype.com/search?q=io.github.mobilebytelabs)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.1-blue)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3-blue)](https://kotlinlang.org)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
 ## Platform Support
 
-| Platform | Module | Min Version |
-|---|---|---|
-| Android | `worker-android` | API 21 |
-| iOS | `worker-ios` | iOS 14.0 |
-| Desktop (JVM) | `worker-desktop` | JDK 11 |
-| Web (JS) | `worker-web` | Chrome/Node |
-| Compose Multiplatform | `worker-compose` | — |
-| All (common API) | `worker-kmp` | — |
+| Platform | Module | Foreground | Background | Min Version |
+|---|---|:---:|:---:|---|
+| Android | `worker-android` | ✅ | ✅ via `androidx.work` | API 21 |
+| Desktop (JVM) | `worker-desktop` | ✅ | ✅ in-process | JDK 11 |
+| iOS | `worker-ios` | ✅ | ⚠️ foreground only¹ | iOS 14.0 |
+| Web (JS/WasmJs) | `worker-web` | ✅ | ⚠️ foreground only¹ | Chrome/Node |
+| Compose Multiplatform | `worker-compose` | ✅ | — | — |
+| All (common API) | `worker-kmp` | ✅ | — | — |
+
+> ¹ **iOS and Web** are marked `@ExperimentalWorkerApi`. Work runs only while the app is in the
+> foreground. Background execution (BGAppRefreshTask on iOS, Service Worker on Web) is planned
+> for a future release. Opt in at the call site with `@OptIn(ExperimentalWorkerApi::class)`.
 
 ## Setup
 
@@ -93,13 +97,15 @@ class SyncWorker(context: WorkerContext) : CoroutineWorker(context) {
 // Android
 initializeWorkerAndroid(context, workerFactory)
 
-// iOS
+// iOS  (@ExperimentalWorkerApi — foreground only)
+@OptIn(ExperimentalWorkerApi::class)
 initIosWorkManager(workerFactory)
 
 // Desktop (JVM)
 initializeWorkerDesktop()
 
-// Web (JS)
+// Web (JS/WasmJs  (@ExperimentalWorkerApi — foreground only)
+@OptIn(ExperimentalWorkerApi::class)
 initWebWorkManager(workerFactory)
 ```
 
@@ -373,8 +379,11 @@ class MyApplication : Application() {
 
 ### iOS (Swift / Kotlin)
 
+> **Note:** iOS uses `@ExperimentalWorkerApi` — work runs only while the app is in the foreground.
+
 ```kotlin
 // In your Kotlin iOS module
+@OptIn(ExperimentalWorkerApi::class)
 fun initApp() {
     initIosWorkManager(
         workerFactory = object : IosWorkerFactory {
@@ -398,9 +407,12 @@ fun main() {
 }
 ```
 
-### Web (JS)
+### Web (JS/WasmJs)
+
+> **Note:** Web uses `@ExperimentalWorkerApi` — work runs only while the page is open.
 
 ```kotlin
+@OptIn(ExperimentalWorkerApi::class)
 fun main() {
     initWebWorkManager(
         workerFactory = object : WebWorkerFactory {
