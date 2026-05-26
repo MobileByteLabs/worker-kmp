@@ -1,19 +1,18 @@
 # Publish Workflow — delegates to mbl-actionhub reusable publish workflow
 #
 # Triggers:
-#   - GitHub release (released or prereleased)
-#   - Manual dispatch: workflow_dispatch (optional specific module, optional version override)
+#   - Manual dispatch: workflow_dispatch (trigger from GitHub UI → Actions → Publish → Run workflow)
 #
-# TEMPLATE SETUP: before publishing, update group-id and artifact-id below
-# to match your library's Maven coordinates, then configure these secrets:
+# Version is read from gradle.properties (worker.version).
+# The workflow creates the GitHub release + tag automatically after publishing.
+#
+# Required secrets (org-level):
 #   MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD
 #   SIGNING_KEY_ID, SIGNING_PASSWORD, GPG_KEY_CONTENTS
 
 name: Publish
 
 on:
-  release:
-    types: [released, prereleased]
   workflow_dispatch:
     inputs:
       module:
@@ -21,12 +20,12 @@ on:
         required: false
         type: string
       version:
-        description: 'Override version (leave empty to use build.gradle.kts version)'
+        description: 'Override version (leave empty to use worker.version from gradle.properties)'
         required: false
         type: string
 
 permissions:
-  contents: write          # release creation
+  contents: write
   pull-requests: write
 
 jobs:
@@ -38,10 +37,11 @@ jobs:
       group-id: 'io.github.mobilebytelabs'
       artifact-id: 'worker-kmp'
       version: ${{ inputs.version || '' }}
-      verify-against-maven: false           # set true once your library is on Maven Central
-      bump-after-release: false
+      gradle-properties-key: 'worker.version'
+      verify-against-maven: false
+      bump-after-release: true
       java-version: '21'
       java-distribution: 'zulu'
       sonatype-host: 'CENTRAL_PORTAL'
-      create-github-release: false          # release already exists — this workflow is triggered by it
+      create-github-release: true
     secrets: inherit
