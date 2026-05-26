@@ -7,14 +7,8 @@ group = "io.github.mobilebytelabs"
 version = providers.gradleProperty("worker.version").get()
 
 kotlin {
-    js(IR) {
-        browser()
-        nodejs()
-    }
-    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-    }
+    iosArm64()
+    iosSimulatorArm64()
 
     compilerOptions {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
@@ -23,7 +17,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(project(":worker-kmp"))
+                api(project(":cmp-worker-kmp"))
                 implementation(libs.kotlinx.coroutines.core)
             }
         }
@@ -39,12 +33,12 @@ kotlin {
 mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
-        artifactId = "worker-web",
+        artifactId = "worker-ios",
         version = providers.gradleProperty("worker.version").get()
     )
     pom {
-        name.set("worker-web")
-        description.set("WorkManager-equivalent for Kotlin Multiplatform — Web (JS/Wasm) platform module")
+        name.set("worker-ios")
+        description.set("WorkManager-equivalent for Kotlin Multiplatform — iOS platform module")
         url.set("https://github.com/mobilebytelabs/worker-kmp")
         licenses {
             license {

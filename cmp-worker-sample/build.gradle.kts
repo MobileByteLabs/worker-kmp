@@ -26,7 +26,7 @@ kotlin {
     sourceSets {
         jvmMain {
             dependencies {
-                implementation(project(":worker-desktop"))
+                implementation(project(":cmp-worker-desktop"))
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

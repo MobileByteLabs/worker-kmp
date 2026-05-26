@@ -30,7 +30,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                api(project(":worker-kmp"))
+                api(project(":cmp-worker-kmp"))
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

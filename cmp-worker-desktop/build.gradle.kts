@@ -24,7 +24,7 @@ kotlin {
     sourceSets {
         jvmMain {
             dependencies {
-                api(project(":worker-kmp"))
+                api(project(":cmp-worker-kmp"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
             }

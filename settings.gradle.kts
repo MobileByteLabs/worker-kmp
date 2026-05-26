@@ -35,11 +35,11 @@ dependencyResolutionManagement {
     }
 }
 
-include(":worker-kmp")
-include(":worker-desktop")
-include(":worker-android")
-include(":worker-compose")
-include(":worker-web")
-include(":worker-test")
-include(":worker-ios")
-include(":worker-sample")
+include(":cmp-worker-kmp")
+include(":cmp-worker-desktop")
+include(":cmp-worker-android")
+include(":cmp-worker-compose")
+include(":cmp-worker-web")
+include(":cmp-worker-test")
+include(":cmp-worker-ios")
+include(":cmp-worker-sample")
