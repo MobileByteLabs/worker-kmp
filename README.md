@@ -1,874 +1,536 @@
-# WorkKit KMP ⚡
+# worker-kmp
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-blue)](https://kotlinlang.org/docs/multiplatform.html)
-[![Compose](https://img.shields.io/badge/Jetpack-Compose-green)](https://developer.android.com/jetpack/compose)
-[![License](https://img.shields.io/badge/License-Apache%202.0-orange)](LICENSE)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/workkit-kmp)](https://search.maven.org/artifact/io.github.mobilebytelabs/workkit-kmp)
+A Kotlin Multiplatform background task scheduler — the `WorkManager` API you know from Android, available on every platform.
 
-A powerful, cross-platform background task scheduler built with Kotlin Multiplatform. Schedule, manage, and monitor background work across Android, iOS, and Desktop platforms with a unified API following Clean Architecture principles.
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp)](https://central.sonatype.com/search?q=io.github.mobilebytelabs)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3-blue)](https://kotlinlang.org)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-## ✨ Features
+## Platform Support
 
-- 🚀 **Cross-Platform Support**: Android (WorkManager), iOS (Background Tasks), Desktop (Coroutines)
-- ⏰ **Flexible Scheduling**: One-time, periodic, and delayed task execution
-- 🔄 **Retry Logic**: Configurable retry policies with exponential backoff
-- 🏗️ **Clean Architecture**: SOLID principles with dependency injection support
-- 📊 **Work Monitoring**: Real-time work status tracking and observability
-- 🔧 **Constraint-Based**: Network, battery, storage, and charging constraints
-- 🎯 **Type-Safe**: Kotlin coroutines with structured concurrency
-- 📱 **Compose Integration**: UI components for work status monitoring
-- 🌙 **Material Design 3**: Full theming support including dark mode
-- 🧪 **Testing Ready**: Comprehensive testing utilities and mocks
+| Platform | Module | Foreground | Background | Min Version |
+|---|---|:---:|:---:|---|
+| Android | `worker-android` | ✅ | ✅ via `androidx.work` | API 21 |
+| Desktop (JVM) | `worker-desktop` | ✅ | ✅ in-process | JDK 11 |
+| iOS | `worker-ios` | ✅ | ⚠️ foreground only¹ | iOS 14.0 |
+| Web (JS/WasmJs) | `worker-web` | ✅ | ⚠️ foreground only¹ | Chrome/Node |
+| Compose Multiplatform | `worker-compose` | ✅ | — | — |
+| All (common API) | `worker-kmp` | ✅ | — | — |
 
-## 🚀 Platform Support
+> ¹ **iOS and Web** are marked `@ExperimentalWorkerApi`. Work runs only while the app is in the
+> foreground. Background execution (BGAppRefreshTask on iOS, Service Worker on Web) is planned
+> for a future release. Opt in at the call site with `@OptIn(ExperimentalWorkerApi::class)`.
 
-| Platform | Implementation | Min Version | Features |
-|----------|---------------|-------------|----------|
-| Android  | WorkManager   | API 21+     | ✅ Full feature set |
-| iOS      | BGTaskScheduler | iOS 13+   | ✅ Background processing |
-| Desktop  | Coroutines    | JVM 11+     | ✅ Foreground processing |
+## Setup
 
-## 📦 Installation
-
-### Gradle (Kotlin DSL)
+> **Latest version**: check the Maven Central badge above or visit
+> [central.sonatype.com/search?q=io.github.mobilebytelabs](https://central.sonatype.com/search?q=io.github.mobilebytelabs)
 
 ```kotlin
-dependencies {
-    implementation("io.github.mobilebytelabs:workkit-kmp:1.0.0")
-    
-    // For Compose UI components
-    implementation("io.github.mobilebytelabs:workkit-compose:1.0.0")
-    
-    // Platform-specific implementations (automatically included)
-    // implementation("io.github.mobilebytelabs:workkit-android:1.0.0")
-    // implementation("io.github.mobilebytelabs:workkit-ios:1.0.0")
-    // implementation("io.github.mobilebytelabs:workkit-desktop:1.0.0")
+// build.gradle.kts (libs.versions.toml recommended)
+
+// gradle/libs.versions.toml
+// [versions]
+// worker = "<latest>"   ← replace with the version from Maven Central badge above
+
+kotlin {
+    sourceSets {
+        // Common API — always required
+        commonMain.dependencies {
+            implementation(libs.worker.kmp)
+        }
+
+        // Platform modules — pick the ones you need
+        androidMain.dependencies {
+            implementation(libs.worker.android)
+        }
+        iosMain.dependencies {
+            implementation(libs.worker.ios)
+        }
+        jvmMain.dependencies {
+            implementation(libs.worker.desktop)
+        }
+        jsMain.dependencies {
+            implementation(libs.worker.web)
+        }
+
+        // Testing utilities
+        commonTest.dependencies {
+            implementation(libs.worker.test)
+        }
+    }
 }
 ```
 
-### Version Catalog
+Version catalog entries (`gradle/libs.versions.toml`):
 
 ```toml
 [versions]
-workkit = "1.0.0"
+worker = "<latest>"   # see Maven Central badge at the top of this README
 
 [libraries]
-workkit-kmp = { group = "io.github.mobilebytelabs", name = "workkit-kmp", version.ref = "workkit" }
-workkit-compose = { group = "io.github.mobilebytelabs", name = "workkit-compose", version.ref = "workkit" }
+worker-kmp     = { module = "io.github.mobilebytelabs:worker-kmp",     version.ref = "worker" }
+worker-android = { module = "io.github.mobilebytelabs:worker-android", version.ref = "worker" }
+worker-ios     = { module = "io.github.mobilebytelabs:worker-ios",     version.ref = "worker" }
+worker-desktop = { module = "io.github.mobilebytelabs:worker-desktop", version.ref = "worker" }
+worker-web     = { module = "io.github.mobilebytelabs:worker-web",     version.ref = "worker" }
+worker-test    = { module = "io.github.mobilebytelabs:worker-test",    version.ref = "worker" }
 ```
 
-## 🎯 Quick Start
+## Quick Start
 
-### Basic Work Definition
+### 1. Define a worker
 
 ```kotlin
-class DataSyncWorker : CoroutineWorker() {
-    
-    override suspend fun doWork(
-        inputData: WorkData,
-        progressCallback: ProgressCallback
-    ): WorkResult {
-        return try {
-            val apiKey = inputData.getString(KEY_API_KEY) ?: return WorkResult.failure()
-            val syncType = inputData.getEnum<SyncType>(KEY_SYNC_TYPE) ?: SyncType.INCREMENTAL
-            
-            progressCallback.setProgress(
-                WorkProgress(
-                    progress = 0,
-                    statusMessage = "Starting sync..."
-                )
-            )
-            
-            val syncService = SyncService(apiKey)
-            val result = syncService.syncData(
-                type = syncType,
-                onProgress = { progress ->
-                    progressCallback.setProgress(
-                        WorkProgress(
-                            progress = progress,
-                            statusMessage = "Syncing data: ${progress}%"
-                        )
-                    )
-                }
-            )
-            
-            WorkResult.success(
-                outputData = workDataOf(
-                    KEY_SYNC_COUNT to result.syncedItems,
-                    KEY_LAST_SYNC_TIME to System.currentTimeMillis()
-                )
-            )
-            
-        } catch (exception: Exception) {
-            WorkResult.retry(
-                retryReason = exception.message ?: "Unknown error"
-            )
+class SyncWorker(context: WorkerContext) : CoroutineWorker(context) {
+    override suspend fun doWork(): WorkResult {
+        val userId = inputData.getString("user_id") ?: return WorkResult.failure("missing user_id")
+        // ... do work ...
+        return WorkResult.success(workDataOf("synced_count" to 42))
+    }
+}
+```
+
+### 2. Initialize the platform (once, at app start)
+
+```kotlin
+// Android
+initializeWorkerAndroid(context, workerFactory)
+
+// iOS  (@ExperimentalWorkerApi — foreground only)
+@OptIn(ExperimentalWorkerApi::class)
+initIosWorkManager(workerFactory)
+
+// Desktop (JVM)
+initializeWorkerDesktop()
+
+// Web (JS/WasmJs  (@ExperimentalWorkerApi — foreground only)
+@OptIn(ExperimentalWorkerApi::class)
+initWebWorkManager(workerFactory)
+```
+
+### 3. Enqueue work
+
+```kotlin
+val request = OneTimeWorkRequestBuilder<SyncWorker>("SyncWorker")
+    .setInputData(workDataOf("user_id" to "u123"))
+    .addTag("sync")
+    .build()
+
+val id = workManager.enqueue(request)
+```
+
+## Core Concepts
+
+### CoroutineWorker
+
+All workers extend `CoroutineWorker`. The `doWork()` suspension function runs on the appropriate dispatcher for each platform.
+
+```kotlin
+class UploadWorker(context: WorkerContext) : CoroutineWorker(context) {
+    override suspend fun doWork(): WorkResult {
+        val fileUri = inputData.getString("file_uri")
+            ?: return WorkResult.failure("no file_uri in input")
+
+        for (chunk in 0..9) {
+            setProgress(WorkProgress(chunk * 10))
+            uploadChunk(fileUri, chunk)
         }
-    }
-    
-    companion object {
-        const val KEY_API_KEY = "api_key"
-        const val KEY_SYNC_TYPE = "sync_type"
-        const val KEY_SYNC_COUNT = "sync_count"
-        const val KEY_LAST_SYNC_TIME = "last_sync_time"
+
+        return WorkResult.success(workDataOf("bytes_uploaded" to 1_048_576L))
     }
 }
 ```
 
-### Scheduling Work
+### WorkResult
 
 ```kotlin
-@Composable
-fun WorkSchedulerScreen(
-    workManager: WorkManager = LocalWorkManager.current,
-    modifier: Modifier = Modifier
-) {
-    var isScheduling by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // One-time work
-        WorkScheduleCard(
-            title = stringResource(R.string.schedule_one_time_work),
-            description = stringResource(R.string.schedule_one_time_description),
-            isLoading = isScheduling,
-            onScheduleClick = {
-                isScheduling = true
-                scheduleOneTimeWork(workManager) {
-                    isScheduling = false
-                }
-            }
-        )
-        
-        // Periodic work
-        WorkScheduleCard(
-            title = stringResource(R.string.schedule_periodic_work),
-            description = stringResource(R.string.schedule_periodic_description),
-            isLoading = isScheduling,
-            onScheduleClick = {
-                isScheduling = true
-                schedulePeriodicWork(workManager) {
-                    isScheduling = false
-                }
-            }
-        )
-    }
-}
-
-private fun scheduleOneTimeWork(
-    workManager: WorkManager,
-    onComplete: () -> Unit
-) {
-    val workRequest = OneTimeWorkRequestBuilder<DataSyncWorker>()
-        .setInputData(
-            workDataOf(
-                DataSyncWorker.KEY_API_KEY to "your_api_key",
-                DataSyncWorker.KEY_SYNC_TYPE to SyncType.FULL.name
-            )
-        )
-        .setConstraints(
-            Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresCharging(false)
-                .setRequiresBatteryNotLow(true)
-                .build()
-        )
-        .setBackoffCriteria(
-            backoffPolicy = BackoffPolicy.EXPONENTIAL,
-            backoffDelay = Duration.ofMinutes(1)
-        )
-        .build()
-    
-    workManager.enqueue(workRequest)
-    onComplete()
-}
-
-private fun schedulePeriodicWork(
-    workManager: WorkManager,
-    onComplete: () -> Unit
-) {
-    val periodicRequest = PeriodicWorkRequestBuilder<DataSyncWorker>(
-        repeatInterval = Duration.ofHours(6),
-        flexTimeInterval = Duration.ofHours(1)
-    )
-        .setInputData(
-            workDataOf(
-                DataSyncWorker.KEY_API_KEY to "your_api_key",
-                DataSyncWorker.KEY_SYNC_TYPE to SyncType.INCREMENTAL.name
-            )
-        )
-        .setConstraints(
-            Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresBatteryNotLow(true)
-                .build()
-        )
-        .build()
-    
-    workManager.enqueueUniquePeriodicWork(
-        uniqueWorkName = "periodic_data_sync",
-        existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.KEEP,
-        periodicWorkRequest = periodicRequest
-    )
-    
-    onComplete()
-}
-```
-
-### Work Monitoring UI
-
-```kotlin
-@Composable
-fun WorkMonitorScreen(
-    workManager: WorkManager = LocalWorkManager.current,
-    modifier: Modifier = Modifier
-) {
-    val workInfos by workManager.getWorkInfosByTagLiveData("data_sync")
-        .observeAsState(emptyList())
-    
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(workInfos) { workInfo ->
-            WorkInfoCard(
-                workInfo = workInfo,
-                onCancelClick = { workManager.cancelWorkById(workInfo.id) },
-                onRetryClick = { 
-                    // Retry logic implementation
-                    retryWork(workManager, workInfo.id)
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun WorkInfoCard(
-    workInfo: WorkInfo,
-    onCancelClick: () -> Unit,
-    onRetryClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    cardColors: CardColors = CardDefaults.cardColors(),
-    cardElevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = cardColors,
-        elevation = cardElevation
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.work_id_label, workInfo.id.toString().take(8)),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                
-                WorkStatusChip(
-                    status = workInfo.state,
-                    colors = getStatusChipColors(workInfo.state)
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            WorkProgressIndicator(
-                progress = workInfo.progress,
-                showPercentage = true
-            )
-            
-            if (workInfo.outputData.keyValueMap.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                WorkOutputData(
-                    outputData = workInfo.outputData
-                )
-            }
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                if (workInfo.state == WorkInfo.State.FAILED) {
-                    TextButton(onClick = onRetryClick) {
-                        Text(stringResource(R.string.retry_work))
-                    }
-                }
-                
-                if (workInfo.state in listOf(
-                    WorkInfo.State.ENQUEUED,
-                    WorkInfo.State.RUNNING
-                )) {
-                    TextButton(onClick = onCancelClick) {
-                        Text(stringResource(R.string.cancel_work))
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WorkStatusChip(
-    status: WorkInfo.State,
-    modifier: Modifier = Modifier,
-    colors: ChipColors = getStatusChipColors(status)
-) {
-    AssistChip(
-        onClick = { },
-        label = {
-            Text(
-                text = stringResource(getStatusStringRes(status)),
-                style = MaterialTheme.typography.labelSmall
-            )
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = getStatusIcon(status),
-                contentDescription = null,
-                modifier = Modifier.size(16.dp)
-            )
-        },
-        modifier = modifier,
-        colors = colors
-    )
-}
-```
-
-## 🏗️ Architecture
-
-WorkKit KMP follows Clean Architecture principles with clear separation of concerns:
-
-```
-┌─────────────────────┐
-│    Presentation     │  ← Compose UI Components, ViewModels
-├─────────────────────┤
-│      Domain         │  ← Use Cases, Entities, Repository Interfaces
-├─────────────────────┤
-│       Data          │  ← Repository Implementations, Data Sources
-├─────────────────────┤
-│    Framework        │  ← Platform-specific Work Implementations
-└─────────────────────┘
-```
-
-### Core Components
-
-#### Work Definition
-
-```kotlin
-abstract class CoroutineWorker {
-    abstract suspend fun doWork(
-        inputData: WorkData,
-        progressCallback: ProgressCallback
-    ): WorkResult
-}
-
 sealed class WorkResult {
-    object Success : WorkResult()
-    data class Failure(val reason: String? = null) : WorkResult()
-    data class Retry(val retryReason: String? = null) : WorkResult()
-    
-    companion object {
-        fun success(outputData: WorkData = WorkData.EMPTY) = Success
-        fun failure(reason: String? = null) = Failure(reason)
-        fun retry(retryReason: String? = null) = Retry(retryReason)
-    }
+    data class Success(val outputData: WorkData) : WorkResult()
+    data class Failure(val message: String?, val outputData: WorkData) : WorkResult()
+    data class Retry(val reason: String?) : WorkResult()
+}
+
+// Convenience constructors
+WorkResult.success()
+WorkResult.success(workDataOf("key" to "value"))
+WorkResult.failure("something went wrong")
+WorkResult.retry("server returned 503")
+```
+
+### WorkData
+
+Typed key-value pairs for input/output.
+
+```kotlin
+val data = workDataOf(
+    "name"   to "Alice",
+    "age"    to 30,
+    "score"  to 99.5f,
+    "active" to true,
+    "tags"   to arrayOf("admin", "user"),
+)
+
+data.getString("name")       // "Alice"
+data.getInt("age")           // 30
+data.getFloat("score")       // 99.5f
+data.getBoolean("active")    // true
+data.getStringArray("tags")  // ["admin", "user"]
+```
+
+## One-Time Work
+
+```kotlin
+val request = OneTimeWorkRequestBuilder<SyncWorker>("SyncWorker")
+    .setInputData(workDataOf("since" to lastSyncTimestamp))
+    .addTag("sync")
+    .setRetryConfig(
+        RetryConfig(
+            maxAttempts = 3,
+            initialDelay = 5.seconds,
+            backoffPolicy = BackoffPolicy.EXPONENTIAL,
+            multiplier = 2.0,
+            maxDelay = 60.seconds,
+        )
+    )
+    .build()
+
+val id = workManager.enqueue(request)
+```
+
+### DSL shorthand
+
+```kotlin
+val request = oneTimeWorkRequest<SyncWorker>("SyncWorker") {
+    inputData = workDataOf("since" to lastSyncTimestamp)
+    addTag("sync")
 }
 ```
 
-#### Work Request Builder
+## Periodic Work
 
 ```kotlin
-class OneTimeWorkRequestBuilder<T : CoroutineWorker> {
-    
-    fun setInputData(inputData: WorkData): OneTimeWorkRequestBuilder<T>
-    fun setConstraints(constraints: Constraints): OneTimeWorkRequestBuilder<T>
-    fun setBackoffCriteria(
-        backoffPolicy: BackoffPolicy,
-        backoffDelay: Duration
-    ): OneTimeWorkRequestBuilder<T>
-    fun addTag(tag: String): OneTimeWorkRequestBuilder<T>
-    
-    fun build(): OneTimeWorkRequest
-}
+val request = PeriodicWorkRequestBuilder<CacheCleanupWorker>("CacheCleanupWorker",
+    repeatInterval = 6.hours
+).build()
 
-class PeriodicWorkRequestBuilder<T : CoroutineWorker>(
-    repeatInterval: Duration,
-    flexTimeInterval: Duration = Duration.ZERO
-) {
-    // Similar methods as OneTimeWorkRequestBuilder
-    fun build(): PeriodicWorkRequest
-}
-```
-
-### Dependency Injection
-
-#### Koin Example
-
-```kotlin
-val workKitModule = module {
-    single<WorkManager> { PlatformWorkManager() }
-    single<WorkRepository> { WorkRepositoryImpl(get()) }
-    factory { ScheduleWorkUseCase(get()) }
-    factory { MonitorWorkUseCase(get()) }
-    factory { CancelWorkUseCase(get()) }
-}
-```
-
-#### Dagger/Hilt Example
-
-```kotlin
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class WorkKitModule {
-    
-    @Binds
-    abstract fun bindWorkRepository(
-        workRepositoryImpl: WorkRepositoryImpl
-    ): WorkRepository
-    
-    @Provides
-    @Singleton
-    fun provideWorkManager(): WorkManager = PlatformWorkManager()
-}
-```
-
-## ⚙️ Configuration
-
-### Work Constraints
-
-```kotlin
-data class Constraints(
-    val requiredNetworkType: NetworkType = NetworkType.NOT_REQUIRED,
-    val requiresCharging: Boolean = false,
-    val requiresDeviceIdle: Boolean = false,
-    val requiresBatteryNotLow: Boolean = false,
-    val requiresStorageNotLow: Boolean = false,
-    val contentUriTriggers: Set<ContentUriTrigger> = emptySet()
-) {
-    class Builder {
-        fun setRequiredNetworkType(networkType: NetworkType): Builder
-        fun setRequiresCharging(requiresCharging: Boolean): Builder
-        fun setRequiresDeviceIdle(requiresIdle: Boolean): Builder
-        fun setRequiresBatteryNotLow(requiresBatteryNotLow: Boolean): Builder
-        fun setRequiresStorageNotLow(requiresStorageNotLow: Boolean): Builder
-        fun addContentUriTrigger(uri: Uri, triggerForDescendants: Boolean): Builder
-        fun build(): Constraints
-    }
-}
-
-enum class NetworkType {
-    NOT_REQUIRED,
-    CONNECTED,
-    UNMETERED,
-    NOT_ROAMING,
-    METERED
-}
-```
-
-### Retry Policies
-
-```kotlin
-enum class BackoffPolicy {
-    EXPONENTIAL,
-    LINEAR
-}
-
-data class RetryConfig(
-    val maxAttempts: Int = 3,
-    val backoffPolicy: BackoffPolicy = BackoffPolicy.EXPONENTIAL,
-    val initialDelay: Duration = Duration.ofMinutes(1),
-    val maxDelay: Duration = Duration.ofHours(1),
-    val multiplier: Double = 2.0
+workManager.enqueueUniquePeriodicWork(
+    uniqueWorkName = "cache-cleanup",
+    existingPeriodicWorkPolicy = ExistingPeriodicWorkPolicy.KEEP,
+    request = request,
 )
 ```
 
-## 📱 Platform-Specific Implementation
+`ExistingPeriodicWorkPolicy` options:
 
-### Android Setup
+| Policy | Behaviour |
+|---|---|
+| `KEEP` | Do nothing if a job with this name is already enqueued or running |
+| `REPLACE` | Cancel the existing job and enqueue the new one |
+| `UPDATE` | Update constraints/interval without interrupting a running execution |
 
-Add to `AndroidManifest.xml`:
-
-```xml
-<application>
-    <!-- WorkManager initialization -->
-    <provider
-        android:name="androidx.startup.InitializationProvider"
-        android:authorities="${applicationId}.androidx-startup"
-        android:exported="false"
-        tools:node="merge">
-        <meta-data
-            android:name="io.github.mobilebytelabs.workkit.WorkKitInitializer"
-            android:value="androidx.startup" />
-    </provider>
-</application>
-```
-
-### iOS Setup
-
-Configure background tasks in `Info.plist`:
-
-```xml
-<key>BGTaskSchedulerPermittedIdentifiers</key>
-<array>
-    <string>com.yourapp.background-sync</string>
-    <string>com.yourapp.data-processing</string>
-</array>
-```
-
-### Desktop Configuration
+## Constraints
 
 ```kotlin
-class DesktopWorkManagerConfig {
-    val maxConcurrentWorkers: Int = 4
-    val workDirectory: String = System.getProperty("user.home") + "/.workkit"
-    val enablePersistence: Boolean = true
-}
+val constraints = Constraints.Builder()
+    .setRequiredNetworkType(NetworkType.CONNECTED)
+    .setRequiresCharging(true)
+    .setRequiresDeviceIdle(true)
+    .setRequiresBatteryNotLow(true)
+    .setRequiresStorageNotLow(true)
+    .build()
+
+val request = OneTimeWorkRequestBuilder<BackupWorker>("BackupWorker")
+    .setConstraints(constraints)
+    .build()
 ```
 
-## 🧪 Testing
+`NetworkType` options: `NOT_REQUIRED`, `CONNECTED`, `UNMETERED`, `NOT_ROAMING`, `METERED`.
 
-### Unit Testing Workers
+## Retry and Backoff
 
 ```kotlin
-class DataSyncWorkerTest {
-    
-    private val testDispatcher = StandardTestDispatcher()
-    private val mockSyncService = mockk<SyncService>()
-    
-    @Before
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-    }
-    
-    @Test
-    fun `should return success when sync completes successfully`() = runTest {
-        // Given
-        val worker = DataSyncWorker()
-        val inputData = workDataOf(
-            DataSyncWorker.KEY_API_KEY to "test_key",
-            DataSyncWorker.KEY_SYNC_TYPE to SyncType.INCREMENTAL.name
-        )
-        val progressCallback = mockk<ProgressCallback>(relaxed = true)
-        
-        coEvery { mockSyncService.syncData(any(), any()) } returns SyncResult(
-            syncedItems = 100,
-            success = true
-        )
-        
-        // When
-        val result = worker.doWork(inputData, progressCallback)
-        
-        // Then
-        assertTrue(result is WorkResult.Success)
-        verify { progressCallback.setProgress(any()) }
-    }
-    
-    @Test
-    fun `should return retry when network error occurs`() = runTest {
-        // Given
-        val worker = DataSyncWorker()
-        val inputData = workDataOf(
-            DataSyncWorker.KEY_API_KEY to "test_key"
-        )
-        val progressCallback = mockk<ProgressCallback>(relaxed = true)
-        
-        coEvery { mockSyncService.syncData(any(), any()) } throws NetworkException("Connection failed")
-        
-        // When
-        val result = worker.doWork(inputData, progressCallback)
-        
-        // Then
-        assertTrue(result is WorkResult.Retry)
-        assertEquals("Connection failed", (result as WorkResult.Retry).retryReason)
+val retryConfig = RetryConfig(
+    maxAttempts    = 5,
+    initialDelay   = 2.seconds,
+    maxDelay       = 5.minutes,
+    backoffPolicy  = BackoffPolicy.EXPONENTIAL,
+    multiplier     = 2.0,
+)
+
+val request = OneTimeWorkRequestBuilder<NetworkWorker>("NetworkWorker")
+    .setRetryConfig(retryConfig)
+    .build()
+```
+
+Return `WorkResult.retry()` from `doWork()` to trigger a retry attempt:
+
+```kotlin
+override suspend fun doWork(): WorkResult {
+    return try {
+        api.sync()
+        WorkResult.success()
+    } catch (e: IOException) {
+        WorkResult.retry("network failure: ${e.message}")
     }
 }
 ```
 
-### Integration Testing
+## Progress Reporting
 
 ```kotlin
-@RunWith(AndroidJUnit4::class)
-class WorkManagerIntegrationTest {
-    
-    @get:Rule
-    val composeTestRule = createComposeRule()
-    
-    private lateinit var workManager: TestWorkManager
-    
-    @Before
-    fun setup() {
-        workManager = TestWorkManager.getInstance(
-            InstrumentationRegistry.getInstrumentation().targetContext
-        )
-    }
-    
-    @Test
-    fun workScheduler_schedulesWorkSuccessfully() {
-        var workScheduled = false
-        
-        composeTestRule.setContent {
-            WorkSchedulerScreen(
-                workManager = workManager,
-                onWorkScheduled = { workScheduled = true }
-            )
+class TranscodeWorker(context: WorkerContext) : CoroutineWorker(context) {
+    override suspend fun doWork(): WorkResult {
+        val frames = 300
+        repeat(frames) { frame ->
+            transcode(frame)
+            setProgress(WorkProgress(progress = (frame + 1) * 100 / frames))
         }
-        
-        composeTestRule
-            .onNodeWithText("Schedule One-Time Work")
-            .performClick()
-        
-        composeTestRule.waitUntil(timeoutMillis = 5000) {
-            workScheduled
-        }
-        
-        assertTrue(workScheduled)
-        assertEquals(1, workManager.enqueuedRequests.size)
-    }
-}
-```
-
-### Mock Work Manager
-
-```kotlin
-class TestWorkManager : WorkManager {
-    
-    val enqueuedRequests = mutableListOf<WorkRequest>()
-    private val workInfoLiveData = MutableLiveData<List<WorkInfo>>()
-    
-    override fun enqueue(request: WorkRequest): Operation {
-        enqueuedRequests.add(request)
-        return TestOperation.success()
-    }
-    
-    override fun getWorkInfosByTagLiveData(tag: String): LiveData<List<WorkInfo>> {
-        return workInfoLiveData
-    }
-    
-    fun simulateWorkProgress(workId: UUID, progress: WorkProgress) {
-        val updatedWorkInfos = workInfoLiveData.value?.map { workInfo ->
-            if (workInfo.id == workId) {
-                workInfo.copy(progress = progress)
-            } else {
-                workInfo
-            }
-        } ?: emptyList()
-        
-        workInfoLiveData.value = updatedWorkInfos
-    }
-}
-```
-
-## 🚀 Advanced Usage
-
-### Work Chaining
-
-```kotlin
-class WorkChainBuilder {
-    
-    fun buildDataProcessingChain(): WorkContinuation {
-        val downloadWork = OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
-            )
-            .build()
-        
-        val processWork = OneTimeWorkRequestBuilder<ProcessDataWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiresDeviceIdle(true)
-                    .build()
-            )
-            .build()
-        
-        val uploadWork = OneTimeWorkRequestBuilder<UploadWorker>()
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.UNMETERED)
-                    .build()
-            )
-            .build()
-        
-        return WorkManager.getInstance()
-            .beginWith(downloadWork)
-            .then(processWork)
-            .then(uploadWork)
-    }
-}
-```
-
-### Custom Progress Tracking
-
-```kotlin
-class DetailedProgressWorker : CoroutineWorker() {
-    
-    override suspend fun doWork(
-        inputData: WorkData,
-        progressCallback: ProgressCallback
-    ): WorkResult {
-        val totalSteps = 5
-        val stepProgress = 100 / totalSteps
-        
-        // Step 1: Initialize
-        progressCallback.setProgress(
-            WorkProgress(
-                progress = stepProgress,
-                statusMessage = "Initializing...",
-                metadata = mapOf(
-                    "current_step" to "initialization",
-                    "estimated_time_remaining" to "4 minutes"
-                )
-            )
-        )
-        
-        // Perform initialization
-        delay(1000)
-        
-        // Step 2: Download data
-        progressCallback.setProgress(
-            WorkProgress(
-                progress = stepProgress * 2,
-                statusMessage = "Downloading data...",
-                metadata = mapOf(
-                    "current_step" to "download",
-                    "bytes_downloaded" to "1024000",
-                    "total_bytes" to "5120000"
-                )
-            )
-        )
-        
-        // Continue with remaining steps...
-        
         return WorkResult.success()
     }
 }
 ```
 
-### Conditional Work Execution
+Observe progress on the caller side:
 
 ```kotlin
-class ConditionalWorker : CoroutineWorker() {
-    
-    override suspend fun doWork(
-        inputData: WorkData,
-        progressCallback: ProgressCallback
-    ): WorkResult {
-        val userPreferences = getUserPreferences()
-        val networkState = getNetworkState()
-        val batteryLevel = getBatteryLevel()
-        
-        // Check custom conditions
-        if (!userPreferences.allowBackgroundSync) {
-            return WorkResult.failure("Background sync disabled by user")
-        }
-        
-        if (networkState.isMetered && !userPreferences.allowMeteredSync) {
-            return WorkResult.retry("Waiting for unmetered connection")
-        }
-        
-        if (batteryLevel < 20 && !userPreferences.allowLowBatterySync) {
-            return WorkResult.retry("Waiting for battery to charge")
-        }
-        
-        // Proceed with work
-        return performActualWork(inputData, progressCallback)
+workManager.getWorkInfosByTag("transcode").collect { infos ->
+    infos.forEach { info ->
+        println("${info.id}: ${info.state} — ${info.progress?.progress}%")
     }
 }
 ```
 
-## 📚 Sample Projects
+## Monitoring Work
 
-Check out our sample projects in the `/samples` directory:
+```kotlin
+// Single work item (suspend, current value)
+val info: WorkInfo? = workManager.getWorkInfoById(id)
+println(info?.state)       // ENQUEUED / RUNNING / SUCCEEDED / FAILED / CANCELLED / BLOCKED
+println(info?.outputData)  // WorkData with results
 
-- **`basic-scheduler`**: Simple background task scheduling
-- **`data-sync-app`**: Complete data synchronization example
-- **`image-processor`**: Batch image processing with progress tracking
-- **`notification-sender`**: Scheduled notification system
-- **`file-backup`**: Automated file backup with constraints
+// Flow of all work with a given tag
+workManager.getWorkInfosByTag("sync").collect { infos ->
+    infos.forEach { println("${it.id}: ${it.state}") }
+}
+```
 
-## 🤝 Contributing
+`WorkInfo.State`:
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+| State | Terminal? |
+|---|---|
+| `ENQUEUED` | no |
+| `RUNNING` | no |
+| `SUCCEEDED` | yes |
+| `FAILED` | yes |
+| `CANCELLED` | yes |
+| `BLOCKED` | no |
 
-### Development Setup
+## Work Chaining
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/mobilebytelabs/workkit-kmp.git
-   cd workkit-kmp
-   ```
+Chain multiple workers sequentially. The output data of each step flows to the input of the next.
 
-2. Set up the development environment:
-   ```bash
-   ./gradlew build
-   ```
+```kotlin
+val download  = OneTimeWorkRequestBuilder<DownloadWorker>("DownloadWorker").build()
+val transcode = OneTimeWorkRequestBuilder<TranscodeWorker>("TranscodeWorker").build()
+val upload    = OneTimeWorkRequestBuilder<UploadWorker>("UploadWorker").build()
 
-3. Run tests:
-   ```bash
-   ./gradlew allTests
-   ```
+workManager
+    .beginWith(download)
+    .then(transcode)
+    .then(upload)
+    .enqueue()
+```
 
-4. Format code:
-   ```bash
-   ./gradlew spotlessApply
-   ```
+## Cancellation
 
-### Code Style
+```kotlin
+// Cancel a specific work item
+workManager.cancelWorkById(id)
 
-This project follows [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html) and uses:
-- [Spotless](https://github.com/diffplug/spotless) for code formatting
-- [Detekt](https://detekt.dev/) for static analysis
-- [ktlint](https://ktlint.github.io/) for Kotlin linting
+// Cancel all work with a given tag
+workManager.cancelAllWorkByTag("sync")
+```
 
-## 📄 License
+Cancellation is a no-op when the work is already in a terminal state (`SUCCEEDED`, `FAILED`, `CANCELLED`).
+
+## Platform Initialization
+
+### Android
+
+```kotlin
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initializeWorkerAndroid(
+            context = this,
+            workerFactory = object : AndroidWorkerFactory {
+                override fun create(workerClassName: String, context: WorkerContext): CoroutineWorker? =
+                    when (workerClassName) {
+                        "SyncWorker"   -> SyncWorker(context)
+                        "BackupWorker" -> BackupWorker(context)
+                        else           -> null
+                    }
+            }
+        )
+    }
+}
+```
+
+### iOS (Swift / Kotlin)
+
+> **Note:** iOS uses `@ExperimentalWorkerApi` — work runs only while the app is in the foreground.
+
+```kotlin
+// In your Kotlin iOS module
+@OptIn(ExperimentalWorkerApi::class)
+fun initApp() {
+    initIosWorkManager(
+        workerFactory = object : IosWorkerFactory {
+            override fun create(workerClassName: String, context: WorkerContext): CoroutineWorker? =
+                when (workerClassName) {
+                    "SyncWorker" -> SyncWorker(context)
+                    else         -> null
+                }
+        }
+    )
+}
+```
+
+### Desktop (JVM)
+
+```kotlin
+fun main() {
+    initializeWorkerDesktop()
+    val wm = PlatformWorkManager.instance
+    // enqueue work ...
+}
+```
+
+### Web (JS/WasmJs)
+
+> **Note:** Web uses `@ExperimentalWorkerApi` — work runs only while the page is open.
+
+```kotlin
+@OptIn(ExperimentalWorkerApi::class)
+fun main() {
+    initWebWorkManager(
+        workerFactory = object : WebWorkerFactory {
+            override fun create(workerClassName: String, context: WorkerContext): CoroutineWorker? =
+                when (workerClassName) {
+                    "SyncWorker" -> SyncWorker(context)
+                    else         -> null
+                }
+        }
+    )
+    val wm = PlatformWorkManager.instance
+}
+```
+
+## Testing
+
+Add the test artifact to your test source set (use the same version as your other worker artifacts):
+
+```kotlin
+// gradle/libs.versions.toml — add to the [libraries] block shown in Setup
+// worker-test = { module = "io.github.mobilebytelabs:worker-test", version.ref = "worker" }
+
+commonTest.dependencies {
+    implementation(libs.worker.test)
+}
+```
+
+`TestWorkManager` is an in-memory implementation. Work is **never executed automatically** — you drive state transitions manually, so tests are deterministic and instant.
+
+```kotlin
+class SyncFeatureTest {
+    private val workManager = TestWorkManager()
+
+    @Test
+    fun sync_enqueuesOneTimeRequest() = runTest {
+        val request = OneTimeWorkRequestBuilder<SyncWorker>("SyncWorker")
+            .addTag("sync")
+            .build()
+
+        val id = workManager.enqueue(request)
+
+        assertEquals(1, workManager.enqueuedRequests.size)
+        assertEquals(WorkInfo.State.ENQUEUED, workManager.getWorkInfoById(id)?.state)
+        assertTrue(workManager.hasWorkWithTag("sync"))
+    }
+
+    @Test
+    fun sync_reportsSuccessOutput() = runTest {
+        val id = workManager.enqueue(
+            OneTimeWorkRequestBuilder<SyncWorker>("SyncWorker").build()
+        )
+
+        workManager.simulateWorkRunning(id)
+        workManager.simulateWorkSuccess(id, workDataOf("synced_count" to 42))
+
+        val info = workManager.getWorkInfoById(id)
+        assertEquals(WorkInfo.State.SUCCEEDED, info?.state)
+        assertEquals(42, info?.outputData?.getInt("synced_count"))
+    }
+
+    @Test
+    fun sync_retries_onTransientFailure() = runTest {
+        val id = workManager.enqueue(
+            OneTimeWorkRequestBuilder<SyncWorker>("SyncWorker").build()
+        )
+
+        workManager.simulateWorkRetry(id)
+        workManager.simulateWorkRetry(id)
+
+        assertEquals(2, workManager.getWorkInfoById(id)?.runAttemptCount)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        workManager.reset()
+    }
+}
+```
+
+### TestWorkManager API
+
+| Method | Description |
+|---|---|
+| `simulateWorkRunning(id)` | Transitions work to `RUNNING` |
+| `simulateWorkSuccess(id, outputData?)` | Transitions work to `SUCCEEDED` with optional output |
+| `simulateWorkFailure(id)` | Transitions work to `FAILED` |
+| `simulateWorkProgress(id, progress)` | Updates progress without changing state |
+| `simulateWorkRetry(id)` | Transitions back to `ENQUEUED`, increments `runAttemptCount` |
+| `reset()` | Clears all state — call in `@BeforeTest` / `@AfterTest` |
+| `enqueuedRequests` | Ordered list of all enqueued requests |
+| `uniqueWorkNames` | Names registered via `enqueueUniquePeriodicWork` |
+| `lastEnqueuedRequest` | The most recently enqueued request |
+| `hasWorkWithTag(tag)` | Returns true if any work with this tag was enqueued |
+| `workCountWithTag(tag)` | Count of enqueued work items with this tag |
+
+## Artifacts
+
+All modules are published together under `io.github.mobilebytelabs` on Maven Central with a shared version.
+Check the badge at the top of this README for the latest release.
+
+| Artifact | Use |
+|---|---|
+| `worker-kmp` | Common API — include in `commonMain` |
+| `worker-android` | Android platform implementation |
+| `worker-ios` | iOS platform implementation (iosArm64, iosSimulatorArm64) |
+| `worker-desktop` | JVM desktop implementation |
+| `worker-web` | JS/browser + Node.js implementation |
+| `worker-compose` | Compose Multiplatform integration |
+| `worker-test` | Test utilities (`TestWorkManager`) |
+
+## License
 
 ```
-Copyright 2024 MobileByteLabs
+Copyright 2024 Mobile Byte Labs
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+    https://www.apache.org/licenses/LICENSE-2.0
 ```
-
-## 🙏 Acknowledgments
-
-- [AndroidX WorkManager](https://developer.android.com/topic/libraries/architecture/workmanager) for Android implementation patterns
-- [Jetpack Compose](https://developer.android.com/jetpack/compose) for modern UI toolkit
-- [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) for cross-platform development
-- [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) for structured concurrency
-
-## 📞 Support
-
-- 📖 [Documentation](https://mobilebytelabs.github.io/workkit-kmp)
-- 🐛 [Issue Tracker](https://github.com/mobilebytelabs/workkit-kmp/issues)
-- 💬 [Discussions](https://github.com/mobilebytelabs/workkit-kmp/discussions)
-- 📧 [Email Support](mailto:support@mobilebytelabs.com)
-
----
-
-<div align="center">
-Made with ⚡ by MobileByteLabs team
-</div>

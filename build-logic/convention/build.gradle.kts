@@ -1,0 +1,45 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    `kotlin-dsl`
+}
+
+group = "io.github.mobilebytelabs.worker.buildlogic"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+
+dependencies {
+    compileOnly(libs.detekt.gradlePlugin)
+    compileOnly(libs.spotless.gradle)
+}
+
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
+}
+
+gradlePlugin {
+    plugins {
+        register("detekt") {
+            id = "io.github.mobilebytelabs.detekt"
+            implementationClass = "DetektConventionPlugin"
+            description = "Configures detekt static analysis for worker-kmp modules"
+        }
+        register("spotless") {
+            id = "io.github.mobilebytelabs.spotless"
+            implementationClass = "SpotlessConventionPlugin"
+            description = "Configures spotless code formatting for worker-kmp modules"
+        }
+    }
+}

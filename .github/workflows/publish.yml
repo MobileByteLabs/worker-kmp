@@ -1,0 +1,47 @@
+# Publish Workflow — delegates to mbl-actionhub reusable publish workflow
+#
+# Triggers:
+#   - GitHub release (released or prereleased)
+#   - Manual dispatch: workflow_dispatch (optional specific module, optional version override)
+#
+# TEMPLATE SETUP: before publishing, update group-id and artifact-id below
+# to match your library's Maven coordinates, then configure these secrets:
+#   MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD
+#   SIGNING_KEY_ID, SIGNING_PASSWORD, GPG_KEY_CONTENTS
+
+name: Publish
+
+on:
+  release:
+    types: [released, prereleased]
+  workflow_dispatch:
+    inputs:
+      module:
+        description: 'Specific module to publish (leave empty for all cmp-* modules)'
+        required: false
+        type: string
+      version:
+        description: 'Override version (leave empty to use build.gradle.kts version)'
+        required: false
+        type: string
+
+permissions:
+  contents: write          # release creation
+  pull-requests: write
+
+jobs:
+  publish:
+    uses: MobileByteLabs/mbl-actionhub/.github/workflows/publish-kmp-library.yml@v1.6.1
+    with:
+      module-pattern: 'cmp-'
+      module: ${{ inputs.module || '' }}
+      group-id: 'io.github.mobilebytelabs'
+      artifact-id: 'worker-kmp'
+      version: ${{ inputs.version || '' }}
+      verify-against-maven: false           # set true once your library is on Maven Central
+      bump-after-release: false
+      java-version: '21'
+      java-distribution: 'zulu'
+      sonatype-host: 'CENTRAL_PORTAL'
+      create-github-release: false          # release already exists — this workflow is triggered by it
+    secrets: inherit
