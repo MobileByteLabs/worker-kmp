@@ -35,8 +35,8 @@ jobs:
     with:
       module-pattern: 'cmp-'
       module: ${{ inputs.module || '' }}
-      group-id: 'io.github.mobilebytelabs.worker'        # TEMPLATE: replace with your Maven group ID
-      artifact-id: 'worker'       # TEMPLATE: replace with your library artifact ID
+      group-id: 'io.github.mobilebytelabs'
+      artifact-id: 'worker-kmp'
       version: ${{ inputs.version || '' }}
       verify-against-maven: false           # set true once your library is on Maven Central
       bump-after-release: false
