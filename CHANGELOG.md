@@ -5,6 +5,8 @@ All notable changes to worker-kmp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
 ## [2.0.0] - 2026-05-26
 
 ### Added
@@ -258,6 +260,7 @@ unified API across Android, iOS, Desktop (JVM), and Web (JS/WasmJs).
 - Maven Central publishing via `vanniktech/gradle-maven-publish-plugin` 0.30.0
 - Single version source of truth in `gradle.properties` (`worker.version`)
 
+[Unreleased]: https://github.com/MobileByteLabs/worker-kmp/compare/v2.0.0...HEAD
 [2.0.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.2.1...v2.0.0
 [1.2.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.0.0...v1.1.0
