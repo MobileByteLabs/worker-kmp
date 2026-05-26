@@ -19,6 +19,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.pow
@@ -27,17 +30,36 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalWorkerApi::class)
-class WebWorkManager(private val workerFactory: WebWorkerFactory) : WorkManager {
+class WebWorkManager internal constructor(
+    private val workerFactory: WebWorkerFactory,
+    private val config: WebWorkManagerConfig = WebWorkManagerConfig.DEFAULT,
+    private val constraintEvaluator: WebConstraintEvaluator,
+    private val persistence: WebWorkPersistence = createWebWorkPersistence(config),
+) : WorkManager {
+
+    constructor(
+        workerFactory: WebWorkerFactory,
+        config: WebWorkManagerConfig = WebWorkManagerConfig.DEFAULT,
+    ) : this(workerFactory, config, defaultConstraintEvaluator())
 
     private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.Default + CoroutineName("WebWorkManager"),
     )
     private val jobRegistry = mutableMapOf<Uuid, Job>()
-    private val stateStore = WebWorkStateStore()
+    private val stateStore = WebWorkStateStore(persistence = persistence, scope = scope)
+
+    init {
+        scope.launch { stateStore.restoreFromPersistence() }
+    }
 
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         stateStore.initWork(request.id, request.tags)
-        val job = scope.launch { executeWorker(request) }
+        val job = scope.launch {
+            if (!constraintEvaluator.evaluate(request.constraints)) {
+                awaitConstraintsSatisfied(request)
+            }
+            executeWorker(request)
+        }
         jobRegistry[request.id] = job
         return request.id
     }
@@ -47,8 +69,13 @@ class WebWorkManager(private val workerFactory: WebWorkerFactory) : WorkManager 
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
         request: PeriodicWorkRequest,
     ): Uuid {
-        if (existingPeriodicWorkPolicy == ExistingPeriodicWorkPolicy.REPLACE) {
-            cancelAllWorkByTag(uniqueWorkName)
+        val existing = stateStore.snapshot().values
+            .firstOrNull { uniqueWorkName in it.tags && !it.state.isFinished }
+        when (existingPeriodicWorkPolicy) {
+            ExistingPeriodicWorkPolicy.KEEP -> if (existing != null) return existing.id
+            ExistingPeriodicWorkPolicy.REPLACE,
+            ExistingPeriodicWorkPolicy.UPDATE,
+            -> cancelAllWorkByTag(uniqueWorkName)
         }
         stateStore.initWork(request.id, request.tags + uniqueWorkName)
         val job = scope.launch {
@@ -121,6 +148,15 @@ class WebWorkManager(private val workerFactory: WebWorkerFactory) : WorkManager 
             stateStore.updateState(request.id, WorkInfo.State.CANCELLED)
             throw e
         }
+    }
+
+    private suspend fun awaitConstraintsSatisfied(request: WorkRequest) {
+        if (constraintEvaluator.evaluate(request.constraints)) return
+        // Timer guarantees we re-check even on platforms without a network watcher.
+        // Online-watcher fires immediately on network state changes, short-circuiting the timer.
+        val timerFlow = flow { while (true) { delay(config.constraintCheckIntervalMs); emit(Unit) } }
+        merge(timerFlow, onlineWatcher())
+            .first { constraintEvaluator.evaluate(request.constraints) }
     }
 
     fun shutdown() {

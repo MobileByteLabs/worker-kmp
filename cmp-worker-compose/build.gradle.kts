@@ -30,6 +30,17 @@ kotlin {
     jvm("desktop") {
         compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
     }
+    js(IR) {
+        browser {
+            testTask { enabled = false }
+        }
+    }
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            testTask { enabled = false }
+        }
+    }
 
     compilerOptions {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
