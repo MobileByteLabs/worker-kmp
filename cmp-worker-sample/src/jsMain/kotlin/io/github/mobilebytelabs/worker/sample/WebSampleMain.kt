@@ -18,8 +18,8 @@ import io.github.mobilebytelabs.worker.WorkerContext
 import io.github.mobilebytelabs.worker.web.WebWorkManager
 import io.github.mobilebytelabs.worker.web.WebWorkManagerConfig
 import io.github.mobilebytelabs.worker.web.WebWorkerFactory
-import io.github.mobilebytelabs.worker.web.isWebWorkManagerSupported
 import io.github.mobilebytelabs.worker.web.initWebWorkManager
+import io.github.mobilebytelabs.worker.web.isWebWorkManagerSupported
 import io.github.mobilebytelabs.worker.workDataOf
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -169,10 +169,12 @@ private suspend fun webScenario5_keepPolicy(wm: WebWorkManager) {
     println("── Scenario 5: KEEP policy ────────────────────────────────")
 
     val req1 = PeriodicWorkRequestBuilder<WebHeartbeatWorker>(
-        "WebHeartbeatWorker", repeatInterval = 5.minutes,
+        "WebHeartbeatWorker",
+        repeatInterval = 5.minutes,
     ).addTag("keep-demo").build()
     val req2 = PeriodicWorkRequestBuilder<WebHeartbeatWorker>(
-        "WebHeartbeatWorker", repeatInterval = 5.minutes,
+        "WebHeartbeatWorker",
+        repeatInterval = 5.minutes,
     ).addTag("keep-demo").build()
 
     val id1 = wm.enqueueUniquePeriodicWork("keep-demo", ExistingPeriodicWorkPolicy.KEEP, req1)

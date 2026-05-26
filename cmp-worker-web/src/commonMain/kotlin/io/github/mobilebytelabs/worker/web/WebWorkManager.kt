@@ -73,6 +73,7 @@ class WebWorkManager internal constructor(
             .firstOrNull { uniqueWorkName in it.tags && !it.state.isFinished }
         when (existingPeriodicWorkPolicy) {
             ExistingPeriodicWorkPolicy.KEEP -> if (existing != null) return existing.id
+
             ExistingPeriodicWorkPolicy.REPLACE,
             ExistingPeriodicWorkPolicy.UPDATE,
             -> cancelAllWorkByTag(uniqueWorkName)
@@ -154,7 +155,12 @@ class WebWorkManager internal constructor(
         if (constraintEvaluator.evaluate(request.constraints)) return
         // Timer guarantees we re-check even on platforms without a network watcher.
         // Online-watcher fires immediately on network state changes, short-circuiting the timer.
-        val timerFlow = flow { while (true) { delay(config.constraintCheckIntervalMs); emit(Unit) } }
+        val timerFlow = flow {
+            while (true) {
+                delay(config.constraintCheckIntervalMs)
+                emit(Unit)
+            }
+        }
         merge(timerFlow, onlineWatcher())
             .first { constraintEvaluator.evaluate(request.constraints) }
     }

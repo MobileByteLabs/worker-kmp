@@ -17,10 +17,10 @@ import io.github.mobilebytelabs.worker.WorkResult
 import io.github.mobilebytelabs.worker.WorkerContext
 import io.github.mobilebytelabs.worker.oneTimeWorkRequest
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlin.test.Test
@@ -289,11 +289,13 @@ class WebWorkManagerTest {
     fun enqueue_withMultipleConstraints_allSatisfied_executes() = runTest {
         val wm = workManager(constraintEvaluator = WebConstraintEvaluator { true })
         val req = OneTimeWorkRequestBuilder<SuccessWebWorker>(SuccessWebWorker::class.simpleName!!)
-            .setConstraints(Constraints {
-                setRequiredNetworkType(NetworkType.CONNECTED)
-                setRequiresBatteryNotLow(true)
-                setRequiresStorageNotLow(true)
-            })
+            .setConstraints(
+                Constraints {
+                    setRequiredNetworkType(NetworkType.CONNECTED)
+                    setRequiresBatteryNotLow(true)
+                    setRequiresStorageNotLow(true)
+                },
+            )
             .build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -311,10 +313,12 @@ class WebWorkManagerTest {
             },
         )
         val req = OneTimeWorkRequestBuilder<SuccessWebWorker>(SuccessWebWorker::class.simpleName!!)
-            .setConstraints(Constraints {
-                setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                setRequiresBatteryNotLow(true)
-            })
+            .setConstraints(
+                Constraints {
+                    setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+                    setRequiresBatteryNotLow(true)
+                },
+            )
             .build()
         val id = wm.enqueue(req)
         delay(200)
@@ -520,7 +524,9 @@ internal class InMemoryWorkPersistence : WebWorkPersistence {
     val saveHistory: List<WorkInfo> get() = _saveHistory.toList()
 
     // Pre-seed persistence before constructing WebWorkManager (simulates prior page session)
-    fun seed(info: WorkInfo) { _saved.add(info) }
+    fun seed(info: WorkInfo) {
+        _saved.add(info)
+    }
 
     override suspend fun save(info: WorkInfo): Unit = mutex.withLock {
         _saved.removeAll { it.id == info.id }

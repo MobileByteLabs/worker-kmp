@@ -5,38 +5,34 @@ import io.github.mobilebytelabs.worker.NetworkType
 import kotlinx.coroutines.await
 import kotlin.js.Promise
 
-private fun jsOnline(): Boolean =
-    js("typeof navigator !== 'undefined' && navigator.onLine === true") as Boolean
+private fun jsOnline(): Boolean = js("typeof navigator !== 'undefined' && navigator.onLine === true") as Boolean
 
 @Suppress("UnsafeCastFromDynamic")
-private fun jsBatteryNotLowPromise(): Promise<Boolean> =
-    js(
-        """(function() {
+private fun jsBatteryNotLowPromise(): Promise<Boolean> = js(
+    """(function() {
             if (typeof navigator === 'undefined' || !('getBattery' in navigator)) return Promise.resolve(true);
             return navigator.getBattery().then(function(b) { return b.level > 0.2; });
         })()""",
-    )
+)
 
 @Suppress("UnsafeCastFromDynamic")
-private fun jsChargingPromise(): Promise<Boolean> =
-    js(
-        """(function() {
+private fun jsChargingPromise(): Promise<Boolean> = js(
+    """(function() {
             if (typeof navigator === 'undefined' || !('getBattery' in navigator)) return Promise.resolve(true);
             return navigator.getBattery().then(function(b) { return b.charging === true; });
         })()""",
-    )
+)
 
 @Suppress("UnsafeCastFromDynamic")
-private fun jsStorageNotLowPromise(): Promise<Boolean> =
-    js(
-        """(function() {
+private fun jsStorageNotLowPromise(): Promise<Boolean> = js(
+    """(function() {
             if (typeof navigator === 'undefined' || !navigator.storage || !navigator.storage.estimate)
                 return Promise.resolve(true);
             return navigator.storage.estimate().then(function(e) {
                 return (e.quota - e.usage) > 5242880;
             });
         })()""",
-    )
+)
 
 internal actual fun defaultConstraintEvaluator(): WebConstraintEvaluator = WebConstraintEvaluator { constraints ->
     if (constraints.requiredNetworkType != NetworkType.NOT_REQUIRED && !jsOnline()) return@WebConstraintEvaluator false

@@ -22,7 +22,11 @@ private external fun jsCharging(): Boolean
 private external fun jsStorageNotLow(): Boolean
 
 internal actual fun defaultConstraintEvaluator(): WebConstraintEvaluator = WebConstraintEvaluator { constraints ->
-    if (constraints.requiredNetworkType != NetworkType.NOT_REQUIRED && !jsNavigatorOnline()) return@WebConstraintEvaluator false
+    if (constraints.requiredNetworkType != NetworkType.NOT_REQUIRED &&
+        !jsNavigatorOnline()
+    ) {
+        return@WebConstraintEvaluator false
+    }
     if (constraints.requiresBatteryNotLow && !jsBatteryNotLow()) return@WebConstraintEvaluator false
     if (constraints.requiresCharging && !jsCharging()) return@WebConstraintEvaluator false
     if (constraints.requiresStorageNotLow && !jsStorageNotLow()) return@WebConstraintEvaluator false

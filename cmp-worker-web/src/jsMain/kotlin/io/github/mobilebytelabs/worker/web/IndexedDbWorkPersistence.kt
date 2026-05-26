@@ -11,9 +11,8 @@ private const val STORE_NAME = "work_infos"
 // Using a function (not a top-level val) lets callers pass dbName as a JS argument,
 // avoiding Kotlin variable capture issues inside js("") string literals.
 @Suppress("UnsafeCastFromDynamic")
-private fun buildIdbHelper(dbName: String): dynamic =
-    js(
-        """(function(dbName) { return {
+private fun buildIdbHelper(dbName: String): dynamic = js(
+    """(function(dbName) { return {
     _db: null,
     getDb: function() {
         var self = this;
@@ -64,12 +63,11 @@ private fun buildIdbHelper(dbName: String): dynamic =
         });
     }
 };})(dbName)""",
-    )(dbName)
+)(dbName)
 
 // Guard for private browsing / SSR / old browsers where indexedDB is unavailable.
 @Suppress("UnsafeCastFromDynamic")
-private fun isIndexedDbAvailable(): Boolean =
-    js("typeof indexedDB !== 'undefined' && indexedDB !== null") as Boolean
+private fun isIndexedDbAvailable(): Boolean = js("typeof indexedDB !== 'undefined' && indexedDB !== null") as Boolean
 
 private fun workInfoToRecord(info: WorkInfo): dynamic {
     val record: dynamic = js("({})")
@@ -142,5 +140,8 @@ private object NoOpPersistence : WebWorkPersistence {
 }
 
 internal actual fun createWebWorkPersistence(config: WebWorkManagerConfig): WebWorkPersistence =
-    if (config.enablePersistence) IndexedDbWorkPersistence(config.persistenceDbName)
-    else NoOpPersistence
+    if (config.enablePersistence) {
+        IndexedDbWorkPersistence(config.persistenceDbName)
+    } else {
+        NoOpPersistence
+    }
