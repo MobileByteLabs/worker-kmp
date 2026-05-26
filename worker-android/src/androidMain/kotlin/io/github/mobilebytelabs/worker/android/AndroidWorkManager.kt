@@ -1,0 +1,100 @@
+package io.github.mobilebytelabs.worker.android
+
+import android.content.Context
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager as AndroidWM
+import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
+import io.github.mobilebytelabs.worker.WorkInfo
+import io.github.mobilebytelabs.worker.WorkManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import java.util.concurrent.TimeUnit
+import kotlin.uuid.Uuid
+
+class AndroidWorkManager(context: Context) : WorkManager {
+
+    private val wm = AndroidWM.getInstance(context)
+
+    override suspend fun enqueue(
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest
+    ): Uuid {
+        wm.enqueue(request.toAndroidOneTime()).result.await()
+        return request.id
+    }
+
+    override suspend fun enqueueUniquePeriodicWork(
+        uniqueWorkName: String,
+        existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
+        request: io.github.mobilebytelabs.worker.PeriodicWorkRequest
+    ): Uuid {
+        wm.enqueueUniquePeriodicWork(
+            uniqueWorkName,
+            existingPeriodicWorkPolicy.toAndroid(),
+            request.toAndroidPeriodic()
+        ).result.await()
+        return request.id
+    }
+
+    override suspend fun cancelWorkById(id: Uuid) {
+        wm.cancelAllWorkByTag(id.toTag()).result.await()
+    }
+
+    override suspend fun cancelAllWorkByTag(tag: String) {
+        wm.cancelAllWorkByTag(tag).result.await()
+    }
+
+    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
+        wm.getWorkInfosByTagFlow(tag).map { list -> list.mapNotNull { it.toKmp() } }
+
+    override suspend fun getWorkInfoById(id: Uuid): WorkInfo? =
+        wm.getWorkInfosByTagFlow(id.toTag()).first().firstOrNull()?.toKmp()
+
+    // ── Private builders ──────────────────────────────────────────────────────
+
+    private fun io.github.mobilebytelabs.worker.OneTimeWorkRequest.toAndroidOneTime(): OneTimeWorkRequest {
+        val data = buildInputData(workerClass, id, inputData)
+        return OneTimeWorkRequestBuilder<KmpAndroidWorker>()
+            .setInputData(data)
+            .setConstraints(constraints.toAndroid())
+            .setBackoffCriteria(
+                retryConfig.backoffPolicy.toAndroid(),
+                retryConfig.initialDelay.inWholeMilliseconds,
+                TimeUnit.MILLISECONDS
+            )
+            .addTag(id.toTag())
+            .apply { tags.forEach { addTag(it) } }
+            .build()
+    }
+
+    private fun io.github.mobilebytelabs.worker.PeriodicWorkRequest.toAndroidPeriodic(): PeriodicWorkRequest {
+        val data = buildInputData(workerClass, id, inputData)
+        val intervalMs = repeatInterval.inWholeMilliseconds
+            .coerceAtLeast(PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS)
+        return PeriodicWorkRequestBuilder<KmpAndroidWorker>(intervalMs, TimeUnit.MILLISECONDS)
+            .setInputData(data)
+            .setConstraints(constraints.toAndroid())
+            .addTag(id.toTag())
+            .apply { tags.forEach { addTag(it) } }
+            .build()
+    }
+
+    private fun buildInputData(
+        workerClass: String,
+        id: Uuid,
+        inputData: io.github.mobilebytelabs.worker.WorkData
+    ): androidx.work.Data {
+        val userPairs: Array<Pair<String, Any?>> = inputData.keyValueMap()
+            .entries
+            .map { (k, v) -> k to v }
+            .toTypedArray()
+        return androidx.work.workDataOf(
+            KEY_KMP_CLASS to workerClass,
+            KEY_KMP_ID to id.toString(),
+            *userPairs
+        )
+    }
+}
