@@ -31,7 +31,7 @@ class FakeWorkManager : WorkManager {
     override suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: PeriodicWorkRequest
+        request: PeriodicWorkRequest,
     ): Uuid {
         periodicRequests += uniqueWorkName to request
         return request.id
@@ -45,8 +45,7 @@ class FakeWorkManager : WorkManager {
         cancelledTags += tag
     }
 
-    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
-        _store.map { it[tag] ?: emptyList() }
+    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = _store.map { it[tag] ?: emptyList() }
 
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? =
         _store.value.values.flatten().firstOrNull { it.id == id }

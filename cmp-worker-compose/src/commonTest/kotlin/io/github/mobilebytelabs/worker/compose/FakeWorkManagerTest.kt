@@ -76,7 +76,7 @@ class FakeWorkManagerTest {
         val info = WorkInfo(
             id = id,
             state = WorkInfo.State.SUCCEEDED,
-            progress = WorkProgress(100)
+            progress = WorkProgress(100),
         )
         manager.putInfos("tag", info)
 

@@ -23,7 +23,7 @@ class TestWorkManager : WorkManager {
     override suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: PeriodicWorkRequest
+        request: PeriodicWorkRequest,
     ): Uuid {
         _enqueuedRequests.add(request)
         updateState(request.id, WorkInfo(id = request.id, state = WorkInfo.State.ENQUEUED, tags = request.tags))
@@ -45,7 +45,9 @@ class TestWorkManager : WorkManager {
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.value[id]
 
     fun simulateSuccess(id: Uuid, outputData: WorkData = WorkData.EMPTY) {
-        stateStore.value[id]?.let { updateState(id, it.copy(state = WorkInfo.State.SUCCEEDED, outputData = outputData)) }
+        stateStore.value[id]?.let {
+            updateState(id, it.copy(state = WorkInfo.State.SUCCEEDED, outputData = outputData))
+        }
     }
 
     fun simulateFailure(id: Uuid, message: String = "") {

@@ -21,7 +21,7 @@ fun WorkManager.beginWith(works: List<OneTimeWorkRequest>): WorkContinuation =
 internal class DefaultWorkContinuation(
     private val workManager: WorkManager,
     private val initialWork: List<OneTimeWorkRequest>,
-    private val chain: List<List<OneTimeWorkRequest>> = emptyList()
+    private val chain: List<List<OneTimeWorkRequest>> = emptyList(),
 ) : WorkContinuation {
 
     override fun then(work: OneTimeWorkRequest): WorkContinuation = then(listOf(work))

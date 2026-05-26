@@ -23,7 +23,7 @@ A Kotlin Multiplatform background task scheduler — the `WorkManager` API you k
 
 ## Setup
 
-> **Latest version**: check the Maven Central badge above or visit  
+> **Latest version**: check the Maven Central badge above or visit
 > [central.sonatype.com/search?q=io.github.mobilebytelabs](https://central.sonatype.com/search?q=io.github.mobilebytelabs)
 
 ```kotlin

@@ -35,7 +35,7 @@ class IosWorkManagerTest {
     fun enqueue_returnsId() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<SuccessIosWorker>(
-            SuccessIosWorker::class.simpleName!!
+            SuccessIosWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         assertEquals(req.id, id)
@@ -45,7 +45,7 @@ class IosWorkManagerTest {
     fun enqueue_successWorker_transitionsToSucceeded() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<SuccessIosWorker>(
-            SuccessIosWorker::class.simpleName!!
+            SuccessIosWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -56,7 +56,7 @@ class IosWorkManagerTest {
     fun enqueue_failWorker_transitionsToFailed() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<FailIosWorker>(
-            FailIosWorker::class.simpleName!!
+            FailIosWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.FAILED }
@@ -70,10 +70,10 @@ class IosWorkManagerTest {
         val shortRetry = RetryConfig(
             maxAttempts = 3,
             initialDelay = 10.milliseconds,
-            backoffPolicy = BackoffPolicy.LINEAR
+            backoffPolicy = BackoffPolicy.LINEAR,
         )
         val req = OneTimeWorkRequestBuilder<RetryThenSucceedIosWorker>(
-            RetryThenSucceedIosWorker::class.simpleName!!
+            RetryThenSucceedIosWorker::class.simpleName!!,
         ).setBackoffCriteria(BackoffPolicy.LINEAR, shortRetry).build()
         val id = wm.enqueue(req)
         eventually(timeoutMs = 3_000) { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -85,7 +85,7 @@ class IosWorkManagerTest {
     fun cancelWorkById_stopsEnqueuedWork() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<SlowIosWorker>(
-            SlowIosWorker::class.simpleName!!
+            SlowIosWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         wm.cancelWorkById(id)
@@ -104,7 +104,7 @@ class IosWorkManagerTest {
         val wm = workManager()
         val tag = "ios-sync"
         val req = OneTimeWorkRequestBuilder<SuccessIosWorker>(
-            SuccessIosWorker::class.simpleName!!
+            SuccessIosWorker::class.simpleName!!,
         ).addTag(tag).build()
         wm.enqueue(req)
         eventually { wm.getWorkInfoById(req.id)?.state == WorkInfo.State.SUCCEEDED }
@@ -118,7 +118,7 @@ class IosWorkManagerTest {
         val tag = "batch-ios"
         val ids = (1..3).map {
             val req = OneTimeWorkRequestBuilder<SlowIosWorker>(
-                SlowIosWorker::class.simpleName!!
+                SlowIosWorker::class.simpleName!!,
             ).addTag(tag).build()
             wm.enqueue(req)
         }
@@ -152,7 +152,7 @@ class IosWorkManagerTest {
     fun progressReportingWorker_updatesProgress() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<ProgressIosWorker>(
-            ProgressIosWorker::class.simpleName!!
+            ProgressIosWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -164,7 +164,7 @@ class IosWorkManagerTest {
         val wm = workManager()
         val req = PeriodicWorkRequestBuilder<SuccessIosWorker>(
             SuccessIosWorker::class.simpleName!!,
-            repeatInterval = 50.milliseconds
+            repeatInterval = 50.milliseconds,
         ).build()
         wm.enqueueUniquePeriodicWork("periodic-ios", ExistingPeriodicWorkPolicy.REPLACE, req)
         eventually(timeoutMs = 2_000) {
@@ -180,11 +180,11 @@ class IosWorkManagerTest {
         val wm = workManager()
         val req1 = PeriodicWorkRequestBuilder<SuccessIosWorker>(
             SuccessIosWorker::class.simpleName!!,
-            repeatInterval = 5.minutes
+            repeatInterval = 5.minutes,
         ).build()
         val req2 = PeriodicWorkRequestBuilder<SuccessIosWorker>(
             SuccessIosWorker::class.simpleName!!,
-            repeatInterval = 5.minutes
+            repeatInterval = 5.minutes,
         ).build()
         wm.enqueueUniquePeriodicWork("unique-ios", ExistingPeriodicWorkPolicy.REPLACE, req1)
         wm.enqueueUniquePeriodicWork("unique-ios", ExistingPeriodicWorkPolicy.REPLACE, req2)
@@ -232,25 +232,19 @@ class RetryThenSucceedIosWorker(context: WorkerContext) : CoroutineWorker(contex
 // ── Factory ───────────────────────────────────────────────────────────────────
 
 private object TestIosWorkerFactory : IosWorkerFactory {
-    override fun create(workerClass: String, context: WorkerContext): CoroutineWorker {
-        return when (workerClass) {
-            SuccessIosWorker::class.simpleName -> SuccessIosWorker(context)
-            FailIosWorker::class.simpleName -> FailIosWorker(context)
-            SlowIosWorker::class.simpleName -> SlowIosWorker(context)
-            ProgressIosWorker::class.simpleName -> ProgressIosWorker(context)
-            RetryThenSucceedIosWorker::class.simpleName -> RetryThenSucceedIosWorker(context)
-            else -> throw IllegalArgumentException("Unknown worker: $workerClass")
-        }
+    override fun create(workerClass: String, context: WorkerContext): CoroutineWorker = when (workerClass) {
+        SuccessIosWorker::class.simpleName -> SuccessIosWorker(context)
+        FailIosWorker::class.simpleName -> FailIosWorker(context)
+        SlowIosWorker::class.simpleName -> SlowIosWorker(context)
+        ProgressIosWorker::class.simpleName -> ProgressIosWorker(context)
+        RetryThenSucceedIosWorker::class.simpleName -> RetryThenSucceedIosWorker(context)
+        else -> throw IllegalArgumentException("Unknown worker: $workerClass")
     }
 }
 
 // ── Test helper ───────────────────────────────────────────────────────────────
 
-private suspend fun eventually(
-    timeoutMs: Long = 2_000,
-    intervalMs: Long = 30,
-    condition: suspend () -> Boolean
-) {
+private suspend fun eventually(timeoutMs: Long = 2_000, intervalMs: Long = 30, condition: suspend () -> Boolean) {
     withContext(Dispatchers.Default) {
         val mark = kotlin.time.TimeSource.Monotonic.markNow()
         while (mark.elapsedNow().inWholeMilliseconds < timeoutMs) {

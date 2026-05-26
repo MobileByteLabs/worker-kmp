@@ -34,6 +34,5 @@ internal class DesktopConstraintEvaluator(private val config: DesktopWorkManager
         false
     }
 
-    private fun checkStorageNotLow(): Boolean =
-        config.persistencePath.getUsableSpace() > 10L * 1024 * 1024
+    private fun checkStorageNotLow(): Boolean = config.persistencePath.getUsableSpace() > 10L * 1024 * 1024
 }

@@ -10,7 +10,7 @@ data class RetryConfig(
     val initialDelay: Duration = 1.minutes,
     val maxDelay: Duration = 1.hours,
     val backoffPolicy: BackoffPolicy = BackoffPolicy.EXPONENTIAL,
-    val multiplier: Double = 2.0
+    val multiplier: Double = 2.0,
 ) {
     companion object {
         val DEFAULT = RetryConfig()
@@ -21,5 +21,5 @@ data class RetryConfig(
 
 enum class BackoffPolicy {
     EXPONENTIAL,
-    LINEAR
+    LINEAR,
 }

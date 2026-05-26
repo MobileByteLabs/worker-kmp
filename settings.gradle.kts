@@ -1,6 +1,7 @@
 rootProject.name = "worker-kmp"
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()

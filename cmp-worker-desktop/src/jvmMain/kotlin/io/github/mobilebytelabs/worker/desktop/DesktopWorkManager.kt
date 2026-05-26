@@ -29,11 +29,11 @@ import kotlin.uuid.Uuid
 
 class DesktopWorkManager(
     private val config: DesktopWorkManagerConfig = DesktopWorkManagerConfig.DEFAULT,
-    private val workerFactory: DesktopWorkerFactory = ReflectionWorkerFactory
+    private val workerFactory: DesktopWorkerFactory = ReflectionWorkerFactory,
 ) : WorkManager {
 
     private val scope = CoroutineScope(
-        SupervisorJob() + Dispatchers.IO + CoroutineName("DesktopWorkManager")
+        SupervisorJob() + Dispatchers.IO + CoroutineName("DesktopWorkManager"),
     )
     private val jobRegistry = ConcurrentHashMap<Uuid, Job>()
     private val stateStore = DesktopWorkStateStore()
@@ -54,7 +54,7 @@ class DesktopWorkManager(
     override suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: PeriodicWorkRequest
+        request: PeriodicWorkRequest,
     ): Uuid {
         if (existingPeriodicWorkPolicy == ExistingPeriodicWorkPolicy.REPLACE) {
             cancelAllWorkByTag(uniqueWorkName)
@@ -84,8 +84,7 @@ class DesktopWorkManager(
             .forEach { cancelWorkById(it.id) }
     }
 
-    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
-        stateStore.observeByTag(tag)
+    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = stateStore.observeByTag(tag)
 
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.getById(id)
 
@@ -94,10 +93,10 @@ class DesktopWorkManager(
             id = request.id,
             inputData = request.inputData,
             tags = request.tags,
-            stateStore = stateStore
+            stateStore = stateStore,
         )
         val worker = workerFactory.create(request.workerClass, context)
-        if (!stateStore.transitionToRunning(request.id)) return  // already cancelled
+        if (!stateStore.transitionToRunning(request.id)) return // already cancelled
 
         var attempt = 0
         var result: WorkResult
@@ -127,7 +126,7 @@ class DesktopWorkManager(
             stateStore.updateState(
                 request.id,
                 finalState,
-                (result as? WorkResult.Success)?.outputData ?: WorkData.EMPTY
+                (result as? WorkResult.Success)?.outputData ?: WorkData.EMPTY,
             )
         } catch (e: CancellationException) {
             stateStore.updateState(request.id, WorkInfo.State.CANCELLED)
@@ -150,6 +149,7 @@ internal fun backoffDelay(config: RetryConfig, attempt: Int): Duration {
     val delayMs = when (config.backoffPolicy) {
         BackoffPolicy.EXPONENTIAL ->
             (config.initialDelay.inWholeMilliseconds * config.multiplier.pow(attempt)).toLong()
+
         BackoffPolicy.LINEAR ->
             config.initialDelay.inWholeMilliseconds * (attempt + 1)
     }.coerceAtMost(config.maxDelay.inWholeMilliseconds)
@@ -161,13 +161,10 @@ interface DesktopWorkerFactory {
 }
 
 internal object ReflectionWorkerFactory : DesktopWorkerFactory {
-    override fun create(
-        workerClass: String,
-        context: io.github.mobilebytelabs.worker.WorkerContext
-    ): CoroutineWorker {
+    override fun create(workerClass: String, context: io.github.mobilebytelabs.worker.WorkerContext): CoroutineWorker {
         val clazz = Class.forName(workerClass)
         val constructor = clazz.getDeclaredConstructor(
-            io.github.mobilebytelabs.worker.WorkerContext::class.java
+            io.github.mobilebytelabs.worker.WorkerContext::class.java,
         )
         return constructor.newInstance(context) as CoroutineWorker
     }

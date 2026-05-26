@@ -8,7 +8,7 @@ data class WorkInfo(
     val progress: WorkProgress = WorkProgress.NONE,
     val outputData: WorkData = WorkData.EMPTY,
     val tags: Set<String> = emptySet(),
-    val runAttemptCount: Int = 0
+    val runAttemptCount: Int = 0,
 ) {
     enum class State {
         ENQUEUED,
@@ -16,7 +16,8 @@ data class WorkInfo(
         SUCCEEDED,
         FAILED,
         CANCELLED,
-        BLOCKED;
+        BLOCKED,
+        ;
 
         val isFinished: Boolean
             get() = this == SUCCEEDED || this == FAILED || this == CANCELLED

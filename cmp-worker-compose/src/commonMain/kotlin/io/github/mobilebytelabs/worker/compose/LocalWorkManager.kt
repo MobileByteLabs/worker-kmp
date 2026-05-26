@@ -16,7 +16,7 @@ import io.github.mobilebytelabs.worker.WorkManager
 val LocalWorkManager: ProvidableCompositionLocal<WorkManager> = compositionLocalOf {
     error(
         "No WorkManager found in composition. " +
-            "Wrap your root composable with WorkManagerProvider { ... }."
+            "Wrap your root composable with WorkManagerProvider { ... }.",
     )
 }
 
@@ -34,10 +34,7 @@ val LocalWorkManager: ProvidableCompositionLocal<WorkManager> = compositionLocal
  * @param workManager defaults to [PlatformWorkManager] so callers usually omit it.
  */
 @Composable
-fun WorkManagerProvider(
-    workManager: WorkManager = PlatformWorkManager(),
-    content: @Composable () -> Unit
-) {
+fun WorkManagerProvider(workManager: WorkManager = PlatformWorkManager(), content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalWorkManager provides workManager) {
         content()
     }

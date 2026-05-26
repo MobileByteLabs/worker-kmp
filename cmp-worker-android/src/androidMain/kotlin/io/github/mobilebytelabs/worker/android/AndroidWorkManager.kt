@@ -5,7 +5,6 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager as AndroidWM
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkManager
@@ -14,14 +13,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.concurrent.TimeUnit
 import kotlin.uuid.Uuid
+import androidx.work.WorkManager as AndroidWM
 
 class AndroidWorkManager(context: Context) : WorkManager {
 
     private val wm = AndroidWM.getInstance(context)
 
-    override suspend fun enqueue(
-        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest
-    ): Uuid {
+    override suspend fun enqueue(request: io.github.mobilebytelabs.worker.OneTimeWorkRequest): Uuid {
         wm.enqueue(request.toAndroidOneTime()).result.await()
         return request.id
     }
@@ -29,12 +27,12 @@ class AndroidWorkManager(context: Context) : WorkManager {
     override suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: io.github.mobilebytelabs.worker.PeriodicWorkRequest
+        request: io.github.mobilebytelabs.worker.PeriodicWorkRequest,
     ): Uuid {
         wm.enqueueUniquePeriodicWork(
             uniqueWorkName,
             existingPeriodicWorkPolicy.toAndroid(),
-            request.toAndroidPeriodic()
+            request.toAndroidPeriodic(),
         ).result.await()
         return request.id
     }
@@ -63,7 +61,7 @@ class AndroidWorkManager(context: Context) : WorkManager {
             .setBackoffCriteria(
                 retryConfig.backoffPolicy.toAndroid(),
                 retryConfig.initialDelay.inWholeMilliseconds,
-                TimeUnit.MILLISECONDS
+                TimeUnit.MILLISECONDS,
             )
             .addTag(id.toTag())
             .apply { tags.forEach { addTag(it) } }
@@ -85,7 +83,7 @@ class AndroidWorkManager(context: Context) : WorkManager {
     private fun buildInputData(
         workerClass: String,
         id: Uuid,
-        inputData: io.github.mobilebytelabs.worker.WorkData
+        inputData: io.github.mobilebytelabs.worker.WorkData,
     ): androidx.work.Data {
         val userPairs: Array<Pair<String, Any?>> = inputData.keyValueMap()
             .entries
@@ -94,7 +92,7 @@ class AndroidWorkManager(context: Context) : WorkManager {
         return androidx.work.workDataOf(
             KEY_KMP_CLASS to workerClass,
             KEY_KMP_ID to id.toString(),
-            *userPairs
+            *userPairs,
         )
     }
 }

@@ -31,7 +31,7 @@ fun main() = runBlocking {
 
     val wm = DesktopWorkManager(
         config = DesktopWorkManagerConfig.IN_MEMORY,
-        workerFactory = SampleWorkerFactory
+        workerFactory = SampleWorkerFactory,
     )
 
     scenario1_oneTimeTaskWithIO(wm)
@@ -107,7 +107,7 @@ private suspend fun scenario3_retryWithBackoff(wm: DesktopWorkManager) {
     val retryConfig = RetryConfig(
         maxAttempts = 3,
         initialDelay = 100.milliseconds,
-        backoffPolicy = BackoffPolicy.EXPONENTIAL
+        backoffPolicy = BackoffPolicy.EXPONENTIAL,
     )
     val req = OneTimeWorkRequestBuilder<DataSyncWorker>("DataSyncWorker")
         .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, retryConfig)
@@ -134,7 +134,7 @@ private suspend fun scenario4_uniquePeriodicWork(wm: DesktopWorkManager) {
 
     val req = PeriodicWorkRequestBuilder<CacheCleanupWorker>(
         workerClass = "CacheCleanupWorker",
-        repeatInterval = 200.milliseconds
+        repeatInterval = 200.milliseconds,
     ).addTag("cleanup").build()
 
     wm.enqueueUniquePeriodicWork("cache-cleanup", ExistingPeriodicWorkPolicy.REPLACE, req)
@@ -180,10 +180,7 @@ private suspend fun scenario5_cancellation(wm: DesktopWorkManager) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-private suspend fun DesktopWorkManager.awaitFinished(
-    id: Uuid,
-    timeoutMs: Long = 8_000
-): WorkInfo? {
+private suspend fun DesktopWorkManager.awaitFinished(id: Uuid, timeoutMs: Long = 8_000): WorkInfo? {
     val deadline = System.currentTimeMillis() + timeoutMs
     while (System.currentTimeMillis() < deadline) {
         val info = getWorkInfoById(id) ?: return null

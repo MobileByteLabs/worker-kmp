@@ -1,7 +1,7 @@
 package io.github.mobilebytelabs.worker.desktop
 
-import io.github.mobilebytelabs.worker.CoroutineWorker
 import io.github.mobilebytelabs.worker.Constraints
+import io.github.mobilebytelabs.worker.CoroutineWorker
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
 import io.github.mobilebytelabs.worker.NetworkType
 import io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder
@@ -38,7 +38,9 @@ class FailWorker(context: WorkerContext) : CoroutineWorker(context) {
 }
 
 class RetryThenSucceedWorker(context: WorkerContext) : CoroutineWorker(context) {
-    companion object { var callCount = 0 }
+    companion object {
+        var callCount = 0
+    }
     override suspend fun doWork(): WorkResult {
         callCount++
         return if (callCount < 3) WorkResult.retry("not ready") else WorkResult.success()
@@ -65,15 +67,13 @@ class SlowWorker(context: WorkerContext) : CoroutineWorker(context) {
 
 private val inMemoryConfig = DesktopWorkManagerConfig.IN_MEMORY
 
-private fun fakeFactory(workerClass: String, context: WorkerContext): CoroutineWorker {
-    return when (workerClass) {
-        SuccessWorker::class.qualifiedName -> SuccessWorker(context)
-        FailWorker::class.qualifiedName -> FailWorker(context)
-        RetryThenSucceedWorker::class.qualifiedName -> RetryThenSucceedWorker(context)
-        ProgressReportingWorker::class.qualifiedName -> ProgressReportingWorker(context)
-        SlowWorker::class.qualifiedName -> SlowWorker(context)
-        else -> throw IllegalArgumentException("Unknown worker: $workerClass")
-    }
+private fun fakeFactory(workerClass: String, context: WorkerContext): CoroutineWorker = when (workerClass) {
+    SuccessWorker::class.qualifiedName -> SuccessWorker(context)
+    FailWorker::class.qualifiedName -> FailWorker(context)
+    RetryThenSucceedWorker::class.qualifiedName -> RetryThenSucceedWorker(context)
+    ProgressReportingWorker::class.qualifiedName -> ProgressReportingWorker(context)
+    SlowWorker::class.qualifiedName -> SlowWorker(context)
+    else -> throw IllegalArgumentException("Unknown worker: $workerClass")
 }
 
 private object FakeFactory : DesktopWorkerFactory {
@@ -113,10 +113,10 @@ class DesktopWorkManagerTest {
         val shortRetry = io.github.mobilebytelabs.worker.RetryConfig(
             maxAttempts = 3,
             initialDelay = 50.milliseconds,
-            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.LINEAR
+            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.LINEAR,
         )
         val request = OneTimeWorkRequestBuilder<RetryThenSucceedWorker>(
-            RetryThenSucceedWorker::class.qualifiedName!!
+            RetryThenSucceedWorker::class.qualifiedName!!,
         ).setBackoffCriteria(io.github.mobilebytelabs.worker.BackoffPolicy.LINEAR, shortRetry).build()
         val id = wm.enqueue(request)
         eventually(timeoutMs = 3_000) { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -158,7 +158,7 @@ class DesktopWorkManagerTest {
     fun progressReportingWorker_updatesProgress() = runTest {
         val wm = workManager()
         val request = OneTimeWorkRequestBuilder<ProgressReportingWorker>(
-            ProgressReportingWorker::class.qualifiedName!!
+            ProgressReportingWorker::class.qualifiedName!!,
         ).build()
         val id = wm.enqueue(request)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -172,7 +172,7 @@ class DesktopWorkManagerTest {
         val tag = "periodic-sync"
         val request = PeriodicWorkRequestBuilder<SuccessWorker>(
             SuccessWorker::class.qualifiedName!!,
-            repeatInterval = 100.milliseconds
+            repeatInterval = 100.milliseconds,
         ).addTag(tag).build()
         wm.enqueueUniquePeriodicWork("periodic-sync", ExistingPeriodicWorkPolicy.REPLACE, request)
         eventually(timeoutMs = 2_000) { (wm.getWorkInfoById(request.id)?.runAttemptCount ?: 0) >= 2 }
@@ -224,7 +224,7 @@ class DesktopWorkManagerTest {
         val config = io.github.mobilebytelabs.worker.RetryConfig(
             initialDelay = 1.seconds,
             multiplier = 2.0,
-            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.EXPONENTIAL
+            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.EXPONENTIAL,
         )
         assertEquals(1_000, backoffDelay(config, 0).inWholeMilliseconds)
         assertEquals(2_000, backoffDelay(config, 1).inWholeMilliseconds)
@@ -235,7 +235,7 @@ class DesktopWorkManagerTest {
     fun backoffDelay_linearGrowth() {
         val config = io.github.mobilebytelabs.worker.RetryConfig(
             initialDelay = 1.seconds,
-            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.LINEAR
+            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.LINEAR,
         )
         assertEquals(1_000, backoffDelay(config, 0).inWholeMilliseconds)
         assertEquals(2_000, backoffDelay(config, 1).inWholeMilliseconds)
@@ -247,7 +247,7 @@ class DesktopWorkManagerTest {
         val config = io.github.mobilebytelabs.worker.RetryConfig(
             initialDelay = 1.minutes,
             maxDelay = 5.seconds,
-            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.EXPONENTIAL
+            backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.EXPONENTIAL,
         )
         assertTrue(backoffDelay(config, 0).inWholeMilliseconds <= 5_000)
     }
@@ -255,11 +255,7 @@ class DesktopWorkManagerTest {
 
 // ── Test utilities ────────────────────────────────────────────────────────────
 
-private suspend fun eventually(
-    timeoutMs: Long = 2_000,
-    intervalMs: Long = 50,
-    condition: suspend () -> Boolean
-) {
+private suspend fun eventually(timeoutMs: Long = 2_000, intervalMs: Long = 50, condition: suspend () -> Boolean) {
     val deadline = System.currentTimeMillis() + timeoutMs
     while (System.currentTimeMillis() < deadline) {
         if (condition()) return

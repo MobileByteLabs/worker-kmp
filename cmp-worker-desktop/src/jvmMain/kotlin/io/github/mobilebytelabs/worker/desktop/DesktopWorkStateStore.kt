@@ -64,8 +64,7 @@ internal class DesktopWorkStateStore {
 
     suspend fun getById(id: Uuid): WorkInfo? = store.value[id]
 
-    fun observeByTag(tag: String): Flow<List<WorkInfo>> =
-        store.map { infos -> infos.values.filter { tag in it.tags } }
+    fun observeByTag(tag: String): Flow<List<WorkInfo>> = store.map { infos -> infos.values.filter { tag in it.tags } }
 
     fun snapshot(): Map<Uuid, WorkInfo> = store.value
 }

@@ -21,7 +21,7 @@ class ImageResizeWorker(context: WorkerContext) : CoroutineWorker(context) {
         delay(80)
         setProgress(WorkProgress(100))
 
-        val dst = src.replace(".", "_${width}x${height}.")
+        val dst = src.replace(".", "_${width}x$height.")
         return WorkResult.success(workDataOf("dst" to dst, "width" to width, "height" to height))
     }
 }

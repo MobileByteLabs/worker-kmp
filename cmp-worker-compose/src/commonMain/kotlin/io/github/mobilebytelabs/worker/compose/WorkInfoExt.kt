@@ -23,7 +23,7 @@ import kotlin.uuid.Uuid
 @Composable
 fun WorkManager.collectWorkInfosByTagAsState(
     tag: String,
-    initial: List<WorkInfo> = emptyList()
+    initial: List<WorkInfo> = emptyList(),
 ): State<List<WorkInfo>> = getWorkInfosByTag(tag).collectAsState(initial = initial)
 
 /**
@@ -39,10 +39,7 @@ fun WorkManager.collectWorkInfosByTagAsState(
  * ```
  */
 @Composable
-fun WorkManager.collectWorkInfoByIdAsState(
-    id: Uuid,
-    initial: WorkInfo? = null
-): State<WorkInfo?> {
+fun WorkManager.collectWorkInfoByIdAsState(id: Uuid, initial: WorkInfo? = null): State<WorkInfo?> {
     val state = remember(id) { mutableStateOf(initial) }
     LaunchedEffect(id) {
         state.value = getWorkInfoById(id)

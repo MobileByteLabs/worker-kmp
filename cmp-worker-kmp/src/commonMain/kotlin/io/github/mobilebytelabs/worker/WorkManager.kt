@@ -11,7 +11,7 @@ interface WorkManager {
     suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: PeriodicWorkRequest
+        request: PeriodicWorkRequest,
     ): Uuid
 
     /** Cancel work by ID. No-op if already SUCCEEDED/FAILED. */

@@ -53,7 +53,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-kmp",
-        version = providers.gradleProperty("worker.version").get()
+        version = providers.gradleProperty("worker.version").get(),
     )
     pom {
         name.set("worker-kmp")

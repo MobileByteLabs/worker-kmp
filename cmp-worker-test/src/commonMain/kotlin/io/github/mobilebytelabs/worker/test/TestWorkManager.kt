@@ -56,7 +56,7 @@ class TestWorkManager : WorkManager {
     override suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: PeriodicWorkRequest
+        request: PeriodicWorkRequest,
     ): Uuid {
         if (existingPeriodicWorkPolicy == ExistingPeriodicWorkPolicy.REPLACE) {
             store.value.values
@@ -75,8 +75,11 @@ class TestWorkManager : WorkManager {
 
     override suspend fun cancelAllWorkByTag(tag: String) {
         store.value = store.value.mapValues { (_, info) ->
-            if (tag in info.tags && !info.isFinished) info.copy(state = WorkInfo.State.CANCELLED)
-            else info
+            if (tag in info.tags && !info.isFinished) {
+                info.copy(state = WorkInfo.State.CANCELLED)
+            } else {
+                info
+            }
         }
     }
 
@@ -88,20 +91,17 @@ class TestWorkManager : WorkManager {
     // ── Test control ──────────────────────────────────────────────────────────
 
     /** Transitions work to RUNNING. */
-    fun simulateWorkRunning(id: Uuid) =
-        update(id) { copy(state = WorkInfo.State.RUNNING) }
+    fun simulateWorkRunning(id: Uuid) = update(id) { copy(state = WorkInfo.State.RUNNING) }
 
     /** Transitions work to SUCCEEDED with optional output data. */
     fun simulateWorkSuccess(id: Uuid, outputData: WorkData = WorkData.EMPTY) =
         update(id) { copy(state = WorkInfo.State.SUCCEEDED, outputData = outputData) }
 
     /** Transitions work to FAILED. */
-    fun simulateWorkFailure(id: Uuid) =
-        update(id) { copy(state = WorkInfo.State.FAILED) }
+    fun simulateWorkFailure(id: Uuid) = update(id) { copy(state = WorkInfo.State.FAILED) }
 
     /** Updates the progress of work without changing its state. */
-    fun simulateWorkProgress(id: Uuid, progress: WorkProgress) =
-        update(id) { copy(progress = progress) }
+    fun simulateWorkProgress(id: Uuid, progress: WorkProgress) = update(id) { copy(progress = progress) }
 
     /** Transitions work back to ENQUEUED (simulates a retry). */
     fun simulateWorkRetry(id: Uuid) =
@@ -120,12 +120,10 @@ class TestWorkManager : WorkManager {
     // ── Convenience queries ───────────────────────────────────────────────────
 
     /** Returns true if any request with the given tag was enqueued. */
-    fun hasWorkWithTag(tag: String): Boolean =
-        store.value.values.any { tag in it.tags }
+    fun hasWorkWithTag(tag: String): Boolean = store.value.values.any { tag in it.tags }
 
     /** Returns the number of requests enqueued with the given tag. */
-    fun workCountWithTag(tag: String): Int =
-        store.value.values.count { tag in it.tags }
+    fun workCountWithTag(tag: String): Int = store.value.values.count { tag in it.tags }
 
     /** Returns the last enqueued request, or null if none. */
     val lastEnqueuedRequest: WorkRequest? get() = _enqueuedRequests.lastOrNull()

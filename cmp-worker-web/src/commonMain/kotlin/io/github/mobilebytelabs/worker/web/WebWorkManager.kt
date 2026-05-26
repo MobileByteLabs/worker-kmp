@@ -2,6 +2,7 @@ package io.github.mobilebytelabs.worker.web
 
 import io.github.mobilebytelabs.worker.BackoffPolicy
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
+import io.github.mobilebytelabs.worker.ExperimentalWorkerApi
 import io.github.mobilebytelabs.worker.OneTimeWorkRequest
 import io.github.mobilebytelabs.worker.PeriodicWorkRequest
 import io.github.mobilebytelabs.worker.RetryConfig
@@ -25,12 +26,11 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
-class WebWorkManager(
-    private val workerFactory: WebWorkerFactory
-) : WorkManager {
+@OptIn(ExperimentalWorkerApi::class)
+class WebWorkManager(private val workerFactory: WebWorkerFactory) : WorkManager {
 
     private val scope = CoroutineScope(
-        SupervisorJob() + Dispatchers.Default + CoroutineName("WebWorkManager")
+        SupervisorJob() + Dispatchers.Default + CoroutineName("WebWorkManager"),
     )
     private val jobRegistry = mutableMapOf<Uuid, Job>()
     private val stateStore = WebWorkStateStore()
@@ -45,7 +45,7 @@ class WebWorkManager(
     override suspend fun enqueueUniquePeriodicWork(
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
-        request: PeriodicWorkRequest
+        request: PeriodicWorkRequest,
     ): Uuid {
         if (existingPeriodicWorkPolicy == ExistingPeriodicWorkPolicy.REPLACE) {
             cancelAllWorkByTag(uniqueWorkName)
@@ -73,8 +73,7 @@ class WebWorkManager(
             .forEach { cancelWorkById(it.id) }
     }
 
-    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
-        stateStore.observeByTag(tag)
+    override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = stateStore.observeByTag(tag)
 
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.getById(id)
 
@@ -83,7 +82,7 @@ class WebWorkManager(
             id = request.id,
             inputData = request.inputData,
             tags = request.tags,
-            stateStore = stateStore
+            stateStore = stateStore,
         )
         val worker = workerFactory.create(request.workerClass, context)
         if (!stateStore.transitionToRunning(request.id)) return
@@ -107,7 +106,7 @@ class WebWorkManager(
                 } else {
                     break
                 }
-            } while (result is WorkResult.Retry)
+            } while (true)
 
             val finalState = when (result) {
                 is WorkResult.Success -> WorkInfo.State.SUCCEEDED
@@ -116,7 +115,7 @@ class WebWorkManager(
             stateStore.updateState(
                 request.id,
                 finalState,
-                (result as? WorkResult.Success)?.outputData ?: WorkData.EMPTY
+                (result as? WorkResult.Success)?.outputData ?: WorkData.EMPTY,
             )
         } catch (e: CancellationException) {
             stateStore.updateState(request.id, WorkInfo.State.CANCELLED)
@@ -133,6 +132,7 @@ internal fun webBackoffDelay(config: RetryConfig, attempt: Int): Duration {
     val delayMs = when (config.backoffPolicy) {
         BackoffPolicy.EXPONENTIAL ->
             (config.initialDelay.inWholeMilliseconds * config.multiplier.pow(attempt)).toLong()
+
         BackoffPolicy.LINEAR ->
             config.initialDelay.inWholeMilliseconds * (attempt + 1)
     }.coerceAtMost(config.maxDelay.inWholeMilliseconds)

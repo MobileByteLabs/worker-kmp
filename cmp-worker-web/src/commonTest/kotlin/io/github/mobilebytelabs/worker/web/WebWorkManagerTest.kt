@@ -35,7 +35,7 @@ class WebWorkManagerTest {
     fun enqueue_returnsId() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<SuccessWebWorker>(
-            SuccessWebWorker::class.simpleName!!
+            SuccessWebWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         assertEquals(req.id, id)
@@ -45,7 +45,7 @@ class WebWorkManagerTest {
     fun enqueue_successWorker_transitionsToSucceeded() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<SuccessWebWorker>(
-            SuccessWebWorker::class.simpleName!!
+            SuccessWebWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -56,7 +56,7 @@ class WebWorkManagerTest {
     fun enqueue_failWorker_transitionsToFailed() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<FailWebWorker>(
-            FailWebWorker::class.simpleName!!
+            FailWebWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.FAILED }
@@ -70,10 +70,10 @@ class WebWorkManagerTest {
         val shortRetry = RetryConfig(
             maxAttempts = 3,
             initialDelay = 10.milliseconds,
-            backoffPolicy = BackoffPolicy.LINEAR
+            backoffPolicy = BackoffPolicy.LINEAR,
         )
         val req = OneTimeWorkRequestBuilder<RetryThenSucceedWebWorker>(
-            RetryThenSucceedWebWorker::class.simpleName!!
+            RetryThenSucceedWebWorker::class.simpleName!!,
         ).setBackoffCriteria(BackoffPolicy.LINEAR, shortRetry).build()
         val id = wm.enqueue(req)
         eventually(timeoutMs = 3_000) { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -85,7 +85,7 @@ class WebWorkManagerTest {
     fun cancelWorkById_stopsEnqueuedWork() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<SlowWebWorker>(
-            SlowWebWorker::class.simpleName!!
+            SlowWebWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         wm.cancelWorkById(id)
@@ -104,7 +104,7 @@ class WebWorkManagerTest {
         val wm = workManager()
         val tag = "web-sync"
         val req = OneTimeWorkRequestBuilder<SuccessWebWorker>(
-            SuccessWebWorker::class.simpleName!!
+            SuccessWebWorker::class.simpleName!!,
         ).addTag(tag).build()
         wm.enqueue(req)
         eventually { wm.getWorkInfoById(req.id)?.state == WorkInfo.State.SUCCEEDED }
@@ -118,7 +118,7 @@ class WebWorkManagerTest {
         val tag = "batch-web"
         val ids = (1..3).map {
             val req = OneTimeWorkRequestBuilder<SlowWebWorker>(
-                SlowWebWorker::class.simpleName!!
+                SlowWebWorker::class.simpleName!!,
             ).addTag(tag).build()
             wm.enqueue(req)
         }
@@ -135,7 +135,10 @@ class WebWorkManagerTest {
     fun enqueue_passesInputData() = runTest {
         var received: WorkData? = null
         val factory = object : WebWorkerFactory {
-            override fun create(workerClass: String, context: WorkerContext): io.github.mobilebytelabs.worker.CoroutineWorker {
+            override fun create(
+                workerClass: String,
+                context: WorkerContext,
+            ): io.github.mobilebytelabs.worker.CoroutineWorker {
                 received = context.inputData
                 return SuccessWebWorker(context)
             }
@@ -152,7 +155,7 @@ class WebWorkManagerTest {
     fun progressReportingWorker_updatesProgress() = runTest {
         val wm = workManager()
         val req = OneTimeWorkRequestBuilder<ProgressWebWorker>(
-            ProgressWebWorker::class.simpleName!!
+            ProgressWebWorker::class.simpleName!!,
         ).build()
         val id = wm.enqueue(req)
         eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
@@ -164,7 +167,7 @@ class WebWorkManagerTest {
         val wm = workManager()
         val req = PeriodicWorkRequestBuilder<SuccessWebWorker>(
             SuccessWebWorker::class.simpleName!!,
-            repeatInterval = 50.milliseconds
+            repeatInterval = 50.milliseconds,
         ).build()
         wm.enqueueUniquePeriodicWork("periodic-web", ExistingPeriodicWorkPolicy.REPLACE, req)
         eventually(timeoutMs = 2_000) {
@@ -180,11 +183,11 @@ class WebWorkManagerTest {
         val wm = workManager()
         val req1 = PeriodicWorkRequestBuilder<SuccessWebWorker>(
             SuccessWebWorker::class.simpleName!!,
-            repeatInterval = 5.minutes
+            repeatInterval = 5.minutes,
         ).build()
         val req2 = PeriodicWorkRequestBuilder<SuccessWebWorker>(
             SuccessWebWorker::class.simpleName!!,
-            repeatInterval = 5.minutes
+            repeatInterval = 5.minutes,
         ).build()
         wm.enqueueUniquePeriodicWork("unique-work", ExistingPeriodicWorkPolicy.REPLACE, req1)
         wm.enqueueUniquePeriodicWork("unique-work", ExistingPeriodicWorkPolicy.REPLACE, req2)
@@ -232,8 +235,8 @@ class RetryThenSucceedWebWorker(context: WorkerContext) : CoroutineWorker(contex
 // ── Factory ───────────────────────────────────────────────────────────────────
 
 private object TestWebWorkerFactory : WebWorkerFactory {
-    override fun create(workerClass: String, context: WorkerContext): io.github.mobilebytelabs.worker.CoroutineWorker {
-        return when (workerClass) {
+    override fun create(workerClass: String, context: WorkerContext): io.github.mobilebytelabs.worker.CoroutineWorker =
+        when (workerClass) {
             SuccessWebWorker::class.simpleName -> SuccessWebWorker(context)
             FailWebWorker::class.simpleName -> FailWebWorker(context)
             SlowWebWorker::class.simpleName -> SlowWebWorker(context)
@@ -241,16 +244,11 @@ private object TestWebWorkerFactory : WebWorkerFactory {
             RetryThenSucceedWebWorker::class.simpleName -> RetryThenSucceedWebWorker(context)
             else -> throw IllegalArgumentException("Unknown worker: $workerClass")
         }
-    }
 }
 
 // ── Test helper ───────────────────────────────────────────────────────────────
 
-private suspend fun eventually(
-    timeoutMs: Long = 2_000,
-    intervalMs: Long = 30,
-    condition: suspend () -> Boolean
-) {
+private suspend fun eventually(timeoutMs: Long = 2_000, intervalMs: Long = 30, condition: suspend () -> Boolean) {
     withContext(Dispatchers.Default) {
         val mark = kotlin.time.TimeSource.Monotonic.markNow()
         while (mark.elapsedNow().inWholeMilliseconds < timeoutMs) {

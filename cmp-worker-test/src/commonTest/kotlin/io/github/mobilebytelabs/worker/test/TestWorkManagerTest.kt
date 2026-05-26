@@ -205,10 +205,9 @@ class TestWorkManagerTest {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private fun request(workerClass: String, tag: String? = null) =
-        OneTimeWorkRequestBuilder<FakeWorker>(workerClass)
-            .also { if (tag != null) it.addTag(tag) }
-            .build()
+    private fun request(workerClass: String, tag: String? = null) = OneTimeWorkRequestBuilder<FakeWorker>(workerClass)
+        .also { if (tag != null) it.addTag(tag) }
+        .build()
 
     private fun periodicRequest(workerClass: String) =
         PeriodicWorkRequestBuilder<FakeWorker>(workerClass, repeatInterval = 1.hours).build()

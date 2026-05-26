@@ -45,7 +45,7 @@ class WorkConvertersTest {
         val data = workDataOf(
             "key1" to "hello",
             "key2" to 42,
-            "key3" to true
+            "key3" to true,
         )
         val androidData = data.toAndroid()
         val backAgain = androidData.toKmp()
@@ -59,7 +59,7 @@ class WorkConvertersTest {
         val androidData = androidx.work.workDataOf(
             KEY_KMP_CLASS to "com.example.MyWorker",
             KEY_KMP_ID to "550e8400-e29b-41d4-a716-446655440000",
-            "user_key" to "user_value"
+            "user_key" to "user_value",
         )
         val kmpData = androidData.toKmp()
         assertNull(kmpData.getString(KEY_KMP_CLASS))

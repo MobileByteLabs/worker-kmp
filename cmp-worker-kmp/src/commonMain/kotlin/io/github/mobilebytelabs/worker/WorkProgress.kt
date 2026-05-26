@@ -1,9 +1,6 @@
 package io.github.mobilebytelabs.worker
 
-data class WorkProgress(
-    val progress: Int,
-    val data: WorkData = WorkData.EMPTY
-) {
+data class WorkProgress(val progress: Int, val data: WorkData = WorkData.EMPTY) {
     init {
         require(progress in 0..100) { "Progress must be 0..100, was $progress" }
     }

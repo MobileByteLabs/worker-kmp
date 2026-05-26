@@ -9,7 +9,7 @@ internal class IosWorkerContext(
     override val id: Uuid,
     override val inputData: WorkData,
     override val tags: Set<String>,
-    private val stateStore: IosWorkStateStore
+    private val stateStore: IosWorkStateStore,
 ) : WorkerContext {
     override suspend fun setProgress(progress: WorkProgress) {
         stateStore.updateProgress(id, progress)

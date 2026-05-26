@@ -2,10 +2,7 @@ package io.github.mobilebytelabs.worker
 
 sealed class WorkResult {
     data class Success(val outputData: WorkData = WorkData.EMPTY) : WorkResult()
-    data class Failure(
-        val message: String = "",
-        val outputData: WorkData = WorkData.EMPTY
-    ) : WorkResult()
+    data class Failure(val message: String = "", val outputData: WorkData = WorkData.EMPTY) : WorkResult()
     data class Retry(val reason: String = "") : WorkResult()
 
     companion object {

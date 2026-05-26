@@ -12,14 +12,12 @@ import io.github.mobilebytelabs.worker.WorkerContext
  *
  * Install via `WorkManager.initialize(context, Configuration.Builder().setWorkerFactory(factory).build())`.
  */
-class KmpWorkerFactory(
-    private val kmpFactory: KmpAndroidWorkerFactory = ReflectionKmpWorkerFactory
-) : WorkerFactory() {
+class KmpWorkerFactory(private val kmpFactory: KmpAndroidWorkerFactory = ReflectionKmpWorkerFactory) : WorkerFactory() {
 
     override fun createWorker(
         appContext: Context,
         workerClassName: String,
-        workerParameters: WorkerParameters
+        workerParameters: WorkerParameters,
     ): ListenableWorker? {
         if (workerClassName != KmpAndroidWorker::class.qualifiedName) return null
         instance = kmpFactory

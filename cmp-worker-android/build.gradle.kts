@@ -14,8 +14,14 @@ version = providers.gradleProperty("worker.version").get()
 kotlin {
     android {
         namespace = "io.github.mobilebytelabs.worker.android"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.android.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
         compilerOptions { jvmTarget = JvmTarget.JVM_11 }
     }
     compilerOptions {
@@ -42,7 +48,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-android",
-        version = providers.gradleProperty("worker.version").get()
+        version = providers.gradleProperty("worker.version").get(),
     )
     pom {
         name.set("worker-android")

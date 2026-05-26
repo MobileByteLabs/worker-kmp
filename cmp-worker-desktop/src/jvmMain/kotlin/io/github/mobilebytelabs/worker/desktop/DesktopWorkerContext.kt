@@ -9,7 +9,7 @@ internal class DesktopWorkerContext(
     override val id: Uuid,
     override val inputData: WorkData,
     override val tags: Set<String>,
-    private val stateStore: DesktopWorkStateStore
+    private val stateStore: DesktopWorkStateStore,
 ) : WorkerContext {
     override suspend fun setProgress(progress: WorkProgress) {
         stateStore.updateProgress(id, progress)

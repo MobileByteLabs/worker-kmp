@@ -6,7 +6,7 @@ actual object PlatformWorkManager {
     actual operator fun invoke(): WorkManager = _delegate
         ?: error(
             "WorkManager not configured for iOS. " +
-                "Add the worker-ios module to iosMain dependencies."
+                "Add the worker-ios module to iosMain dependencies.",
         )
 
     fun configure(workManager: WorkManager) {

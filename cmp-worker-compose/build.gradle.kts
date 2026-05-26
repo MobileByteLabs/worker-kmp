@@ -16,8 +16,14 @@ version = providers.gradleProperty("worker.version").get()
 kotlin {
     android {
         namespace = "io.github.mobilebytelabs.worker.compose"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.android.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
         withHostTestBuilder {}.configure {}
         compilerOptions { jvmTarget = JvmTarget.JVM_11 }
     }
@@ -55,7 +61,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-compose",
-        version = providers.gradleProperty("worker.version").get()
+        version = providers.gradleProperty("worker.version").get(),
     )
     pom {
         name.set("worker-compose")

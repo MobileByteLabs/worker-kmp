@@ -5,7 +5,7 @@ class Constraints private constructor(
     val requiresCharging: Boolean = false,
     val requiresDeviceIdle: Boolean = false,
     val requiresBatteryNotLow: Boolean = false,
-    val requiresStorageNotLow: Boolean = false
+    val requiresStorageNotLow: Boolean = false,
 ) {
     companion object {
         val NONE: Constraints = Constraints()
@@ -20,11 +20,9 @@ class Constraints private constructor(
         private var requiresBatteryNotLow: Boolean = false
         private var requiresStorageNotLow: Boolean = false
 
-        fun setRequiredNetworkType(networkType: NetworkType): Builder =
-            apply { requiredNetworkType = networkType }
+        fun setRequiredNetworkType(networkType: NetworkType): Builder = apply { requiredNetworkType = networkType }
 
-        fun setRequiresCharging(requiresCharging: Boolean): Builder =
-            apply { this.requiresCharging = requiresCharging }
+        fun setRequiresCharging(requiresCharging: Boolean): Builder = apply { this.requiresCharging = requiresCharging }
 
         fun setRequiresDeviceIdle(requiresDeviceIdle: Boolean): Builder =
             apply { this.requiresDeviceIdle = requiresDeviceIdle }
@@ -40,7 +38,7 @@ class Constraints private constructor(
             requiresCharging = requiresCharging,
             requiresDeviceIdle = requiresDeviceIdle,
             requiresBatteryNotLow = requiresBatteryNotLow,
-            requiresStorageNotLow = requiresStorageNotLow
+            requiresStorageNotLow = requiresStorageNotLow,
         )
     }
 
@@ -48,10 +46,10 @@ class Constraints private constructor(
         if (this === other) return true
         if (other !is Constraints) return false
         return requiredNetworkType == other.requiredNetworkType &&
-                requiresCharging == other.requiresCharging &&
-                requiresDeviceIdle == other.requiresDeviceIdle &&
-                requiresBatteryNotLow == other.requiresBatteryNotLow &&
-                requiresStorageNotLow == other.requiresStorageNotLow
+            requiresCharging == other.requiresCharging &&
+            requiresDeviceIdle == other.requiresDeviceIdle &&
+            requiresBatteryNotLow == other.requiresBatteryNotLow &&
+            requiresStorageNotLow == other.requiresStorageNotLow
     }
 
     override fun hashCode(): Int {
@@ -69,11 +67,11 @@ enum class NetworkType {
     CONNECTED,
     UNMETERED,
     NOT_ROAMING,
-    METERED
+    METERED,
 }
 
 enum class ExistingPeriodicWorkPolicy {
     KEEP,
     REPLACE,
-    UPDATE
+    UPDATE,
 }

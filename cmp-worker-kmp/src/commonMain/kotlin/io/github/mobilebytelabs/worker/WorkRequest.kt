@@ -19,7 +19,7 @@ data class OneTimeWorkRequest internal constructor(
     override val inputData: WorkData,
     override val constraints: Constraints,
     override val retryConfig: RetryConfig,
-    override val tags: Set<String>
+    override val tags: Set<String>,
 ) : WorkRequest()
 
 @ConsistentCopyVisibility
@@ -31,7 +31,7 @@ data class PeriodicWorkRequest internal constructor(
     override val retryConfig: RetryConfig,
     override val tags: Set<String>,
     val repeatInterval: Duration,
-    val flexTimeInterval: Duration = Duration.ZERO
+    val flexTimeInterval: Duration = Duration.ZERO,
 ) : WorkRequest()
 
 class OneTimeWorkRequestBuilder<T : CoroutineWorker>(private val workerClass: String) {
@@ -54,14 +54,14 @@ class OneTimeWorkRequestBuilder<T : CoroutineWorker>(private val workerClass: St
         inputData = inputData,
         constraints = constraints,
         retryConfig = retryConfig,
-        tags = tags.toSet()
+        tags = tags.toSet(),
     )
 }
 
 class PeriodicWorkRequestBuilder<T : CoroutineWorker>(
     private val workerClass: String,
     private val repeatInterval: Duration,
-    private val flexTimeInterval: Duration = Duration.ZERO
+    private val flexTimeInterval: Duration = Duration.ZERO,
 ) {
     private var inputData: WorkData = WorkData.EMPTY
     private var constraints: Constraints = Constraints.NONE
@@ -79,19 +79,18 @@ class PeriodicWorkRequestBuilder<T : CoroutineWorker>(
         retryConfig = RetryConfig.DEFAULT,
         tags = tags.toSet(),
         repeatInterval = repeatInterval,
-        flexTimeInterval = flexTimeInterval
+        flexTimeInterval = flexTimeInterval,
     )
 }
 
 inline fun <reified T : CoroutineWorker> oneTimeWorkRequest(
-    block: OneTimeWorkRequestBuilder<T>.() -> Unit = {}
-): OneTimeWorkRequest =
-    OneTimeWorkRequestBuilder<T>(T::class.simpleName ?: "Unknown").apply(block).build()
+    block: OneTimeWorkRequestBuilder<T>.() -> Unit = {},
+): OneTimeWorkRequest = OneTimeWorkRequestBuilder<T>(T::class.simpleName ?: "Unknown").apply(block).build()
 
 inline fun <reified T : CoroutineWorker> periodicWorkRequest(
     repeatInterval: Duration,
     flexTimeInterval: Duration = Duration.ZERO,
-    block: PeriodicWorkRequestBuilder<T>.() -> Unit = {}
+    block: PeriodicWorkRequestBuilder<T>.() -> Unit = {},
 ): PeriodicWorkRequest =
     PeriodicWorkRequestBuilder<T>(T::class.simpleName ?: "Unknown", repeatInterval, flexTimeInterval)
         .apply(block)

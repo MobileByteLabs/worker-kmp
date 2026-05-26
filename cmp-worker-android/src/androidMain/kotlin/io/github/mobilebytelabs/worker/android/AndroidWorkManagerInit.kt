@@ -26,16 +26,13 @@ import io.github.mobilebytelabs.worker.PlatformWorkManager
  * `<provider android:name="androidx.startup.InitializationProvider" tools:node="remove" />`
  * or use `androidx.work.impl.WorkManagerInitializer` removal if you call this manually.
  */
-fun initializeWorkerAndroid(
-    context: Context,
-    workerFactory: KmpAndroidWorkerFactory = ReflectionKmpWorkerFactory
-) {
+fun initializeWorkerAndroid(context: Context, workerFactory: KmpAndroidWorkerFactory = ReflectionKmpWorkerFactory) {
     val factory = KmpWorkerFactory(workerFactory)
     WorkManager.initialize(
         context,
         Configuration.Builder()
             .setWorkerFactory(factory)
-            .build()
+            .build(),
     )
     PlatformWorkManager.configure(AndroidWorkManager(context))
 }

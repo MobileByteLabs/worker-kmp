@@ -12,10 +12,7 @@ import kotlin.uuid.Uuid
  * Reads the KMP worker class name from input data, instantiates it via the registered
  * [KmpWorkerFactory], and delegates [doWork] to it.
  */
-class KmpAndroidWorker(
-    appContext: Context,
-    params: WorkerParameters
-) : CoroutineWorker(appContext, params) {
+class KmpAndroidWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
         val workerClass = inputData.getString(KEY_KMP_CLASS)
@@ -34,9 +31,11 @@ class KmpAndroidWorker(
 
         return when (val result = worker.doWork()) {
             is WorkResult.Success -> Result.success(result.outputData.toAndroid())
+
             is WorkResult.Failure -> Result.failure(
-                androidx.work.workDataOf("error" to result.message)
+                androidx.work.workDataOf("error" to result.message),
             )
+
             is WorkResult.Retry -> Result.retry()
         }
     }
