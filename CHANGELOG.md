@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-05-26
+
+### Added
+
+#### Core API (`cmp-worker-kmp`)
+
+- `ConditionalWorker` — abstract `CoroutineWorker` subclass that gates execution on a runtime
+  `condition()` check; returns `WorkResult.failure` when condition is `false`, allowing callers
+  to skip work based on feature flags, auth state, or resource availability without retrying.
+- `DefaultWorkContinuation` — concrete implementation of `WorkContinuation` that executes chain
+  steps sequentially: each step is fully awaited before the next is enqueued; the chain halts
+  on any `FAILED` or `CANCELLED` step; output data from each step is merged and forwarded as
+  input to the next step (accumulated across all prior steps).
+- `WorkData.mergeWith()` — internal extension that merges two `WorkData` instances, with the
+  right-hand operand's keys taking precedence on collision.
+
+#### Testing (`cmp-worker-test`)
+
+- `WorkContinuationTest` — 10 tests covering single-step, two-step, three-step chains, halt on
+  failure/cancel/middle-failure, output data propagation, accumulated output across 3 steps,
+  original input preservation when predecessor has no output, and parallel initial steps.
+- `WorkContinuationConditionalWorkerTest` — 3 tests covering condition-true execution,
+  condition-false skip, and retry passthrough from `doConditionalWork`.
+
+## [1.1.0] - 2026-05-26
+
+### Added
+
+#### Core API (`cmp-worker-kmp`)
+
+- `ContentUriTrigger` — data class representing a content-provider URI trigger (Android-only,
+  API 24+); added to `Constraints` via `addContentUriTrigger(uriString, triggerForDescendants)`.
+
+#### Android (`cmp-worker-android`)
+
+- `Constraints.toAndroid()` now maps `contentUriTriggers` to `androidx.work.Constraints.Builder.addContentUriTrigger()`.
+
+#### Compose Multiplatform (`cmp-worker-compose`)
+
+- `WorkStatusChip` — `AssistChip` bound to `WorkInfo.State` with state-coloured icon and label.
+- `WorkProgressIndicator` — `LinearProgressIndicator` bound to `WorkProgress`; indeterminate
+  when `progress.isIndeterminate`, determinate otherwise; optional status message label.
+- `WorkInfoCard` — M3 `Card` displaying work ID, `WorkStatusChip`, `WorkProgressIndicator`
+  (when running or progress > 0), output data key-value pairs, Cancel and Retry action buttons.
+- `WorkMonitorScreen` — `LazyColumn` of `WorkInfoCard` items observed via `collectWorkInfosByTagAsState`;
+  configurable empty-state message and per-item Cancel/Retry callbacks.
+- `WorkSchedulerScreen` — full scheduling form with worker class, tag, one-time vs. periodic
+  toggle, repeat interval, and network/charging/battery constraint checkboxes; calls `onSchedule`
+  with the built `WorkRequest` on submission.
+
 ## [1.0.0] - 2026-05-26
 
 Initial release of worker-kmp — a Kotlin Multiplatform WorkManager library with a
@@ -100,5 +150,7 @@ unified API across Android, iOS, Desktop (JVM), and Web (JS/WasmJs).
 - Maven Central publishing via `vanniktech/gradle-maven-publish-plugin` 0.30.0
 - Single version source of truth in `gradle.properties` (`worker.version`)
 
-[Unreleased]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/MobileByteLabs/worker-kmp/releases/tag/v1.0.0

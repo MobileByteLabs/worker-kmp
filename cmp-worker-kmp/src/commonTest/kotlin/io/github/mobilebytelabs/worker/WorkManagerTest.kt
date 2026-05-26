@@ -1,6 +1,9 @@
 package io.github.mobilebytelabs.worker
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -248,6 +251,12 @@ class WorkManagerTest {
     fun workContinuation_chainEnqueuesAllSteps() = runTest {
         val step1 = OneTimeWorkRequestBuilder<FakeWorker>("FakeWorker").build()
         val step2 = OneTimeWorkRequestBuilder<FakeWorker>("FakeWorker").build()
+        fun CoroutineScope.autoSucceed(id: Uuid) = launch {
+            while (workManager.getWorkInfoById(id) == null) delay(1)
+            workManager.simulateSuccess(id)
+        }
+        autoSucceed(step1.id)
+        autoSucceed(step2.id)
         val ids = workManager.beginWith(step1).then(step2).enqueue()
         assertEquals(2, ids.size)
         assertEquals(2, workManager.enqueuedRequests.size)

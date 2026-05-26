@@ -40,13 +40,21 @@ internal fun NetworkType.toAndroid(): AndroidNetworkType = when (this) {
     NetworkType.METERED -> AndroidNetworkType.METERED
 }
 
-internal fun Constraints.toAndroid(): AndroidConstraints = AndroidConstraints.Builder()
-    .setRequiredNetworkType(requiredNetworkType.toAndroid())
-    .setRequiresCharging(requiresCharging)
-    .setRequiresDeviceIdle(requiresDeviceIdle)
-    .setRequiresBatteryNotLow(requiresBatteryNotLow)
-    .setRequiresStorageNotLow(requiresStorageNotLow)
-    .build()
+internal fun Constraints.toAndroid(): AndroidConstraints {
+    val builder = AndroidConstraints.Builder()
+        .setRequiredNetworkType(requiredNetworkType.toAndroid())
+        .setRequiresCharging(requiresCharging)
+        .setRequiresDeviceIdle(requiresDeviceIdle)
+        .setRequiresBatteryNotLow(requiresBatteryNotLow)
+        .setRequiresStorageNotLow(requiresStorageNotLow)
+    contentUriTriggers.forEach { trigger ->
+        builder.addContentUriTrigger(
+            android.net.Uri.parse(trigger.uriString),
+            trigger.triggerForDescendants,
+        )
+    }
+    return builder.build()
+}
 
 internal fun ExistingPeriodicWorkPolicy.toAndroid(): AndroidExistingPeriodicWorkPolicy = when (this) {
     ExistingPeriodicWorkPolicy.KEEP -> AndroidExistingPeriodicWorkPolicy.KEEP

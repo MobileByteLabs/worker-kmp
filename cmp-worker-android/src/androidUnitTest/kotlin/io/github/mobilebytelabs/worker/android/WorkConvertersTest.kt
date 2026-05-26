@@ -1,5 +1,6 @@
 package io.github.mobilebytelabs.worker.android
 
+import io.github.mobilebytelabs.worker.Constraints
 import io.github.mobilebytelabs.worker.WorkData
 import io.github.mobilebytelabs.worker.workDataOf
 import kotlin.test.Test
@@ -71,5 +72,30 @@ class WorkConvertersTest {
     fun toAndroid_emptyWorkData_producesEmptyAndroidData() {
         val androidData = WorkData.EMPTY.toAndroid()
         assertTrue(androidData.keyValueMap.isEmpty())
+    }
+
+    // ── ContentUriTrigger ─────────────────────────────────────────────────────
+
+    @Test
+    fun contentUriTrigger_appearsInAndroidConstraints() {
+        val constraints = Constraints {
+            addContentUriTrigger("content://com.example/items", triggerForDescendants = true)
+            addContentUriTrigger("content://com.example/settings", triggerForDescendants = false)
+        }
+        val android = constraints.toAndroid()
+        val triggers = android.contentUriTriggers
+        assertEquals(2, triggers.size)
+        assertTrue(triggers.any { it.uri.toString() == "content://com.example/items" && it.isTriggeredForDescendants })
+        assertTrue(
+            triggers.any {
+                it.uri.toString() == "content://com.example/settings" && !it.isTriggeredForDescendants
+            },
+        )
+    }
+
+    @Test
+    fun noContentUriTriggers_producesEmptySet() {
+        val android = Constraints.NONE.toAndroid()
+        assertTrue(android.contentUriTriggers.isEmpty())
     }
 }

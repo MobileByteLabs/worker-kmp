@@ -1,5 +1,6 @@
 package io.github.mobilebytelabs.worker
 
+import kotlinx.coroutines.delay
 import kotlin.uuid.Uuid
 
 /**
@@ -85,8 +86,61 @@ internal class DefaultWorkContinuation(
 
     override suspend fun enqueue(): List<Uuid> {
         val ids = mutableListOf<Uuid>()
-        initialWork.forEach { ids.add(workManager.enqueue(it)) }
-        chain.forEach { step -> step.forEach { ids.add(workManager.enqueue(it)) } }
+        var carried = WorkData.EMPTY
+
+        val initialInfos = executeStep(initialWork, carried, ids) ?: return ids
+        carried = mergeOutputs(initialInfos)
+
+        for (step in chain) {
+            val stepInfos = executeStep(step, carried, ids) ?: return ids
+            carried = carried.mergeWith(mergeOutputs(stepInfos))
+        }
+
         return ids
     }
+
+    private suspend fun executeStep(
+        requests: List<OneTimeWorkRequest>,
+        inputOverride: WorkData,
+        ids: MutableList<Uuid>,
+    ): List<WorkInfo>? {
+        val enqueued = requests.map { req ->
+            val merged = if (inputOverride != WorkData.EMPTY) {
+                req.copy(inputData = inputOverride.mergeWith(req.inputData))
+            } else {
+                req
+            }
+            workManager.enqueue(merged).also { ids.add(it) }
+        }
+
+        val finished = enqueued.map { id -> awaitFinished(id) }
+        return if (finished.any { it.state == WorkInfo.State.FAILED || it.state == WorkInfo.State.CANCELLED }) {
+            null
+        } else {
+            finished
+        }
+    }
+
+    private suspend fun awaitFinished(id: Uuid): WorkInfo {
+        while (true) {
+            val info = workManager.getWorkInfoById(id)
+            if (info != null && info.isFinished) return info
+            delay(POLL_MS)
+        }
+    }
+
+    private fun mergeOutputs(infos: List<WorkInfo>): WorkData =
+        infos.fold(WorkData.EMPTY) { acc, info -> acc.mergeWith(info.outputData) }
+
+    private companion object {
+        const val POLL_MS = 50L
+    }
+}
+
+internal fun WorkData.mergeWith(other: WorkData): WorkData {
+    if (other == WorkData.EMPTY) return this
+    if (this == WorkData.EMPTY) return other
+    val combined = HashMap(keyValueMap())
+    combined.putAll(other.keyValueMap())
+    return WorkData(*combined.entries.map { it.key to it.value }.toTypedArray())
 }

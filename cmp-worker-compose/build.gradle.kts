@@ -40,6 +40,9 @@ kotlin {
             dependencies {
                 api(project(":cmp-worker-kmp"))
                 api(libs.compose.runtime)
+                api(libs.compose.ui)
+                api(libs.compose.foundation)
+                api(compose.material3)
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

@@ -1,6 +1,17 @@
 package io.github.mobilebytelabs.worker
 
 /**
+ * A content-provider URI that triggers work execution when its data changes.
+ *
+ * Only observed on Android (API 24+); ignored on other platforms.
+ *
+ * @property uriString the content URI as a string (e.g. `"content://com.example.provider/items"`).
+ * @property triggerForDescendants `true` to trigger when any URI under [uriString] changes;
+ *   `false` to trigger only on an exact match.
+ */
+data class ContentUriTrigger(val uriString: String, val triggerForDescendants: Boolean)
+
+/**
  * System conditions that must all be satisfied before a [WorkRequest] is allowed to execute.
  *
  * Construct with the DSL operator or [Builder]:
@@ -8,19 +19,21 @@ package io.github.mobilebytelabs.worker
  * val constraints = Constraints {
  *     setRequiredNetworkType(NetworkType.UNMETERED)
  *     setRequiresBatteryNotLow(true)
+ *     addContentUriTrigger("content://com.example/items", triggerForDescendants = true)
  * }
  * ```
  *
  * Use [Constraints.NONE] when no conditions are required (the default for new requests).
  *
  * Platform note: constraint evaluation is best-effort on iOS and Web. Only Android enforces
- * all constraints natively via `androidx.work`.
+ * all constraints natively via `androidx.work`. [contentUriTriggers] is Android-only (API 24+).
  *
  * @property requiredNetworkType the network connectivity level required before the worker runs.
  * @property requiresCharging `true` if the device must be charging.
  * @property requiresDeviceIdle `true` if the device must be idle (Android API 23+; ignored elsewhere).
  * @property requiresBatteryNotLow `true` if the battery must be above the system low-battery threshold.
  * @property requiresStorageNotLow `true` if available storage must be above the system low-storage threshold.
+ * @property contentUriTriggers content-provider URIs whose changes trigger work; Android-only (API 24+).
  */
 class Constraints private constructor(
     val requiredNetworkType: NetworkType = NetworkType.NOT_REQUIRED,
@@ -28,6 +41,7 @@ class Constraints private constructor(
     val requiresDeviceIdle: Boolean = false,
     val requiresBatteryNotLow: Boolean = false,
     val requiresStorageNotLow: Boolean = false,
+    val contentUriTriggers: List<ContentUriTrigger> = emptyList(),
 ) {
     companion object {
         /** No constraints — work may run immediately regardless of device state. */
@@ -44,6 +58,7 @@ class Constraints private constructor(
         private var requiresDeviceIdle: Boolean = false
         private var requiresBatteryNotLow: Boolean = false
         private var requiresStorageNotLow: Boolean = false
+        private val contentUriTriggers: MutableList<ContentUriTrigger> = mutableListOf()
 
         /** Sets the network connectivity level required before the worker starts. */
         fun setRequiredNetworkType(networkType: NetworkType): Builder = apply { requiredNetworkType = networkType }
@@ -67,6 +82,18 @@ class Constraints private constructor(
         fun setRequiresStorageNotLow(requiresStorageNotLow: Boolean): Builder =
             apply { this.requiresStorageNotLow = requiresStorageNotLow }
 
+        /**
+         * Adds a content-provider URI trigger that causes this work to execute when the
+         * URI's data changes.
+         *
+         * Only observed on Android (API 24+); ignored on other platforms.
+         *
+         * @param uriString the content URI as a string.
+         * @param triggerForDescendants `true` to fire on any descendant URI; `false` for exact match.
+         */
+        fun addContentUriTrigger(uriString: String, triggerForDescendants: Boolean): Builder =
+            apply { contentUriTriggers.add(ContentUriTrigger(uriString, triggerForDescendants)) }
+
         /** Constructs the immutable [Constraints]. */
         fun build(): Constraints = Constraints(
             requiredNetworkType = requiredNetworkType,
@@ -74,6 +101,7 @@ class Constraints private constructor(
             requiresDeviceIdle = requiresDeviceIdle,
             requiresBatteryNotLow = requiresBatteryNotLow,
             requiresStorageNotLow = requiresStorageNotLow,
+            contentUriTriggers = contentUriTriggers.toList(),
         )
     }
 
@@ -84,7 +112,8 @@ class Constraints private constructor(
             requiresCharging == other.requiresCharging &&
             requiresDeviceIdle == other.requiresDeviceIdle &&
             requiresBatteryNotLow == other.requiresBatteryNotLow &&
-            requiresStorageNotLow == other.requiresStorageNotLow
+            requiresStorageNotLow == other.requiresStorageNotLow &&
+            contentUriTriggers == other.contentUriTriggers
     }
 
     override fun hashCode(): Int {
@@ -93,6 +122,7 @@ class Constraints private constructor(
         result = 31 * result + requiresDeviceIdle.hashCode()
         result = 31 * result + requiresBatteryNotLow.hashCode()
         result = 31 * result + requiresStorageNotLow.hashCode()
+        result = 31 * result + contentUriTriggers.hashCode()
         return result
     }
 }

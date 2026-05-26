@@ -232,13 +232,13 @@ workManager.enqueueUniquePeriodicWork(
 ## Constraints
 
 ```kotlin
-val constraints = Constraints.Builder()
-    .setRequiredNetworkType(NetworkType.CONNECTED)
-    .setRequiresCharging(true)
-    .setRequiresDeviceIdle(true)
-    .setRequiresBatteryNotLow(true)
-    .setRequiresStorageNotLow(true)
-    .build()
+val constraints = Constraints {
+    setRequiredNetworkType(NetworkType.CONNECTED)
+    setRequiresCharging(true)
+    setRequiresDeviceIdle(true)
+    setRequiresBatteryNotLow(true)
+    setRequiresStorageNotLow(true)
+}
 
 val request = OneTimeWorkRequestBuilder<BackupWorker>("BackupWorker")
     .setConstraints(constraints)
@@ -246,6 +246,19 @@ val request = OneTimeWorkRequestBuilder<BackupWorker>("BackupWorker")
 ```
 
 `NetworkType` options: `NOT_REQUIRED`, `CONNECTED`, `UNMETERED`, `NOT_ROAMING`, `METERED`.
+
+### Content URI Triggers (Android only, API 24+)
+
+Trigger work automatically when a content-provider URI changes:
+
+```kotlin
+val constraints = Constraints {
+    addContentUriTrigger(
+        uriString = "content://com.example.provider/items",
+        triggerForDescendants = true,   // also fires for content://…/items/42 etc.
+    )
+}
+```
 
 ## Retry and Backoff
 
@@ -342,6 +355,29 @@ workManager
     .enqueue()
 ```
 
+## Conditional Execution
+
+`ConditionalWorker` gates `doWork()` behind a runtime `condition()` check. When `condition()` returns `false` the worker reports `WorkResult.failure` without invoking the actual work body, so the chain halts cleanly without retrying.
+
+Typical use-cases: feature flags, auth state, required resources.
+
+```kotlin
+class FeatureSyncWorker(context: WorkerContext) : ConditionalWorker(context) {
+
+    override suspend fun condition(): Boolean =
+        FeatureFlags.isEnabled("premium_sync") && AuthManager.isSignedIn()
+
+    override suspend fun doConditionalWork(): WorkResult {
+        return if (networkService.isReachable()) {
+            val result = apiService.sync()
+            WorkResult.success(workDataOf("synced" to result.count))
+        } else {
+            WorkResult.retry("network unavailable")
+        }
+    }
+}
+```
+
 ## Cancellation
 
 ```kotlin
@@ -425,6 +461,84 @@ fun main() {
     )
     val wm = PlatformWorkManager.instance
 }
+```
+
+## Compose Multiplatform UI
+
+Add the Compose module to your dependencies:
+
+```kotlin
+commonMain.dependencies {
+    implementation(libs.worker.compose)
+}
+```
+
+Version catalog entry: `worker-compose = { module = "io.github.mobilebytelabs:worker-compose", version.ref = "worker" }`
+
+### Inject WorkManager
+
+```kotlin
+CompositionLocalProvider(LocalWorkManager provides workManager) {
+    MyApp()
+}
+
+// anywhere inside the tree
+val wm = LocalWorkManager.current
+```
+
+### Ready-made components
+
+#### WorkStatusChip
+
+Coloured chip showing the current `WorkInfo.State`:
+
+```kotlin
+WorkStatusChip(state = info.state)
+```
+
+#### WorkProgressIndicator
+
+Linear progress bar bound to a `WorkProgress` value; indeterminate while the progress is 0:
+
+```kotlin
+WorkProgressIndicator(
+    progress = info.progress ?: WorkProgress.NONE,
+    statusMessage = "Uploading…",
+)
+```
+
+#### WorkInfoCard
+
+Full work card with ID, status chip, progress bar, output data, and Cancel/Retry buttons:
+
+```kotlin
+WorkInfoCard(
+    info = info,
+    onCancel = { workManager.cancelWorkById(info.id) },
+    onRetry  = { workManager.enqueue(originalRequest) },
+)
+```
+
+#### WorkMonitorScreen
+
+Full-screen list of active work items for a tag — observes the `WorkManager` flow automatically:
+
+```kotlin
+WorkMonitorScreen(
+    tag      = "sync",
+    onCancel = { info -> workManager.cancelWorkById(info.id) },
+    onRetry  = { info -> workManager.enqueue(retryRequestFor(info)) },
+)
+```
+
+#### WorkSchedulerScreen
+
+Developer/admin form for scheduling work at runtime:
+
+```kotlin
+WorkSchedulerScreen(
+    onSchedule = { request -> workManager.enqueue(request) },
+)
 ```
 
 ## Testing
@@ -520,7 +634,7 @@ Check the badge at the top of this README for the latest release.
 | `worker-ios` | iOS platform implementation (iosArm64, iosSimulatorArm64) |
 | `worker-desktop` | JVM desktop implementation |
 | `worker-web` | JS/browser + Node.js implementation |
-| `worker-compose` | Compose Multiplatform integration |
+| `worker-compose` | Compose Multiplatform integration — `LocalWorkManager`, `WorkStatusChip`, `WorkProgressIndicator`, `WorkInfoCard`, `WorkMonitorScreen`, `WorkSchedulerScreen` |
 | `worker-test` | Test utilities (`TestWorkManager`) |
 
 ## License
