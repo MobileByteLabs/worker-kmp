@@ -47,7 +47,6 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-test",
-        version = providers.gradleProperty("worker.version").get(),
     )
     pom {
         name.set("worker-test")

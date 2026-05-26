@@ -61,7 +61,6 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-compose",
-        version = providers.gradleProperty("worker.version").get(),
     )
     pom {
         name.set("worker-compose")
