@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.mobilebytelabs"
-version = libs.versions.worker.get()
+version = providers.gradleProperty("worker.version").get()
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -42,7 +42,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-android",
-        version = libs.versions.worker.get()
+        version = providers.gradleProperty("worker.version").get()
     )
     pom {
         name.set("worker-android")

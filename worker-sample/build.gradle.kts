@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.mobilebytelabs"
-version = "1.0.0"
+version = providers.gradleProperty("worker.version").get()
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.mobilebytelabs"
-version = libs.versions.worker.get()
+version = providers.gradleProperty("worker.version").get()
 
 kotlin {
     js(IR) {
@@ -40,7 +40,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-web",
-        version = libs.versions.worker.get()
+        version = providers.gradleProperty("worker.version").get()
     )
     pom {
         name.set("worker-web")

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.mobilebytelabs"
-version = libs.versions.worker.get()
+version = providers.gradleProperty("worker.version").get()
 
 kotlin {
     iosArm64()
@@ -34,7 +34,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-ios",
-        version = libs.versions.worker.get()
+        version = providers.gradleProperty("worker.version").get()
     )
     pom {
         name.set("worker-ios")
