@@ -31,6 +31,7 @@ kotlin {
 }
 
 mavenPublishing {
+    signAllPublications()
     coordinates(
         groupId = "io.github.mobilebytelabs",
         artifactId = "worker-ios",
@@ -38,12 +39,26 @@ mavenPublishing {
     pom {
         name.set("worker-ios")
         description.set("WorkManager-equivalent for Kotlin Multiplatform — iOS platform module")
-        url.set("https://github.com/mobilebytelabs/worker-kmp")
+        url.set("https://github.com/MobileByteLabs/worker-kmp")
+        inceptionYear.set("2026")
         licenses {
             license {
-                name.set("Apache-2.0")
-                url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("repo")
             }
+        }
+        developers {
+            developer {
+                id.set("MobileByteLabs")
+                name.set("MobileByteLabs")
+                url.set("https://github.com/MobileByteLabs")
+            }
+        }
+        scm {
+            url.set("https://github.com/MobileByteLabs/worker-kmp/")
+            connection.set("scm:git:git://github.com/MobileByteLabs/worker-kmp.git")
+            developerConnection.set("scm:git:ssh://git@github.com/MobileByteLabs/worker-kmp.git")
         }
     }
 }
