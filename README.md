@@ -450,18 +450,28 @@ fun main() {
 ```kotlin
 @OptIn(ExperimentalWorkerApi::class)
 fun main() {
+    // Optional: check support before init (always true in browsers/Node.js)
+    if (!isWebWorkManagerSupported()) return
+
     initWebWorkManager(
         workerFactory = object : WebWorkerFactory {
-            override fun create(workerClassName: String, context: WorkerContext): CoroutineWorker? =
+            override fun create(workerClassName: String, context: WorkerContext): CoroutineWorker =
                 when (workerClassName) {
                     "SyncWorker" -> SyncWorker(context)
-                    else         -> null
+                    else         -> error("Unknown worker: $workerClassName")
                 }
-        }
+        },
+        config = WebWorkManagerConfig(
+            constraintCheckIntervalMs = 5_000, // how often to re-check unsatisfied constraints
+            enablePersistence = true,           // persist work state in IndexedDB
+            persistenceDbName = "my-app-worker", // override when sharing an origin with other apps
+        ),
     )
-    val wm = PlatformWorkManager.instance
+    val wm = PlatformWorkManager()
 }
 ```
+
+See [## Web Platform](#web-platform) for persistence, constraint, and progressive enhancement details.
 
 ## Compose Multiplatform UI
 
@@ -621,6 +631,94 @@ class SyncFeatureTest {
 | `lastEnqueuedRequest` | The most recently enqueued request |
 | `hasWorkWithTag(tag)` | Returns true if any work with this tag was enqueued |
 | `workCountWithTag(tag)` | Count of enqueued work items with this tag |
+
+## Web Platform
+
+The `worker-web` module targets Kotlin/JS (`jsMain`) and Kotlin/Wasm (`wasmJsMain`). Work runs in the current page or Node.js process — it is **foreground-only** (no Service Worker / background sync in the current release).
+
+### Progressive enhancement
+
+```kotlin
+import io.github.mobilebytelabs.worker.web.isWebWorkManagerSupported
+
+if (isWebWorkManagerSupported()) {
+    initWebWorkManager(workerFactory)
+} else {
+    // Very old browsers or SSR environments — skip background work.
+}
+```
+
+`isWebWorkManagerSupported()` always returns `true` in a real browser or Node.js runtime and `false` on the JVM target (which is used only for unit tests).
+
+### Configuration — `WebWorkManagerConfig`
+
+| Field | Default | Description |
+|---|---|---|
+| `constraintCheckIntervalMs` | `5_000` | How often to re-evaluate unsatisfied constraints (ms). Lower values are more responsive but burn more CPU on battery-constrained devices. |
+| `enablePersistence` | `true` | When `true`, work state is written to IndexedDB so pending and running work survives page reloads. |
+| `persistenceDbName` | `"worker-kmp"` | IndexedDB database name. Override when multiple apps share the same origin to avoid key collisions. |
+
+```kotlin
+WebWorkManagerConfig(
+    constraintCheckIntervalMs = 2_000,
+    enablePersistence         = true,
+    persistenceDbName         = "my-app",
+)
+```
+
+### IndexedDB persistence
+
+When `enablePersistence = true` (the default), `WebWorkManager` automatically:
+
+- **Saves** each `WorkInfo` to IndexedDB on every state transition.
+- **Restores** persisted work on the next page load — `RUNNING` items are restored as `ENQUEUED` (they were interrupted mid-flight by the reload).
+- **Deletes** terminal items (`SUCCEEDED`, `FAILED`, `CANCELLED`) to keep the database clean.
+
+Set `enablePersistence = false` for SSR, Node.js samples, or any environment where IndexedDB is unavailable.
+
+### Constraint system
+
+The JS actual evaluates constraints using browser APIs:
+
+| Constraint | Browser API |
+|---|---|
+| `setRequiredNetworkType(CONNECTED)` | `navigator.onLine` |
+| `setRequiresBatteryNotLow(true)` | `navigator.getBattery()` — passes when `level > 0.20` |
+| `setRequiresCharging(true)` | `navigator.getBattery()` — passes when `charging == true` |
+| `setRequiresStorageNotLow(true)` | `navigator.storage.estimate()` — passes when free quota > 5 MB |
+
+Conservative fallback: when a browser API is unavailable (e.g. Battery Status API in Firefox), the constraint **passes** rather than blocking work indefinitely.
+
+### Online/offline event-driven re-evaluation
+
+The constraint loop does not just poll every `constraintCheckIntervalMs`. It also wires `window.addEventListener("online", …)` and `window.addEventListener("offline", …)` so that a transition from offline → online wakes up constrained work **immediately** instead of waiting up to 5 seconds.
+
+### Unique periodic work policies
+
+All three `ExistingPeriodicWorkPolicy` values are supported:
+
+| Policy | Web behavior |
+|---|---|
+| `KEEP` | If active work with the same unique name exists, returns its existing ID — no second job is created. |
+| `REPLACE` | Cancels the existing job and enqueues the new request. |
+| `UPDATE` | Cancels the existing job and enqueues the new request (same semantics as `REPLACE` for the coroutine-based web scheduler). |
+
+### Browser compatibility
+
+| Browser | Minimum version | Notes |
+|---|---|---|
+| Chrome / Edge | 66+ | Full support — all constraint APIs available |
+| Firefox | 64+ | Battery Status API unavailable — constraint passes conservatively |
+| Safari | 15.4+ | Battery Status API unavailable — constraint passes conservatively |
+| Node.js | 18+ | IndexedDB unavailable — set `enablePersistence = false` |
+
+### Sample
+
+See `cmp-worker-sample/src/jsMain/kotlin/…/WebSampleMain.kt` for a runnable Node.js demo covering all scenarios. Run with:
+
+```bash
+./gradlew :cmp-worker-sample:jsNodeRun
+```
 
 ## Artifacts
 

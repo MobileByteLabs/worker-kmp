@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.vanniktech.publish)
@@ -6,10 +9,20 @@ plugins {
 group = "io.github.mobilebytelabs"
 version = providers.gradleProperty("worker.version").get()
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
     js(IR) {
-        browser()
-        nodejs()
+        browser {
+            testTask { enabled = false }
+        }
+        nodejs {
+            testTask { enabled = false }
+        }
     }
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {

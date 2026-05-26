@@ -5,7 +5,115 @@ All notable changes to worker-kmp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - 2026-05-26
+
+### Added
+
+#### Web (`cmp-worker-web`)
+
+- **`WebWorkManagerConfig` persistence settings** — two new fields:
+  - `enablePersistence: Boolean = true` — set to `false` to skip IndexedDB entirely (work
+    survives only for the current page session); useful in SSR, test, or private-browsing contexts.
+  - `persistenceDbName: String = "worker-kmp"` — override when multiple apps share the same
+    origin to prevent IndexedDB key collisions.
+  - Both fields are backwards-compatible; existing code that constructs `WebWorkManagerConfig`
+    with only `constraintCheckIntervalMs` continues to compile and behave identically.
+- **IndexedDB persistence** — `WebWorkPersistence` internal interface (`save`, `loadAll`, `delete`)
+  with `expect fun createWebWorkPersistence(config: WebWorkManagerConfig)` for per-platform actuals.
+- `IndexedDbWorkPersistence(dbName: String)` (JS target) — a factory function `buildIdbHelper(dbName)`
+  wraps a self-contained `js("(function(dbName){...})")` object that owns the `IDBDatabase`
+  connection; all three operations (`put`, `getAll`, `delete`) are Promise-based and awaited via
+  `Promise.await()`. Private-browsing / SSR guard: `typeof indexedDB !== 'undefined'`.
+- `NoOpPersistence` (JS target, `enablePersistence = false`) — in-memory only; returned by
+  `createWebWorkPersistence` when persistence is disabled.
+- `NoOpWorkPersistence` (JVM + WasmJs targets) — no-op actual; in-memory state is authoritative.
+- `WebWorkStateStore` — now accepts optional `WebWorkPersistence` + `CoroutineScope`; fires
+  save/delete persistence calls as fire-and-forget `scope.launch` on every state mutation;
+  terminal states (SUCCEEDED, FAILED, CANCELLED) trigger `delete` to keep IndexedDB clean.
+- `WebWorkManager` — extended internal constructor with `persistence` param; `init` block
+  restores persisted work via `stateStore.restoreFromPersistence()` on startup; RUNNING entries
+  restored as ENQUEUED (interrupted by page reload); restore uses `compareAndSet` to avoid
+  clobbering in-flight state mutations.
+- **Online/offline event-driven constraint wake-up** — `awaitConstraintsSatisfied` now merges
+  a `timerFlow` (poll fallback) with `onlineWatcher()` (platform-specific); JS target wires
+  `window.addEventListener("online"/"offline")` via `callbackFlow` so network constraint
+  re-evaluation fires instantly on reconnect instead of waiting up to 5 seconds.
+- `OnlineWatcher.kt` — `internal expect fun onlineWatcher(): Flow<Unit>`; JS actual uses
+  `callbackFlow` + `awaitClose` for proper listener lifecycle; JVM + WasmJs use `emptyFlow()`.
+- 5 new persistence + constraint tests (26 total in `WebWorkManagerTest`):
+  - `persistence_save_isCalledOnEnqueue` — verifies save history after work completes
+  - `persistence_delete_isCalledOnTerminalState` — verifies cleanup on SUCCEEDED
+  - `persistence_restore_reEnqueuesInterruptedWork` — RUNNING → ENQUEUED on restore
+  - `persistence_restore_keepsFinalStates` — SUCCEEDED / FAILED history preserved
+  - `enqueue_withUnsatisfiedConstraint_executesWhenConstraintSatisfied_viaEvaluator` — constraint polling with evaluator call-count verification
+- **`isWebWorkManagerSupported()`** — `expect`/`actual` progressive-enhancement check: returns
+  `true` on JS and WasmJs targets (always a real web runtime), `false` on JVM (test host only).
+  Consumers should guard `WebWorkManager` initialisation with this check for SSR / CLI contexts.
+- **`ExistingPeriodicWorkPolicy.KEEP` and `UPDATE` correctness** — `enqueueUniquePeriodicWork`
+  now properly checks the state store for a non-finished work entry with the same unique-work
+  name tag: `KEEP` returns the existing `id` without creating a second job; `UPDATE` (like
+  `REPLACE`) cancels the prior entry before enqueuing the new request.
+- 3 additional tests (29 total):
+  - `enqueueUniquePeriodicWork_keep_returnsExistingIdWithoutCreatingNew`
+  - `enqueueUniquePeriodicWork_update_replacesExistingWork`
+  - `isWebWorkManagerSupported_returnsFalseOnJvm`
+
+#### Sample (`cmp-worker-sample`)
+
+- **Web / Node.js sample** (`jsMain`) — `WebSampleMain.kt` covers 6 scenarios end-to-end using
+  only the public API (`initWebWorkManager`, `PlatformWorkManager()`):
+  1. One-time work with typed input/output data
+  2. Progress reporting via `setProgress(WorkProgress(percent, workDataOf(...)))`
+  3. Retry with exponential backoff (`BackoffPolicy.EXPONENTIAL`, `maxAttempts = 3`)
+  4. Unique periodic work (100 ms interval, ~8 executions observed over 850 ms)
+  5. `KEEP` policy — second `enqueueUniquePeriodicWork` call returns the first work's `id`
+  6. Network constraint declaration (`NetworkType.CONNECTED`)
+  Run with: `./gradlew :cmp-worker-sample:jsNodeRun`
+
+#### Compose Multiplatform (`cmp-worker-compose`)
+
+- Added `js(IR)` and `wasmJs` browser targets — all existing composables
+  (`WorkMonitorScreen`, `WorkSchedulerScreen`, `WorkInfoCard`, `WorkStatusChip`,
+  `WorkProgressIndicator`, `LocalWorkManager`, `WorkManagerProvider`,
+  `collectWorkInfosByTagAsState`, `collectWorkInfoByIdAsState`) now compile and run on
+  Kotlin/JS and Kotlin/Wasm web targets with no code changes required.
+- Fixed: `MenuAnchorType` → `ExposedDropdownMenuAnchorType` (M3 1.4 rename) in
+  `WorkSchedulerScreen`.
+- Fixed: unnecessary `!!` non-null assertions on `onRetry`/`onCancel` lambdas in
+  `WorkInfoCard` — replaced with `?: {}` safe fallback (callers already guard with
+  `showRetry`/`showCancel` checks).
+
+#### Web (`cmp-worker-web`)
+
+- `WebConstraintEvaluator` — `internal` SAM interface (`suspend fun evaluate(Constraints): Boolean`)
+  injected into `WebWorkManager`; allows test-time substitution without exposing the internal type
+  in the public API.
+- `WebWorkManagerConfig` — configuration data class with `constraintCheckIntervalMs: Long = 5_000`;
+  controls the polling interval used by `awaitConstraintsSatisfied`.
+- Constraint-aware execution in `WebWorkManager.enqueue()` — work is deferred until all constraints
+  are satisfied; polling loop delegates to `WebConstraintEvaluator`.
+- **JS target** (`jsMain`) — `DefaultWebConstraintEvaluator` evaluates all five constraint types:
+  - `requiredNetworkType` via synchronous `navigator.onLine`.
+  - `requiresBatteryNotLow` via async `navigator.getBattery().then(b => b.level > 0.2)`
+    (conservative `true` when Battery Status API unavailable).
+  - `requiresCharging` via async `navigator.getBattery().then(b => b.charging)`
+    (conservative `true` when Battery Status API unavailable).
+  - `requiresStorageNotLow` via async `navigator.storage.estimate()` — passes when
+    free quota > 5 MB (conservative `true` when StorageManager unavailable).
+- **Wasm target** (`wasmJsMain`) — `DefaultWebConstraintEvaluator` evaluates `requiredNetworkType`
+  via `navigator.onLine`; battery/storage return conservative `true` (Battery Status API and
+  StorageManager are async and not directly bindable via `@JsFun`).
+- **JVM test target** added to `cmp-worker-web` — `commonTest` now runs via `jvmTest` (seconds)
+  instead of `jsNodeTest` (minutes); `jsBrowserTest` and `jsNodeTest` both disabled.
+- 9 new constraint tests covering battery-not-low, charging, storage-not-low, multi-constraint
+  satisfied/unsatisfied scenarios (total: 19 tests in `WebWorkManagerTest`).
+
+### Changed
+
+- `WebWorkManager` primary constructor is now `internal` (takes `workerFactory`, `config`,
+  `constraintEvaluator`); the public constructor accepts only `workerFactory` + `config` and
+  calls `defaultConstraintEvaluator()` internally — prevents leaking the `internal`
+  `WebConstraintEvaluator` type into the public API.
 
 ## [1.2.0] - 2026-05-26
 
@@ -150,7 +258,7 @@ unified API across Android, iOS, Desktop (JVM), and Web (JS/WasmJs).
 - Maven Central publishing via `vanniktech/gradle-maven-publish-plugin` 0.30.0
 - Single version source of truth in `gradle.properties` (`worker.version`)
 
-[Unreleased]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.2.0...HEAD
+[2.0.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.2.1...v2.0.0
 [1.2.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/MobileByteLabs/worker-kmp/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/MobileByteLabs/worker-kmp/releases/tag/v1.0.0

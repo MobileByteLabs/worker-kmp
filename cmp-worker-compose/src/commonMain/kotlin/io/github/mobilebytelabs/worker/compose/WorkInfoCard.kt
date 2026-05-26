@@ -88,13 +88,13 @@ fun WorkInfoCard(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     if (showRetry) {
-                        TextButton(onClick = onRetry!!) {
+                        TextButton(onClick = onRetry ?: {}) {
                             Text("Retry")
                         }
                     }
                     if (showCancel) {
                         TextButton(
-                            onClick = onCancel!!,
+                            onClick = onCancel ?: {},
                             colors = ButtonDefaults.textButtonColors(
                                 contentColor = MaterialTheme.colorScheme.error,
                             ),
