@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Performance
+
+- **JMH benchmark module** (`cmp-worker-bench`) — JVM-only module with JMH 1.37 (Gradle plugin `me.champeau.jmh` v0.7.2). Initial benchmarks: `EnqueueBenchmark` (one-time + constraints) and `PersistenceBenchmark` (TestWorkManager in-memory state at N=10/100/1000). `ObserverChainBenchmark` is a stub awaiting Phase 4's `WorkObserver` SPI.
+- **Baseline capture** — `scripts/perf-capture-baseline.sh <version>` runs JMH + writes JSON to `perf-baselines/<version>.json`. First baseline captured at v2.2.0 release tag.
+- **CI regression gate** — `.github/workflows/perf-check.yml` runs a quick JMH pass on every PR + compares against latest baseline. Fails on >20% slowdown for any benchmark. Bypass label: `skip-perf-check` (use sparingly).
+- **`PERFORMANCE.md`** — public-facing performance overview at source repo root; documents metrics, methodology, runner spec, capture instructions.
+
+### Backward compatibility
+
+- **BC test gate** — new `cmp-worker-bc-test` module pulls `worker-kmp:2.1.0` from Maven Central as a v2Compat classpath + current local build as v3Compat. Same test classes run against both; CI fails on divergence. Protects deprecated v2 APIs through the v3.x grace window per RULE-CMD-SLIM-001 + Phase 13.
+- **`scripts/bc-test-diff.sh`** + `.github/workflows/bc-test.yml` — CI gate. Bypass label `skip-bc-test`.
+- **`BACKWARD_COMPATIBILITY.md`** — deprecation policy + BC test gate documentation at source repo root.
+- **`.github/ISSUE_TEMPLATE/bc-break.md`** — GitHub Issue template for reporting BC regressions; auto-labels `bc-break` + `priority/critical`.
+- **`:cmp-worker-bc-test:checkDeprecatedCoverage`** — Gradle task scaffold. Currently trivial (no @Deprecated symbols in v2.2.0 baseline). Gains real enforcement at v3.0.0-alpha00 when initializeWorkerXxx() become @Deprecated per Phase 0.
+
 ### Security
 
 - **STRIDE threat model** — `SECURITY.md` (28-row matrix) + `SECURITY_ASSUMPTIONS.md` (trust assumptions) + `THREAT_MODEL_TEMPLATE.md` (consumer-extension template) land at the source repo root. Per Phase 10 of the worker-kmp v3.0.0 epic.

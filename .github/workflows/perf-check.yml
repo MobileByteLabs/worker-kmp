@@ -1,0 +1,24 @@
+name: Performance Regression Check
+
+on:
+  pull_request:
+    branches: [ development, main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  perf-regression:
+    name: JMH regression vs latest baseline
+    runs-on: ubuntu-latest
+    if: |
+      !contains(github.event.pull_request.labels.*.name, 'skip-perf-check')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Run perf regression check
+        run: bash scripts/perf-regression-check.sh
+        continue-on-error: false
