@@ -39,6 +39,7 @@ kotlin {
             dependencies {
                 api(libs.kotlinx.coroutines.core)
                 api(libs.kotlinx.datetime)
+                api(libs.kermit)
             }
         }
         commonTest {

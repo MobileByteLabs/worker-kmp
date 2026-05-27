@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Telemetry
+
+- **`WorkObserver` SAM interface + `WorkEvent` sealed class** — public SPI in `cmp-worker-kmp`. 4 lifecycle events (Enqueued / Started / Progress / Resulted). Consumers wire OpenTelemetry / Sentry / Firebase Performance bridges; see OBSERVERS.md for patterns.
+- **`LoggingWorkObserver`** — out-of-box implementation in `cmp-worker-kmp` core; uses Kermit (`co.touchlab.kermit` v2.0.6) for cross-platform structured logging. Single-line log shape: `worker-kmp <event> id=<uuid> <fields>` at INFO/DEBUG/WARN levels.
+- **`TestWorkManager.observedEvents`** — in-test observer; records all simulated lifecycle events for assertions in test code.
+- **`OBSERVERS.md`** — public docs at source repo root; documents SPI + LoggingWorkObserver + 3 bridge patterns (OTel / Sentry / Firebase Perf) + per-platform actual wiring roadmap.
+- Per-platform observer emission lands in Phases 1/7/8/9 as those phases ship their actual implementations. v2.2.0 ships the SPI + LoggingWorkObserver + TestWorkManager recording.
+
 ### Performance
 
 - **JMH benchmark module** (`cmp-worker-bench`) — JVM-only module with JMH 1.37 (Gradle plugin `me.champeau.jmh` v0.7.2). Initial benchmarks: `EnqueueBenchmark` (one-time + constraints) and `PersistenceBenchmark` (TestWorkManager in-memory state at N=10/100/1000). `ObserverChainBenchmark` is a stub awaiting Phase 4's `WorkObserver` SPI.
