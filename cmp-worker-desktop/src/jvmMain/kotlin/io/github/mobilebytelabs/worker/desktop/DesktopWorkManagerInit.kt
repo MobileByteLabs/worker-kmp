@@ -8,11 +8,20 @@ import io.github.mobilebytelabs.worker.PlatformWorkManager
  *
  * ```kotlin
  * fun main() {
- *     initializeWorkerDesktop()
- *     // ...
+ *     initializeWorkerDesktop(
+ *         workerFactory = object : DesktopWorkerFactory {
+ *             override fun create(workerClass: String, context) = when (workerClass) {
+ *                 "SyncWorker" -> SyncWorker(context)
+ *                 else         -> error("Unknown worker: $workerClass")
+ *             }
+ *         },
+ *     )
  * }
  * ```
  */
-fun initializeWorkerDesktop(config: DesktopWorkManagerConfig = DesktopWorkManagerConfig.DEFAULT) {
-    PlatformWorkManager.configure(DesktopWorkManager(config))
+fun initializeWorkerDesktop(
+    config: DesktopWorkManagerConfig = DesktopWorkManagerConfig.DEFAULT,
+    workerFactory: DesktopWorkerFactory = ReflectionWorkerFactory,
+) {
+    PlatformWorkManager.configure(DesktopWorkManager(config, workerFactory))
 }

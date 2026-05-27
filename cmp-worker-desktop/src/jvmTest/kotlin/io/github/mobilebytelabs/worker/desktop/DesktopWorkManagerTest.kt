@@ -80,7 +80,8 @@ private object FakeFactory : DesktopWorkerFactory {
     override fun create(workerClass: String, context: WorkerContext) = fakeFactory(workerClass, context)
 }
 
-private fun workManager() = DesktopWorkManager(config = inMemoryConfig, workerFactory = FakeFactory)
+private fun workManager(persistence: DesktopWorkPersistence = NoOpDesktopWorkPersistence) =
+    DesktopWorkManager(config = inMemoryConfig, workerFactory = FakeFactory, persistence = persistence)
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
@@ -250,6 +251,89 @@ class DesktopWorkManagerTest {
             backoffPolicy = io.github.mobilebytelabs.worker.BackoffPolicy.EXPONENTIAL,
         )
         assertTrue(backoffDelay(config, 0).inWholeMilliseconds <= 5_000)
+    }
+
+    // ── Persistence ────────────────────────────────────────────────────────────
+
+    @Test
+    fun persistence_enqueuedWorkRestoredOnRestart() = runTest {
+        val sharedPersistence = InMemoryDesktopWorkPersistence()
+
+        val wm1 = workManager(sharedPersistence)
+        val request = OneTimeWorkRequestBuilder<SlowWorker>(SlowWorker::class.qualifiedName!!).build()
+        wm1.enqueue(request)
+        // Wait until work is persisted in ENQUEUED state before "restart"
+        eventually { sharedPersistence.loadAll().any { it.id == request.id } }
+        wm1.shutdown()
+
+        val wm2 = workManager(sharedPersistence)
+        eventually { wm2.getWorkInfoById(request.id)?.state != null }
+        val restored = wm2.getWorkInfoById(request.id)
+        assertNotNull(restored, "Work should be restored from persistence after restart")
+        assertEquals(request.id, restored.id)
+        wm2.shutdown()
+    }
+
+    @Test
+    fun persistence_runningWorkRestoredAsEnqueued() = runTest {
+        val sharedPersistence = InMemoryDesktopWorkPersistence()
+        // Manually simulate a RUNNING entry in persistence (as if the JVM crashed mid-work)
+        sharedPersistence.save(
+            WorkInfo(
+                id = Uuid.random(),
+                state = WorkInfo.State.RUNNING,
+                tags = setOf("crashed"),
+            ),
+        )
+        val wm = workManager(sharedPersistence)
+        eventually { wm.getWorkInfosByTag("crashed").first().isNotEmpty() }
+        val info = wm.getWorkInfosByTag("crashed").first().first()
+        assertEquals(WorkInfo.State.ENQUEUED, info.state, "RUNNING state should be reset to ENQUEUED on restore")
+        wm.shutdown()
+    }
+
+    @Test
+    fun persistence_succeededWork_removedFromPersistence() = runTest {
+        val sharedPersistence = InMemoryDesktopWorkPersistence()
+        val wm = workManager(sharedPersistence)
+        val request = OneTimeWorkRequestBuilder<SuccessWorker>(SuccessWorker::class.qualifiedName!!).build()
+        val id = wm.enqueue(request)
+        eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
+        // Terminal state (SUCCEEDED) should be deleted from persistence
+        eventually { sharedPersistence.loadAll().none { it.id == id } }
+        assertTrue(sharedPersistence.loadAll().none { it.id == id }, "Succeeded work should not persist")
+        wm.shutdown()
+    }
+
+    @Test
+    fun persistence_cancelledWork_removedFromPersistence() = runTest {
+        val sharedPersistence = InMemoryDesktopWorkPersistence()
+        val wm = workManager(sharedPersistence)
+        val request = OneTimeWorkRequestBuilder<SlowWorker>(SlowWorker::class.qualifiedName!!).build()
+        val id = wm.enqueue(request)
+        eventually { sharedPersistence.loadAll().any { it.id == id } }
+        wm.cancelWorkById(id)
+        eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.CANCELLED }
+        eventually { sharedPersistence.loadAll().none { it.id == id } }
+        assertTrue(
+            sharedPersistence.loadAll().none {
+                it.id == id
+            },
+            "Cancelled work should be deleted from persistence",
+        )
+        wm.shutdown()
+    }
+
+    @Test
+    fun persistence_disabled_noOp() = runTest {
+        // NoOpDesktopWorkPersistence (IN_MEMORY config) — workManager() default
+        val wm = workManager()
+        val request = OneTimeWorkRequestBuilder<SuccessWorker>(SuccessWorker::class.qualifiedName!!).build()
+        val id = wm.enqueue(request)
+        eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
+        // No crash = persistence no-op works correctly
+        assertEquals(WorkInfo.State.SUCCEEDED, wm.getWorkInfoById(id)?.state)
+        wm.shutdown()
     }
 }
 

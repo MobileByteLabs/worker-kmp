@@ -443,11 +443,32 @@ fun initApp() {
 
 ```kotlin
 fun main() {
-    initializeWorkerDesktop()
+    initializeWorkerDesktop(
+        config = DesktopWorkManagerConfig(
+            persistenceEnabled = true,           // persist work state across restarts (default)
+            persistencePath = File("~/.my-app/worker-kmp"),  // where .properties files are stored
+            maxConcurrentWorkers = 4,            // parallelism cap (default)
+            constraintCheckIntervalMs = 5_000,   // constraint poll interval in ms (default)
+        ),
+        workerFactory = object : DesktopWorkerFactory {
+            override fun create(workerClass: String, context: WorkerContext): CoroutineWorker =
+                when (workerClass) {
+                    "SyncWorker" -> SyncWorker(context)
+                    else         -> error("Unknown worker: $workerClass")
+                }
+        },
+    )
     val wm = PlatformWorkManager.instance
     // enqueue work ...
 }
 ```
+
+Work state persists across JVM restarts by default. Pending/enqueued items are restored when
+`initializeWorkerDesktop()` is called again; RUNNING items are reset to ENQUEUED (they were
+interrupted by the previous shutdown).
+
+Set `persistenceEnabled = false` (or use `DesktopWorkManagerConfig.IN_MEMORY`) to disable
+persistence entirely (useful in tests or CLI tools where state should not outlive the process).
 
 ### Web (JS/WasmJs)
 
@@ -639,6 +660,25 @@ class SyncFeatureTest {
 | `lastEnqueuedRequest` | The most recently enqueued request |
 | `hasWorkWithTag(tag)` | Returns true if any work with this tag was enqueued |
 | `workCountWithTag(tag)` | Count of enqueued work items with this tag |
+
+## Desktop Persistence
+
+Work state is persisted to disk by default (`persistenceEnabled = true`) using `.properties` files under `~/.worker-kmp`. This means:
+
+- **Restart resilience** — pending work survives JVM process restarts; it is restored and re-executed automatically when `initializeWorkerDesktop()` is called again.
+- **RUNNING → ENQUEUED** — work that was RUNNING when the previous JVM exited is reset to ENQUEUED (it was interrupted mid-execution).
+- **Terminal state cleanup** — SUCCEEDED, FAILED, and CANCELLED items are immediately deleted from disk; the persistence directory only contains pending/active work.
+
+### Configuration — `DesktopWorkManagerConfig`
+
+| Field | Default | Description |
+|---|---|---|
+| `persistenceEnabled` | `true` | When `true`, work state is written to `persistencePath`. Set `false` (or use `IN_MEMORY` preset) to disable all file I/O. |
+| `persistencePath` | `~/.worker-kmp` | Directory for `.properties` files. Override per-app to avoid collisions between multiple JVM processes. |
+| `maxConcurrentWorkers` | `4` | Maximum number of workers running concurrently. |
+| `constraintCheckIntervalMs` | `5000` | Polling interval (ms) when waiting for constraints to be satisfied. |
+
+Use `DesktopWorkManagerConfig.IN_MEMORY` as a convenience preset for tests or CLI tools.
 
 ## iOS BGTaskScheduler
 

@@ -45,6 +45,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `persistence_restore_reEnqueuesInterruptedWork`
   - `persistence_restore_keepsFinalStates`
 
+#### Desktop (`cmp-worker-desktop`)
+
+- **File-based persistence** — work state now survives JVM process restarts. `PropertiesFileWorkPersistence`
+  writes each `WorkInfo` as a `.properties` file under `persistencePath`; `restoreFromPersistence()`
+  re-enqueues RUNNING items as ENQUEUED (interrupted mid-execution by a JVM shutdown).
+- `DesktopWorkManagerConfig.persistenceEnabled: Boolean = true` — already existed; now fully wired to
+  `PropertiesFileWorkPersistence`. Set `persistenceEnabled = false` (or use `IN_MEMORY` preset) to
+  disable all file I/O.
+- `DesktopWorkManagerConfig.persistencePath: File` — default `~/.worker-kmp`; override to control
+  where `.properties` files are stored (useful for multi-app or sandboxed environments).
+- **Internal persistence interface** `DesktopWorkPersistence` with three implementations:
+  - `PropertiesFileWorkPersistence` — production: each work item stored as `<id>.properties`.
+  - `InMemoryDesktopWorkPersistence` — test isolation: in-memory, zero file I/O.
+  - `NoOpDesktopWorkPersistence` — when `persistenceEnabled = false`.
+- **`initializeWorkerDesktop(config, workerFactory)`** — init function now accepts an optional
+  `DesktopWorkerFactory`; existing call sites compile without changes (defaults to
+  `ReflectionWorkerFactory`).
+- `DesktopWorkStateStore` — all state mutations now persist/delete via the injected persistence; the
+  existing manual CAS-loop (`compareAndSet`) pattern is retained for thread-safety.
+- 5 new tests (total: 18 in `DesktopWorkManagerTest`):
+  - `persistence_enqueuedWorkRestoredOnRestart`
+  - `persistence_runningWorkRestoredAsEnqueued`
+  - `persistence_succeededWork_removedFromPersistence`
+  - `persistence_cancelledWork_removedFromPersistence`
+  - `persistence_disabled_noOp`
+
 #### Web (`cmp-worker-web`)
 
 - **Browser Background Sync API integration** (opt-in, `enableBackgroundSync = false` by default) —

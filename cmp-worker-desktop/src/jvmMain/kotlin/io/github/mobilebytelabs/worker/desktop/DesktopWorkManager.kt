@@ -27,17 +27,28 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
-class DesktopWorkManager(
+class DesktopWorkManager internal constructor(
     private val config: DesktopWorkManagerConfig = DesktopWorkManagerConfig.DEFAULT,
     private val workerFactory: DesktopWorkerFactory = ReflectionWorkerFactory,
+    private val persistence: DesktopWorkPersistence,
 ) : WorkManager {
+
+    constructor(
+        config: DesktopWorkManagerConfig = DesktopWorkManagerConfig.DEFAULT,
+        workerFactory: DesktopWorkerFactory = ReflectionWorkerFactory,
+    ) : this(config, workerFactory, createDesktopWorkPersistence(config))
 
     private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO + CoroutineName("DesktopWorkManager"),
     )
     private val jobRegistry = ConcurrentHashMap<Uuid, Job>()
-    private val stateStore = DesktopWorkStateStore()
+    private val stateStore = DesktopWorkStateStore(persistence, scope)
     private val constraintEvaluator = DesktopConstraintEvaluator(config)
+
+    init {
+        // Restore work that was pending when the JVM last exited.
+        scope.launch { stateStore.restoreFromPersistence() }
+    }
 
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         stateStore.initWork(request.id, request.tags)

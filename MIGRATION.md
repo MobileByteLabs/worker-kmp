@@ -224,6 +224,46 @@ workManager.enqueue(
 
 ---
 
+## Desktop — Initialization
+
+The `initializeWorkerDesktop()` function now accepts an optional `workerFactory`. Previously only
+`ReflectionWorkerFactory` (class-name based) was supported; now you can supply a DI-aware factory.
+
+```kotlin
+// Before (still compiles — no change needed for reflection-based factories)
+fun main() {
+    initializeWorkerDesktop()
+}
+
+// After — supply a factory for DI injection or class-splitting across modules
+fun main() {
+    initializeWorkerDesktop(
+        config = DesktopWorkManagerConfig(
+            persistenceEnabled = true,            // default — work survives JVM restarts
+            persistencePath = File("~/.my-app"),  // default: ~/.worker-kmp
+        ),
+        workerFactory = object : DesktopWorkerFactory {
+            override fun create(workerClass: String, context: WorkerContext): CoroutineWorker =
+                when (workerClass) {
+                    "SyncWorker" -> SyncWorker(context, syncRepository)
+                    else         -> error("Unknown worker: $workerClass")
+                }
+        },
+    )
+}
+```
+
+### Persistence mapping
+
+| Before | After |
+|---|---|
+| Work state lost on JVM exit | Work state written to `~/.worker-kmp/*.properties` |
+| No restart recovery | ENQUEUED/RUNNING work restored on next `initializeWorkerDesktop()` |
+| — | RUNNING → ENQUEUED on restore (interrupted mid-execution) |
+| — | Terminal states (SUCCEEDED/FAILED/CANCELLED) deleted from disk |
+
+---
+
 ## From Web (custom polling / setInterval)
 
 The web platform is new in v2.0.0. If you previously used `setInterval`, `setTimeout`, or
