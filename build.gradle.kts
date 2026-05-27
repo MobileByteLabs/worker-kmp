@@ -34,7 +34,7 @@ allprojects {
 
 // BCV — only track public API modules (not sample or test helpers)
 apiValidation {
-    ignoredProjects += listOf("cmp-worker-sample", "cmp-worker-sample-android", "cmp-worker-test", "cmp-worker-bc-test")
+    ignoredProjects += listOf("cmp-worker-sample", "cmp-worker-sample-android", "cmp-worker-test", "cmp-worker-bc-test", "cmp-worker-desktop-daemon")
     nonPublicMarkers += listOf("io.github.mobilebytelabs.worker.ExperimentalWorkerApi")
 }
 

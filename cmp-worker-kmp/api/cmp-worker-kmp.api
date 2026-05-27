@@ -192,6 +192,14 @@ public final class io/github/mobilebytelabs/worker/OneTimeWorkRequestBuilder {
 	public final fun setInputData (Lio/github/mobilebytelabs/worker/WorkData;)Lio/github/mobilebytelabs/worker/OneTimeWorkRequestBuilder;
 }
 
+public final class io/github/mobilebytelabs/worker/OutOfQuotaPolicy : java/lang/Enum {
+	public static final field DROP_WORK_REQUEST Lio/github/mobilebytelabs/worker/OutOfQuotaPolicy;
+	public static final field RUN_AS_NON_EXPEDITED_WORK_REQUEST Lio/github/mobilebytelabs/worker/OutOfQuotaPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/OutOfQuotaPolicy;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/OutOfQuotaPolicy;
+}
+
 public final class io/github/mobilebytelabs/worker/PeriodicWorkRequest : io/github/mobilebytelabs/worker/WorkRequest {
 	public synthetic fun <init> (Lkotlin/uuid/Uuid;Ljava/lang/String;Lio/github/mobilebytelabs/worker/WorkData;Lio/github/mobilebytelabs/worker/Constraints;Lio/github/mobilebytelabs/worker/RetryConfig;Ljava/util/Set;JJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lkotlin/uuid/Uuid;

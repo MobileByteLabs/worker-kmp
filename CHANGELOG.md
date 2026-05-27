@@ -54,6 +54,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   outbox backends (Room/SQLDelight), `SyncerWorker.doWork()` outbox-flush wiring, paging
   integration, Compose helpers, and per-platform retry heuristics ship in alpha03.X follow-ups.
 
+#### Native API parity (Phase 7 alpha04 scaffold)
+
+- **`OutOfQuotaPolicy`** — new public enum in `cmp-worker-kmp` commonMain
+  (`io.github.mobilebytelabs.worker`) mirroring `androidx.work.OutOfQuotaPolicy`. Two values:
+  `RUN_AS_NON_EXPEDITED_WORK_REQUEST`, `DROP_WORK_REQUEST`. Governs behaviour when the
+  Android 12+ expedited-work quota is exhausted; no-op on iOS/Desktop/Web (those platforms
+  have no expedited-quota concept; the request runs as ordinary background work).
+- **`PLATFORM_API_MATRIX.md`** — new source-repo-root doc surfacing every native
+  background-execution API × every platform worker-kmp targets. Documents current cell state
+  + per-cell alpha targets for `setExpedited(OutOfQuotaPolicy)` (alpha04.X), Android 14
+  foreground-service types (alpha04.X), `setInitialDelay(Duration)` (alpha04.X),
+  `BGAppRefreshTaskRequest` (alpha04.X), Info.plist contract validation (alpha04.X),
+  Periodic Background Sync API (alpha04.X, Chrome-only), and Web Notifications API
+  (alpha04.X consumer-opt-in).
+- `OneTimeWorkRequestBuilder.setExpedited(OutOfQuotaPolicy)` wiring — Android-actual landing
+  in alpha04.X follow-up (scaffold intentionally avoids modifying the existing builder while
+  the enum is established).
+
+#### Desktop true-background daemon (Phase 8 alpha05 scaffold)
+
+- **`cmp-worker-desktop-daemon`** (NEW module — JVM-only) — scaffold for the desktop
+  true-background daemon. The daemon is invoked by the host OS scheduler (Windows Task
+  Scheduler / macOS launchd / Linux systemd-user timer / cron) to process pending work
+  when the consumer app is not running.
+- **`DesktopBackgroundDaemon.main(args)`** — entry point in
+  `io.github.mobilebytelabs.worker.daemon`. CLI flags: `--persistence-dir <path>`
+  (default `~/.worker-kmp`), `--max-runtime-seconds <n>` (default 120), `--log-file <path>`,
+  `--probe` (print capabilities + exit). alpha05 scaffold logs intent + exits cleanly;
+  lock-file acquisition, JAR integrity check, persistence loading, and work execution
+  land in alpha05.X follow-ups.
+- **`DesktopBackgroundConfig`** — `data class` carrying installer parameters (`appId`,
+  `daemonJarPath`, `runtimeJavaHome`, `persistenceDir`, `pollIntervalMin`,
+  `installOnFirstRun`, `uninstallOnAppUninstall`, `runOnlyIfLoggedOn`).
+- **`DesktopBackgroundInstaller`** — per-OS installer interface (`install` / `uninstall` /
+  `isInstalled` / `probe`). Per-OS impls (Windows `schtasks`, macOS launchd user agent,
+  Linux `systemd --user` with cron fallback) land in alpha05.X follow-ups. alpha05 ships a
+  `StubInstaller` returning `InstallResult.Failure("alpha05 scaffold")` for `install`/`uninstall`
+  and an OS-family-only `DesktopOsCapability` probe.
+- **`InstallResult`** — sealed class (`Success` / `Failure(reason)`).
+- **`DesktopOsCapability`** — capability descriptor (`osFamily`, `hasSchtasks`,
+  `hasLaunchctl`, `hasSystemctlUser`, `hasCron`, `notes`). alpha05 probe detects OS family
+  only; ProcessBuilder-based per-tool probes land in alpha05.X.
+- **`OsFamily`** — enum (`WINDOWS` / `MACOS` / `LINUX` / `OTHER`).
+- **`createDesktopBackgroundInstaller()`** — top-level factory returning the per-OS installer
+  for the current host (alpha05 returns `StubInstaller`).
+- 4 smoke tests in `DesktopDaemonTest`: `parseFlags` defaults sane, `--probe` flag parsed,
+  `installer.probe()` detects host OS family, `installer.install()` returns Failure in the
+  alpha05 scaffold.
+- **`cmp-worker-desktop-daemon/README.md`** — module README documenting current alpha05
+  scaffold state + per-target alpha05.X follow-up landing list.
+- Maven Central coordinates `io.github.mobilebytelabs:worker-desktop-daemon:3.0.0-alpha05`
+  (publishing config lands alongside the alpha05.X shadowJar fat-JAR packaging).
+
 ### Telemetry
 
 - **`WorkObserver` SAM interface + `WorkEvent` sealed class** — public SPI in `cmp-worker-kmp`. 4 lifecycle events (Enqueued / Started / Progress / Resulted). Consumers wire OpenTelemetry / Sentry / Firebase Performance bridges; see OBSERVERS.md for patterns.
