@@ -107,6 +107,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Maven Central coordinates `io.github.mobilebytelabs:worker-desktop-daemon:3.0.0-alpha05`
   (publishing config lands alongside the alpha05.X shadowJar fat-JAR packaging).
 
+#### Web Push universal background (Phase 9 alpha06 scaffold)
+
+- **`cmp-worker-web-push`** (NEW module — full KMP target matrix: jvm + iosArm64 +
+  iosSimulatorArm64 + js(IR) + wasmJs) — scaffold for the universal-browser background
+  module. Consumer's server is the cron; sends a Web Push message per RFC 8030 that
+  wakes the Service Worker, which then runs pending work entries from IndexedDB.
+- **`WebPushConfig`** — `data class` carrying subscription parameters (`enabled`,
+  `vapidPublicKey`, `serverEndpoint`, `foregroundFallback`,
+  `notificationPermissionAutoRequest`, `serviceWorkerScript`, `subscriptionExpiryDays`).
+  Safe defaults: `enabled=false`, `notificationPermissionAutoRequest=false`,
+  `foregroundFallback=true`, `subscriptionExpiryDays=90`.
+- **`WebPushSubscription`** — `data class` (`endpoint`, `p256dh`, `auth`) for RFC 8030
+  subscription metadata. Treat `endpoint` as a bearer secret.
+- **`WebPushSubscriber`** — `interface` for subscription lifecycle
+  (`ensureSubscribed` / `unsubscribe` / `currentSubscription` / `pushSupported` /
+  `requiresPwaInstall`). alpha06 ships log-only stub actuals on JVM/iOS/JS/WasmJs;
+  real JS `navigator.serviceWorker.register(...)` + `pushManager.subscribe(...)`
+  + WasmJs `@JsFun` bindings land in alpha06.X.
+- **`createWebPushSubscriber()`** — top-level `expect fun` factory returning the
+  platform actual (alpha06 returns log-only stubs everywhere).
+- **`workWebPushKoinModule`** — Koin module exposing `single<WebPushSubscriber>` via
+  the factory; consumer registers alongside `workKoinModule(...)`.
+- **`worker-kmp-sw.js`** — Service Worker JS template at
+  `cmp-worker-web-push/src/jsMain/resources/`. Listens for `push` + `periodicsync`
+  events; the IndexedDB read + work dispatch are stub no-ops at alpha06 (alpha06.X
+  delivers full SW-context work execution + BroadcastChannel cross-tab dedup).
+  CSP-clean: no eval, no document.write, no innerHTML.
+- 2 smoke tests in `WebPushSmokeTest` (commonTest): `WebPushConfig` defaults safe,
+  stub subscriber returns null + reports `pushSupported=false`.
+- **`cmp-worker-web-push/README.md`** — module README documenting current alpha06
+  scaffold state + per-target alpha06.X follow-up landing list.
+- **`WEB_PUSH_SERVER_GUIDE.md`** — new source-repo-root doc scaffold for consumer
+  push servers (RFC 8030 protocol, VAPID key generation, server obligations per
+  SECURITY.md T7-T15, reference server placeholders for Node.js + Ktor).
+- Maven Central coordinates `io.github.mobilebytelabs:worker-web-push:3.0.0-alpha06`
+  (real per-platform JS/WasmJs impls + VAPID Gradle task + reference push servers
+  land alongside alpha06.X follow-ups).
+
+#### Migration toolkit (Phase 12 alpha08 scaffold)
+
+- **`cmp-worker-migrate`** (NEW module — JVM-only Gradle plugin, NOT a KMP library)
+  — scaffold for the v2.x → v3 source-migration toolkit. Uses
+  `kotlin("jvm") + java-gradle-plugin`; declares
+  `compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.0.21")` for the
+  forthcoming AST-driven scanner.
+- **`io.github.mobilebytelabs.worker.migrate`** — Gradle plugin ID. Registers two
+  tasks under the `worker-kmp` group:
+  - `cmpWorkerMigrateCheck` — reports findings as Markdown; no changes.
+    alpha08 placeholder logs "no findings"; real V2PatternDetector via Kotlin
+    compiler frontend + confidence classifier (HIGH/MEDIUM/LOW) + unified-diff
+    generation lands in alpha08.X.
+  - `cmpWorkerMigrateApply` — applies HIGH-confidence diffs; emits MEDIUM/LOW
+    suggestions to `migrate-suggestions.md`. alpha08 placeholder logs only.
+- **`WorkerMigratePlugin`** — plugin entry point in
+  `io.github.mobilebytelabs.worker.migrate`. Registers the two tasks above with
+  Gradle group `worker-kmp` + descriptions.
+- 2 smoke tests in `WorkerMigratePluginTest`: plugin registers both tasks via
+  `ProjectBuilder.builder()` + `plugins.apply(...)`; check task lands in
+  `worker-kmp` group.
+- **`cmp-worker-migrate/README.md`** — module README documenting current alpha08
+  scaffold state + per-target alpha08.X follow-up landing list (5 integration
+  fixtures: v2-android-app / v2-multiplatform-app / v2-koin-already / v2-hilt-app
+  / v2-custom-factory; idempotency tests; Gradle Plugin Portal publishing;
+  ≤10-min migration time verification on real ≥30-worker codebase).
+- BCV: `cmp-worker-migrate` added to root `apiValidation.ignoredProjects` (Gradle
+  plugins do not participate in BCV).
+- Maven Central coordinates `io.github.mobilebytelabs:worker-migrate:3.0.0-alpha08`
+  (Gradle Plugin Portal listing lands in alpha08.X).
+
 ### Telemetry
 
 - **`WorkObserver` SAM interface + `WorkEvent` sealed class** — public SPI in `cmp-worker-kmp`. 4 lifecycle events (Enqueued / Started / Progress / Resulted). Consumers wire OpenTelemetry / Sentry / Firebase Performance bridges; see OBSERVERS.md for patterns.
