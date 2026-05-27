@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0] - 2026-05-27
 
+### Infrastructure
+
+#### Binary Compatibility Validator
+- Added `org.jetbrains.kotlinx.binary-compatibility-validator` (BCV) v0.17.0 to track public API surface across releases.
+- `.api` dump files generated for `cmp-worker-kmp`, `cmp-worker-compose`, `cmp-worker-desktop`, `cmp-worker-web`, `cmp-worker-koin`.
+- `cmp-worker-sample`, `cmp-worker-sample-android`, `cmp-worker-test` excluded from API tracking.
+
+#### Dokka Convention Plugin
+- Added Dokka 2.0 convention plugin (`io.github.mobilebytelabs.dokka`) following the same pattern as Spotless and Detekt.
+- All publishable modules (`cmp-worker-kmp`, `cmp-worker-android`, `cmp-worker-compose`, `cmp-worker-desktop`, `cmp-worker-ios`, `cmp-worker-web`, `cmp-worker-koin`) automatically generate KDoc HTML via `./gradlew dokkaGenerate`.
+- Dokka V2 mode enabled (`org.jetbrains.dokka.experimental.gradle.pluginMode=V2EnabledWithHelpers`) for AGP 9.x compatibility.
+
+### Samples
+
+#### Compose Desktop Demo (`cmp-worker-sample`)
+- New `ComposeSampleApp` — Compose Desktop window with `WorkSchedulerScreen`, `WorkMonitorScreen`, and `BackgroundCapabilitiesBanner` tabs. Demonstrates full UI workflow from task scheduling to live status monitoring.
+
+#### Android Sample App (`cmp-worker-sample-android`)
+- New standalone Android application module with Compose UI, Koin DI wiring, and `SyncWorker`.
+- `MainActivity` shows the same two-tab layout (`WorkSchedulerScreen` + `WorkMonitorScreen`) with `BackgroundCapabilitiesBanner`.
+- `WorkerSampleApp` calls `initializeWorkerAndroid` and `startKoin { modules(workKoinModule, appModule) }` in `Application.onCreate`.
+
+### Documentation
+
+#### iOS Swift Integration Guide (`cmp-worker-ios/SWIFT_INTEGRATION.md`)
+- New step-by-step guide covering: SwiftUI + UIKit setup, `IosWorkerFactory` implementation, enqueueing work from Swift, observing work status via `AsyncSequence`, `BGTaskScheduler` opt-in, and Koin DI integration.
+
+[2.1.0 was originally listed here — entries follow below]
+
 ### Added
 
 #### Koin DI Integration (`cmp-worker-koin`) — new artifact
