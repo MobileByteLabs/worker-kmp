@@ -13,6 +13,11 @@ package io.github.mobilebytelabs.worker.webpush
  * @property serverEndpoint Consumer's server endpoint for POSTing subscription metadata
  *   (`{endpoint, p256dh, auth}` JSON). Consumer uses these to construct subsequent pushes
  *   per RFC 8030.
+ * @property serverEndpointAuthHeader Optional async provider for the `Authorization` header
+ *   value used when POSTing subscriptions to [serverEndpoint]. The library invokes the
+ *   suspend lambda each time it submits a subscription — letting consumers fetch a fresh
+ *   bearer token / OIDC JWT / signed-request header out-of-band. Returning a blank string
+ *   omits the header. Added in v3.0.0-alpha06.X (Phase 9 alpha06.X).
  * @property foregroundFallback If push subscription fails or browser doesn't support it,
  *   fall back to existing 2.1.0 polling-while-tab-open behavior.
  * @property notificationPermissionAutoRequest If false, library NEVER auto-prompts for
@@ -26,6 +31,7 @@ public data class WebPushConfig(
     public val enabled: Boolean = false,
     public val vapidPublicKey: String = "",
     public val serverEndpoint: String = "",
+    public val serverEndpointAuthHeader: (suspend () -> String)? = null,
     public val foregroundFallback: Boolean = true,
     public val notificationPermissionAutoRequest: Boolean = false,
     public val serviceWorkerScript: String = "/worker-kmp-sw.js",

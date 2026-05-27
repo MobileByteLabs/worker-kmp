@@ -89,6 +89,41 @@ kotlin {
     }
 }
 
+// Discoverable VAPID-key generation surface added in v3.0.0-alpha06.X (Phase 9 alpha06.X).
+//
+// Pragmatic alpha06.X scope: print the recommended commands rather than bundling
+// BouncyCastle just for one task. Consumer runs the dedicated VAPID-key generators that
+// already exist in the JS + JVM ecosystems. A full BouncyCastle-based generator can land
+// in alpha06.X.Y if there's appetite.
+abstract class GenerateVapidKeysTask : org.gradle.api.DefaultTask() {
+    @org.gradle.api.tasks.TaskAction
+    fun generate() {
+        val line = "=".repeat(60)
+        println(line)
+        println("Generate a VAPID P-256 keypair for Web Push:")
+        println(line)
+        println()
+        println("Option A (Node.js — recommended):")
+        println("  npx web-push generate-vapid-keys")
+        println()
+        println("Option B (OpenSSL):")
+        println("  openssl ecparam -genkey -name prime256v1 -noout -out vapid.pem")
+        println("  openssl ec -in vapid.pem -pubout -out vapid.pub")
+        println("  # then BASE64URL-encode both keys")
+        println()
+        println("Store the PRIVATE key via:")
+        println("  /secrets push --generate vapid")
+        println("(per RULE-SECRETS-VAULT-001 in claude-product-cycle framework)")
+        println()
+        println("Set the PUBLIC key in WebPushConfig.vapidPublicKey.")
+    }
+}
+
+tasks.register<GenerateVapidKeysTask>("generateVapidKeys") {
+    group = "worker-kmp"
+    description = "Print VAPID P-256 keypair generation instructions (Web Push RFC 8030)"
+}
+
 mavenPublishing {
     signAllPublications()
     coordinates(

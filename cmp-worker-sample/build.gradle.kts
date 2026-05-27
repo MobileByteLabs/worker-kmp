@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -10,7 +11,7 @@ plugins {
 group = "io.github.mobilebytelabs"
 version = providers.gradleProperty("worker.version").get()
 
-@OptIn(ExperimentalKotlinGradlePluginApi::class)
+@OptIn(ExperimentalKotlinGradlePluginApi::class, ExperimentalWasmDsl::class)
 kotlin {
     jvm {
         compilerOptions {
@@ -23,6 +24,9 @@ kotlin {
     js(IR) {
         nodejs()
         binaries.executable()
+    }
+    wasmJs {
+        browser()
     }
 
     compilerOptions {
@@ -51,6 +55,13 @@ kotlin {
         }
         jsMain {
             dependencies {
+                implementation(project(":cmp-worker-web"))
+                implementation(libs.kotlinx.coroutines.core)
+            }
+        }
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(project(":cmp-worker-kmp"))
                 implementation(project(":cmp-worker-web"))
                 implementation(libs.kotlinx.coroutines.core)
             }

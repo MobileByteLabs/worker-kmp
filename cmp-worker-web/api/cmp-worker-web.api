@@ -2,6 +2,14 @@ public final class io/github/mobilebytelabs/worker/web/BackgroundSyncScriptKt {
 	public static final fun backgroundSyncServiceWorkerScript ()Ljava/lang/String;
 }
 
+public final class io/github/mobilebytelabs/worker/web/BroadcastChannelBridgeKt {
+	public static final fun openWorkerKmpBroadcastChannel (Lkotlin/jvm/functions/Function2;)Lio/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription {
+	public abstract fun close ()V
+}
+
 public final class io/github/mobilebytelabs/worker/web/NotificationPermission : java/lang/Enum {
 	public static final field DEFAULT Lio/github/mobilebytelabs/worker/web/NotificationPermission;
 	public static final field DENIED Lio/github/mobilebytelabs/worker/web/NotificationPermission;

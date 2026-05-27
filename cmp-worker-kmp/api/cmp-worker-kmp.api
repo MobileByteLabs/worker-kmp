@@ -556,17 +556,45 @@ public final class io/github/mobilebytelabs/worker/config/AndroidWorkerConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class io/github/mobilebytelabs/worker/config/DesktopBackgroundConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()I
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun component8 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZ)Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZZZILjava/lang/Object;)Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAppId ()Ljava/lang/String;
+	public final fun getDaemonJarPath ()Ljava/lang/String;
+	public final fun getInstallOnFirstRun ()Z
+	public final fun getPersistenceDir ()Ljava/lang/String;
+	public final fun getPollIntervalMin ()I
+	public final fun getRunOnlyIfLoggedOn ()Z
+	public final fun getRuntimeJavaHome ()Ljava/lang/String;
+	public final fun getUninstallOnAppUninstall ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class io/github/mobilebytelabs/worker/config/DesktopWorkerConfig {
 	public fun <init> ()V
-	public fun <init> (IZLjava/lang/String;J)V
-	public synthetic fun <init> (IZLjava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (IZLjava/lang/String;JLio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;)V
+	public synthetic fun <init> (IZLjava/lang/String;JLio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()I
 	public final fun component2 ()Z
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()J
-	public final fun copy (IZLjava/lang/String;J)Lio/github/mobilebytelabs/worker/config/DesktopWorkerConfig;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/config/DesktopWorkerConfig;IZLjava/lang/String;JILjava/lang/Object;)Lio/github/mobilebytelabs/worker/config/DesktopWorkerConfig;
+	public final fun component5 ()Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;
+	public final fun copy (IZLjava/lang/String;JLio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;)Lio/github/mobilebytelabs/worker/config/DesktopWorkerConfig;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/config/DesktopWorkerConfig;IZLjava/lang/String;JLio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/config/DesktopWorkerConfig;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackground ()Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;
 	public final fun getConstraintCheckIntervalMs ()J
 	public final fun getMaxConcurrentWorkers ()I
 	public final fun getPersistenceEnabled ()Z

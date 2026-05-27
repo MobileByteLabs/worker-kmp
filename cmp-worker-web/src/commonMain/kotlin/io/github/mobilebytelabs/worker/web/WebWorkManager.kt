@@ -48,6 +48,22 @@ class WebWorkManager internal constructor(
     private val jobRegistry = mutableMapOf<Uuid, Job>()
     private val stateStore = WebWorkStateStore(persistence = persistence, scope = scope)
 
+    /**
+     * Subscription to `BroadcastChannel('worker-kmp')` — receives cross-tab updates from the
+     * worker-kmp Service Worker after it marks ENQUEUED entries as RUNNING from a push event.
+     * On `PENDING_PROCESSED`, we re-load state from IndexedDB so the UI re-renders without a
+     * manual refresh.
+     *
+     * Added in v3.0.0-alpha06.X (Phase 9 alpha06.X). JS-only; WasmJs + JVM actuals are
+     * no-ops — they continue to discover changes via the constraint-check polling interval.
+     */
+    private val broadcastSubscription: WorkerKmpBroadcastSubscription =
+        openWorkerKmpBroadcastChannel { eventType, _ ->
+            if (eventType == "PENDING_PROCESSED") {
+                scope.launch { stateStore.restoreFromPersistence() }
+            }
+        }
+
     init {
         scope.launch { stateStore.restoreFromPersistence() }
     }
@@ -186,6 +202,7 @@ class WebWorkManager internal constructor(
     }
 
     fun shutdown() {
+        broadcastSubscription.close()
         scope.coroutineContext[Job]?.cancel()
     }
 }

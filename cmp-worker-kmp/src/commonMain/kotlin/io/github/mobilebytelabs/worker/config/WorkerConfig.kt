@@ -112,6 +112,19 @@ public data class DesktopWorkerConfig(
     public val persistenceEnabled: Boolean = true,
     public val persistencePath: String? = null,
     public val constraintCheckIntervalMs: Long = 5_000L,
+    /**
+     * Optional desktop background-daemon installation config. When non-null AND
+     * [DesktopBackgroundConfig.installOnFirstRun] is true, the JVM `desktopWorkManagerFactory(...)`
+     * builder invokes the daemon installer (`cmp-worker-desktop-daemon`) reflectively at first
+     * construction — installing the OS-level scheduled task / launchd agent / systemd-user timer
+     * that wakes the daemon to drain pending work while the consumer app is not running.
+     *
+     * Added in v3.0.0-alpha05.X (Phase 8 alpha05.X). Auto-install is best-effort:
+     * `cmp-worker-desktop-daemon` is NOT a hard dependency of `cmp-worker-desktop`, so when the
+     * daemon module isn't on the classpath the auto-install hook logs a WARN and proceeds without
+     * the background path (the foreground/in-process work flow continues to function normally).
+     */
+    public val background: DesktopBackgroundConfig? = null,
 )
 
 /**

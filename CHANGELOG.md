@@ -9,6 +9,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Core API
 
+#### Desktop true-background daemon (Phase 8 alpha05.X)
+
+- **Per-OS installers — real implementations:**
+  - `WindowsTaskInstaller` via `schtasks /Create /XML` + Task XML (UTF-16) — minute-granular
+    trigger, `InteractiveToken` principal, `LeastPrivilege` run level, 10-min execution
+    limit per firing.
+  - `MacosLaunchdInstaller` via `launchctl load -w` + `~/Library/LaunchAgents/{appId}.worker-kmp.plist`
+    — `StartInterval`-based scheduling, `ProcessType=Background`.
+  - `LinuxSystemdInstaller` via `~/.config/systemd/user/{appId}.worker-kmp.{timer,service}`
+    + `systemctl --user enable --now`. Linger detection via `loginctl show-user`; warns if
+    `Linger=no` (timer pauses on logout — consumer needs `loginctl enable-linger`).
+  - `LinuxCronInstaller` fallback (no systemd-user) — appends marker line
+    `# worker-kmp:{appId}` to user crontab via `crontab -l` / `crontab -`.
+  - `LinuxInstallerRouter` selects `LinuxSystemdInstaller` when `systemctl --user --version`
+    succeeds; falls back to `LinuxCronInstaller` when crontab is reachable; otherwise
+    returns a `NoSchedulerInstaller` that fails every operation cleanly.
+- **`createDesktopBackgroundInstaller()` factory** now dispatches by OS family — Windows /
+  macOS / Linux (via Router) / Other (fail-only stub for unsupported OS). The Kt class
+  `io.github.mobilebytelabs.worker.daemon.installer.DesktopInstallerFactoryKt` provides a
+  stable reflective entry point so `cmp-worker-desktop` can auto-install without taking a
+  hard dependency on the daemon module.
+- **`LockFile`** — `FileChannel.tryLock()` + PID tracking at `{persistenceDir}/daemon.lock`;
+  refuses second daemon instance (advisory on POSIX, mandatory on Windows).
+- **`JarIntegrityCheck`** — SHA-256 of the currently-running daemon JAR (resolved via
+  `protectionDomain.codeSource.location`) compared to `{persistenceDir}/daemon.jar.sha256`
+  (written at install time by the per-OS installer). Mismatch → daemon refuses to run.
+  Fail-OPEN when running from classes (dev/test) or when no hash file exists (first run /
+  manual launch).
+- **Daemon main loop** — real implementation: probe mode prints capability matrix; normal
+  mode acquires lock, verifies integrity, reads `.properties` files from persistence dir,
+  counts entries by state within `--max-runtime-seconds` budget, heals stuck-RUNNING entries
+  back to ENQUEUED (mirrors `DesktopWorkStateStore.restoreFromPersistence`). Full
+  PropertiesFileWorkPersistence + `WorkManager.runOne()` integration deferred to alpha05.X.Y
+  pending a richer persistence schema that carries `workerClass` FQCN + `inputData`.
+- **`DesktopBackgroundConfig` moves to commonMain** —
+  `cmp-worker-kmp/src/commonMain/.../config/DesktopBackgroundConfig.kt`, now field of
+  `DesktopWorkerConfig.background` (nullable; defaults to `null`). Consumers declare the
+  full background-scheduling config from shared code. `persistenceDir` becomes nullable
+  `String?` (null = resolve to `~/.worker-kmp` on the JVM side at install time).
+- **Auto-install at first `DesktopWorkManager` construction** — when
+  `DesktopWorkerConfig.background.installOnFirstRun == true`, `desktopWorkManagerFactory()`
+  invokes the installer reflectively (no hard dep on `cmp-worker-desktop-daemon` from
+  `cmp-worker-desktop`). Skips if `isInstalled(appId)` already returns true. All failures
+  caught + logged at WARN so a missing daemon module never breaks normal factory construction.
+- **`RotatingLogger`** scaffold — file-backed log at `{persistenceDir}/logs/daemon.log.{0..2}`
+  via `java.util.logging.FileHandler` (1 MB × 3-file rotation). Best-effort install — failures
+  during install (e.g., persistenceDir not writable) are silent.
+- **`HmacPersistence`** scaffold — HMAC-SHA256 envelope around `.properties` files defending
+  T2 (persistence-file tamper) per `docs/operations/security.md`. Ephemeral 32-byte key at
+  `{persistenceDir}/.persistence-hmac.key` (POSIX 600 via NIO). Helpers shipped;
+  integration into `PropertiesFileWorkPersistence` reader/writer deferred to alpha05.X.Y.
+- **5 smoke tests in `DesktopDaemonTest`** — defaults sane, `--probe` flag parsed,
+  `installer_probe_returnsCorrectOsForCurrentHost`, `lockFile_acquire_thenSecondAttemptFails`,
+  `jarIntegrityCheck_missingHashFile_isPermissive`, `jarIntegrityCheck_emptyHashFile_isPermissive`.
+
+Deferred to alpha05.X.Y: full `PropertiesFileWorkPersistence` read/execute integration in
+the daemon main loop; HMAC-signed persistence wrapper integration (helpers shipped,
+integration TBD); shadowJar fat-JAR packaging for distribution.
+
+#### Web Push universal background (Phase 9 alpha06.X)
+
+- **`JsWebPushSubscriber`** — real Service Worker registration via
+  `navigator.serviceWorker.register(scriptUrl)` + `pushManager.subscribe({userVisibleOnly,
+  applicationServerKey})`. ArrayBuffer → BASE64URL encoding for `p256dh` + `auth` keys.
+  Auto-POST subscription metadata to consumer's `WebPushConfig.serverEndpoint` with optional
+  async `serverEndpointAuthHeader` auth-header provider. Replaces the alpha06 log-only stub.
+- **`WebPushConfig.serverEndpointAuthHeader: (suspend () -> String)?`** — new optional async
+  auth header provider. Library invokes the lambda each time it submits a subscription —
+  letting consumers fetch a fresh bearer token / OIDC JWT / signed-request header out-of-band.
+- **`worker-kmp-sw.js`** — real implementation. Push event handler reads IndexedDB
+  (`worker-kmp` db, `work` object store), filters ENQUEUED entries matching scope, marks
+  RUNNING, broadcasts `'PENDING_PROCESSED'` via `BroadcastChannel('worker-kmp')` for cross-tab
+  notification. `periodicsync` event handler for the `worker-kmp:` tag prefix. CSP-clean (no
+  eval, no document.write, no innerHTML).
+- **BroadcastChannel cross-tab wiring** — new `expect fun openWorkerKmpBroadcastChannel(...)`
+  in `cmp-worker-web/commonMain`; JS `WebWorkManager` opens
+  `BroadcastChannel('worker-kmp')` at construction, refreshes state-store from IndexedDB on
+  `'PENDING_PROCESSED'` events. WasmJs + JVM actuals are no-ops (WasmJs pending kotlinx-browser
+  bindings; JVM has no browser runtime). Closed in `WebWorkManager.shutdown()`.
+- **Reference push servers** at `samples/web-push-server-{node,ktor}/`:
+  - `web-push-server-node/` — Express + better-sqlite3 + node-cron + web-push npm package
+    (~95 LoC). Hourly cron sends `WORKER_KMP_TRIGGER` push to every subscription. Drops
+    expired (410/404) subscriptions.
+  - `web-push-server-ktor/` — Standalone Gradle project (NOT in root `settings.gradle.kts`);
+    Ktor 3.x + Exposed + sqlite-jdbc + nl.martijndwars:web-push + BouncyCastle (~135 LoC).
+    Same endpoints + same hourly loop.
+  - Both ship hardening checklists pointing at SECURITY.md T7-T15 (rate-limiting, encryption
+    at rest, VAPID-vault integration, unsubscribe endpoint, annual key rotation).
+- **`./gradlew :cmp-worker-web-push:generateVapidKeys`** — Gradle task under `worker-kmp`
+  group that prints VAPID key-generation instructions + framework
+  `/secrets push --generate vapid` integration pointer. Full BouncyCastle-based generator
+  deferred to alpha06.X.Y.
+
+Deferred to alpha06.X.Y: WasmJs real `WebPushSubscriber` (current = stub); BouncyCastle-based
+VAPID key generator inside the Gradle task; end-to-end integration test against a real
+browser; WasmJs `BroadcastChannel` binding via kotlinx-browser.
+
 #### Phase 1 alpha01.X — real foreground impls (v3.0.0-alpha01.X)
 
 Replaces the log-only `runAsForeground` stubs from alpha01 with platform-native
@@ -126,6 +223,56 @@ Wires the previously-scaffolded native-API surfaces into the per-platform work m
 
 All additions retain backward compatibility with v3.0.0-alpha01..alpha06 callers
 (new fields/builders have defaults). BCV dumps updated under `*/api/`.
+
+#### Store5 advanced workers (Phase 2 alpha02.X)
+
+- **`MutableStoreSyncWorker<K, V>`** — abstract `CoroutineWorker` that invokes
+  `MutableStore.write(StoreWriteRequest.of(key, value))` to push pending mutations.
+  Maps `StoreWriteResponse.Success` → `WorkResult.success` (overridable via
+  `mapWriteResponseToWorkData(response)`); `StoreWriteResponse.Error.Exception` is
+  routed through the `isRetryable()` override (defaults to false / fatal);
+  `StoreWriteResponse.Error.Message` is always fatal. Class-level `@OptIn(ExperimentalStoreApi)`
+  propagates Store5's experimental opt-in to subclasses.
+- **`StoreFreshnessWorker<K, Output>`** — checks `Validator<Output>.isValid(item)` against
+  the cached value (read via `StoreReadRequest.cached(key, refresh = false)`) before
+  fetching. If still fresh: returns `WorkResult.success(workDataOf("skipped" to "fresh"))`
+  — observers key off `KEY_SKIPPED` to count bandwidth-saved invocations. If stale: same
+  `store.stream(StoreReadRequest.fresh(key))` path as `StoreBackedWorker`.
+- Both added to `cmp-worker-store5/src/commonMain/kotlin/.../store5/`. BCV updated at
+  orchestrator's final build pass.
+
+#### StoreFlow advanced patterns (Phase 3 alpha03.X)
+
+- **`DraftSubmitHandler<P, R>`** — persistent draft state machine surviving process restarts.
+  State enum `Idle → Drafting → Submitting → Submitted/Failed` driven by `draft(payload)`
+  + `submit()`. `rehydrateFromOutbox()` restores the most-recently-enqueued PENDING/RETRYING
+  entry to `State.Submitting` on process restart so the consumer's UI can offer a
+  "retry / cancel" affordance. Adapts `kmp-project-template/core-base/store/submit/DraftSubmitHandler.kt`
+  to worker-kmp's `SubmitOutbox` contract.
+- **`PrefetchPagingWorker`** — abstract `CoroutineWorker` for paginated cache warming.
+  Consumer extends + implements `fetchPage(pageNumber)`. Input keys: `KEY_START_PAGE` (Int,
+  required) + `KEY_PAGE_COUNT` (Int, optional; default 3). Output key: `KEY_PAGES_FETCHED`
+  (Int). Page-fetch failure → `WorkResult.retry`; all-pages-clean → `WorkResult.success`.
+- **`SubmitStateUi` enum + `SubmitStateUiModel` data class** — Compose helper (in
+  `cmp-worker-compose/.../storeflow/SubmitStateScaffold.kt`) — plain Kotlin types so
+  `cmp-worker-compose` doesn't take a hard dep on `cmp-worker-storeflow`. Consumer code maps
+  `DraftSubmitHandler.State<P>` to one of the five `SubmitStateUi` labels. The full
+  Composable `SubmitStateScaffold(model, content)` lands in alpha03.X.Y.
+- Per-platform persistent `SubmitOutbox` impls (Room / NSUserDefaults / properties-file /
+  IndexedDB) deferred to alpha03.X.Y — `InMemorySubmitOutbox` remains the default.
+
+#### Samples — Wasm browser (Phase 5 alpha07)
+
+- **`cmp-worker-sample/wasmJsBrowserMain`** — Compose-for-Wasm browser sample scaffold.
+  Adds `wasmJs { browser { ... } }` target to `cmp-worker-sample/build.gradle.kts` with
+  `binaries.executable()` + webpack `cssSupport` + named output `cmp-worker-sample.js`.
+  Plain-DOM entry point at `src/wasmJsMain/kotlin/BrowserSampleMain.kt` demonstrating the
+  worker-kmp Wasm import + an enqueue button + event log. Host page at
+  `src/wasmJsMain/resources/index.html`. Run via
+  `./gradlew :cmp-worker-sample:wasmJsBrowserRun`. Full Compose-for-Wasm UI
+  (`CanvasBasedWindow` + `SampleApp()`) defers to alpha07.X.Y.
+- iOS Xcode sample + Hilt Android sample remain README-only scaffolds; full Xcode project
+  + APK defer to alpha07.X.Y based on consumer need.
 
 ### Documentation
 
