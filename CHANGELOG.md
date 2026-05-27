@@ -43,6 +43,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   to inherit the full KMP target matrix including wasmJs. Maven Central coordinates
   `io.github.mobilebytelabs:worker-store5:3.0.0-alpha02`. Future: `MutableStoreSyncWorker` +
   `StoreFreshnessWorker` ship in alpha02.X follow-ups.
+- **`cmp-worker-storeflow`** (NEW artifact) — worker-anchored Store-flow + submit-outbox bridge.
+  Scaffolded minimum-shippable form: `FetchPolicy` enum (lifted verbatim from
+  `kmp-project-template/core-base/store/screen/FetchPolicy.kt`), `SubmitOutbox<P>` interface +
+  `InMemorySubmitOutbox<P>` default, `OutboxEntry<P>` + `OutboxState`,
+  `WorkScheduledOfflineSubmitSyncer<P, R>` (delegates periodic + connectivity-gated retry to
+  `WorkManager.enqueueUniquePeriodicWork`), `SyncerWorker` (no-op scaffold), and
+  `workStoreFlowKoinModule`. Maven Central coordinates
+  `io.github.mobilebytelabs:worker-storeflow:3.0.0-alpha03`. Future: per-platform persistent
+  outbox backends (Room/SQLDelight), `SyncerWorker.doWork()` outbox-flush wiring, paging
+  integration, Compose helpers, and per-platform retry heuristics ship in alpha03.X follow-ups.
 
 ### Telemetry
 
