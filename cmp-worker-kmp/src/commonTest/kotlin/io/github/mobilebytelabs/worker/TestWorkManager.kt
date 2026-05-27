@@ -58,6 +58,10 @@ class TestWorkManager : WorkManager {
         stateStore.value[id]?.let { updateState(id, it.copy(progress = progress)) }
     }
 
+    fun simulateRunning(id: Uuid) {
+        stateStore.value[id]?.let { updateState(id, it.copy(state = WorkInfo.State.RUNNING)) }
+    }
+
     fun simulateStateChange(id: Uuid, workState: WorkInfo.State) {
         stateStore.value[id]?.let { updateState(id, it.copy(state = workState)) }
     }

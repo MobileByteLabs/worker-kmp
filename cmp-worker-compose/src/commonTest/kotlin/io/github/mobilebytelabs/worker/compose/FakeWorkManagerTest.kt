@@ -6,7 +6,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 class FakeWorkManagerTest {
@@ -107,5 +110,36 @@ class FakeWorkManagerTest {
         manager.cancelAllWorkByTag("upload")
 
         assertEquals(listOf("sync", "upload"), manager.cancelledTags)
+    }
+
+    // --- BackgroundCapabilities ---
+
+    @Test
+    fun platformBackgroundCapabilities_isCallable() {
+        val caps = io.github.mobilebytelabs.worker.platformBackgroundCapabilities()
+        assertNotNull(caps)
+    }
+
+    // --- hasActiveWork ---
+
+    @Test
+    fun hasActiveWork_falseWhenEmpty() = runTest {
+        assertFalse(manager.hasActiveWork("tag"))
+    }
+
+    @Test
+    fun hasActiveWork_trueWhenRunningItemExists() = runTest {
+        manager.putInfos("sync", WorkInfo(id = Uuid.random(), state = WorkInfo.State.RUNNING))
+        assertTrue(manager.hasActiveWork("sync"))
+    }
+
+    @Test
+    fun hasActiveWork_falseWhenAllTerminal() = runTest {
+        manager.putInfos(
+            "sync",
+            WorkInfo(id = Uuid.random(), state = WorkInfo.State.SUCCEEDED),
+            WorkInfo(id = Uuid.random(), state = WorkInfo.State.FAILED),
+        )
+        assertFalse(manager.hasActiveWork("sync"))
     }
 }

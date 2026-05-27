@@ -8,14 +8,15 @@ A Kotlin Multiplatform background task scheduler — the `WorkManager` API you k
 
 ## Platform Support
 
-| Platform | Module | Foreground | Background | Min Version |
-|---|---|:---:|:---:|---|
-| Android | `worker-android` | ✅ | ✅ via `androidx.work` | API 21 |
-| Desktop (JVM) | `worker-desktop` | ✅ | ✅ in-process | JDK 11 |
-| iOS | `worker-ios` | ✅ | ⚠️ opt-in via BGTaskScheduler¹ | iOS 13.0 |
-| Web (JS/WasmJs) | `worker-web` | ✅ | ⚠️ opt-in via Background Sync¹ | Chrome/Node |
-| Compose Multiplatform | `worker-compose` | ✅ | — | — |
-| All (common API) | `worker-kmp` | ✅ | — | — |
+| Platform | Module | Foreground | Persistence | OS Scheduling | Min Version |
+|---|---|:---:|:---:|:---:|---|
+| Android | `worker-android` | ✅ | ✅ | ✅ via WorkManager | API 21 |
+| Desktop (JVM) | `worker-desktop` | ✅ | ✅ file-based | — | JDK 11 |
+| iOS | `worker-ios` | ✅ | ✅ NSUserDefaults | ⚠️ opt-in BGTaskScheduler¹ | iOS 13.0 |
+| Web (JS) | `worker-web` | ✅ | ✅ IndexedDB | ⚠️ opt-in Background Sync¹ | Chrome/Node |
+| Web (WasmJs) | `worker-web` | ✅ | — | — | Chrome |
+| Compose Multiplatform | `worker-compose` | ✅ | — | — | — |
+| All (common API) | `worker-kmp` | ✅ | — | — | — |
 
 > ¹ **iOS** and **Web** are marked `@ExperimentalWorkerApi`. Both support opt-in background
 > scheduling: iOS via [BGTaskScheduler](#ios-bgtaskscheduler), Web via
@@ -579,6 +580,57 @@ WorkSchedulerScreen(
     onSchedule = { request -> workManager.enqueue(request) },
 )
 ```
+
+#### WorkCountBadge
+
+Overlays a numeric badge on any icon or composable showing active (non-terminal) work count
+for a tag. Disappears automatically when count reaches zero:
+
+```kotlin
+WorkCountBadge(tag = "upload") {
+    Icon(Icons.Default.Upload, contentDescription = "Uploads")
+}
+```
+
+Use `rememberActiveWorkCount(tag)` for the raw count as `State<Int>`.
+
+#### BackgroundCapabilitiesBanner
+
+Informational banner showing what background features are active on the current platform.
+Useful in settings or debug screens:
+
+```kotlin
+// Renders automatically based on the current platform
+BackgroundCapabilitiesBanner()
+
+// Preview / test with explicit capabilities
+BackgroundCapabilitiesBanner(
+    capabilities = BackgroundCapabilities(supportsPersistence = true, supportsOsScheduling = false),
+)
+```
+
+## Background Capabilities
+
+Query platform background support in shared code:
+
+```kotlin
+val caps = platformBackgroundCapabilities()
+
+if (caps.supportsOsScheduling) {
+    // Configure advanced background options
+}
+if (caps.supportsPersistence) {
+    // Work state survives process restarts — safe to enqueue without immediate execution
+}
+```
+
+| Platform | `supportsPersistence` | `supportsOsScheduling` |
+|---|:---:|:---:|
+| Android | ✓ | ✓ |
+| iOS | ✓ | ✓ |
+| Desktop (JVM) | ✓ | — |
+| Web (JS) | ✓ | — |
+| Web (WasmJs) | — | — |
 
 ## Testing
 

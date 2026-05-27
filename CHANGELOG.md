@@ -9,6 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Common API (`cmp-worker-kmp`)
+
+- **`BackgroundCapabilities`** — new data class (`supportsPersistence: Boolean`,
+  `supportsOsScheduling: Boolean`) with `expect fun platformBackgroundCapabilities()` so shared
+  code can query at runtime what the current platform supports without importing any
+  platform-specific module.
+
+  | Platform | `supportsPersistence` | `supportsOsScheduling` |
+  |---|:---:|:---:|
+  | Android | ✓ | ✓ |
+  | iOS | ✓ | ✓ |
+  | Desktop (JVM) | ✓ | — |
+  | Web (JS) | ✓ | — |
+  | Web (WasmJs) | — | — |
+
+- **`WorkManager` kdoc** updated to reflect actual per-platform background capabilities and
+  point to `platformBackgroundCapabilities()`.
+- **`TestWorkManager.simulateRunning(id)`** — new helper for driving RUNNING state transitions
+  in unit tests; mirrors the existing `simulateSuccess` / `simulateFailure` / `simulateProgress`.
+- 3 new tests in `WorkManagerTest` (31 total):
+  - `platformBackgroundCapabilities_returnsNonNullInstance`
+  - `platformBackgroundCapabilities_fieldsAreBooleans`
+  - `simulateRunning_transitionsToRunning`
+
+#### Compose Multiplatform (`cmp-worker-compose`)
+
+- **`BackgroundCapabilitiesBanner`** — informational `@Composable` banner that shows whether
+  Persistence and OS scheduling are available on the current platform. Accepts an explicit
+  `BackgroundCapabilities` parameter (defaults to `platformBackgroundCapabilities()`) so it can
+  be previewed or tested without a real platform.
+- **`WorkCountBadge`** — `@Composable` that overlays a numeric [Material 3 `Badge`] on any
+  icon or composable, showing the count of active (non-terminal) work items for a given tag.
+  Disappears automatically when the count reaches zero.
+- **`rememberActiveWorkCount(tag)`** — reactive `State<Int>` that counts non-terminal work
+  items for `tag`; derived from `collectWorkInfosByTagAsState`, updates as work transitions.
+- **`WorkManager.hasActiveWork(tag)`** — suspending extension that returns `true` if at least
+  one non-terminal work item with `tag` exists; useful for gating UI elements.
+- 4 new tests in `FakeWorkManagerTest` (13 total):
+  - `platformBackgroundCapabilities_isCallable`
+  - `hasActiveWork_falseWhenEmpty`
+  - `hasActiveWork_trueWhenRunningItemExists`
+  - `hasActiveWork_falseWhenAllTerminal`
+
 #### iOS (`cmp-worker-ios`)
 
 - **`IosWorkManagerConfig`** — new configuration data class (backwards-compatible; all fields have

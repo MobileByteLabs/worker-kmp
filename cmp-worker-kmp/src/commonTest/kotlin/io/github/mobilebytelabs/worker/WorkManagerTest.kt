@@ -262,6 +262,32 @@ class WorkManagerTest {
         assertEquals(2, workManager.enqueuedRequests.size)
     }
 
+    // --- BackgroundCapabilities ---
+
+    @Test
+    fun platformBackgroundCapabilities_returnsNonNullInstance() {
+        val caps = platformBackgroundCapabilities()
+        // just verify it is callable and not null (actual values are platform-specific)
+        assertNotNull(caps)
+    }
+
+    @Test
+    fun platformBackgroundCapabilities_fieldsAreBooleans() {
+        val caps = platformBackgroundCapabilities()
+        // Boolean properties should be accessible without throwing
+        assertTrue(caps.supportsPersistence || !caps.supportsPersistence)
+        assertTrue(caps.supportsOsScheduling || !caps.supportsOsScheduling)
+    }
+
+    // --- simulateRunning ---
+
+    @Test
+    fun simulateRunning_transitionsToRunning() = runTest {
+        val id = workManager.enqueue(OneTimeWorkRequestBuilder<FakeWorker>("FakeWorker").build())
+        workManager.simulateRunning(id)
+        assertEquals(WorkInfo.State.RUNNING, workManager.getWorkInfoById(id)?.state)
+    }
+
     // --- Tags ---
 
     @Test

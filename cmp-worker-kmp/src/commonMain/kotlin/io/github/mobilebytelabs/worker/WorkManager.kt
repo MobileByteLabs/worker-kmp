@@ -14,10 +14,15 @@ import kotlin.uuid.Uuid
  * (snapshot). All suspend functions are safe to call from any coroutine context.
  *
  * Platform notes:
- * - **Android** — backed by `androidx.work.WorkManager`; supports true background execution.
- * - **iOS / Web** — foreground-only; factory initialisation requires
- *   `@OptIn(ExperimentalWorkerApi::class)`.
- * - **Desktop (JVM)** — thread-pool executor; no OS scheduling integration.
+ * - **Android** — backed by `androidx.work.WorkManager`; full OS scheduling + persistence.
+ * - **iOS** — NSUserDefaults persistence by default; opt-in OS scheduling via
+ *   `BGTaskScheduler` (`enableBackgroundTasks = true` in `IosWorkManagerConfig`).
+ *   Requires `@OptIn(ExperimentalWorkerApi::class)`.
+ * - **Desktop (JVM)** — file-based persistence under `~/.worker-kmp` by default; no OS scheduling.
+ * - **Web (JS/WasmJs)** — IndexedDB persistence; opt-in Browser Background Sync API
+ *   (`enableBackgroundSync = true` in `WebWorkManagerConfig`).
+ *   Requires `@OptIn(ExperimentalWorkerApi::class)`.
+ * - Query capabilities at runtime: [platformBackgroundCapabilities].
  *
  * Example:
  * ```kotlin

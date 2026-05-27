@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkManager
+import kotlinx.coroutines.flow.first
 import kotlin.uuid.Uuid
 
 /**
@@ -46,3 +47,10 @@ fun WorkManager.collectWorkInfoByIdAsState(id: Uuid, initial: WorkInfo? = null):
     }
     return state
 }
+
+/**
+ * Returns `true` if there is at least one non-terminal work item with [tag].
+ *
+ * Suspending one-shot check; for reactive updates use [collectWorkInfosByTagAsState].
+ */
+suspend fun WorkManager.hasActiveWork(tag: String): Boolean = getWorkInfosByTag(tag).first().any { !it.isFinished }
