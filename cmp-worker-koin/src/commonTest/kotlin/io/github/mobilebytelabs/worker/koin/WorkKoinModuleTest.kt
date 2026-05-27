@@ -5,6 +5,10 @@ import io.github.mobilebytelabs.worker.OneTimeWorkRequest
 import io.github.mobilebytelabs.worker.PeriodicWorkRequest
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkManager
+import io.github.mobilebytelabs.worker.WorkManagerFactory
+import io.github.mobilebytelabs.worker.config.WorkerConfig
+import io.github.mobilebytelabs.worker.registry.WorkerRegistry
+import io.github.mobilebytelabs.worker.registry.workerRegistry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.core.context.startKoin
@@ -39,10 +43,58 @@ class WorkKoinModuleTest {
     }
 
     @Test
-    fun workKoinModule_declaresWorkManagerBinding() {
-        // workKoinModule() uses PlatformWorkManager() which needs platform config.
-        // Verify the module can be created without error — resolution happens lazily.
-        assertNotNull(workKoinModule())
+    fun workKoinModule_resolvesWorkManagerFromFactory() {
+        val stub = StubWorkManager()
+        val factory = WorkManagerFactory { _, _ -> stub }
+        val koin = startKoin {
+            modules(workKoinModule(factory = factory))
+        }.koin
+        assertNotNull(koin.get<WorkManager>())
+        assertSame(stub, koin.get<WorkManager>())
+    }
+
+    @Test
+    fun workKoinModule_workManagerIsSingleton() {
+        val stub = StubWorkManager()
+        val factory = WorkManagerFactory { _, _ -> stub }
+        val koin = startKoin {
+            modules(workKoinModule(factory = factory))
+        }.koin
+        assertSame(koin.get<WorkManager>(), koin.get<WorkManager>())
+    }
+
+    @Test
+    fun workKoinModule_invokesFactoryWithProvidedConfigAndRegistry() {
+        val stub = StubWorkManager()
+        var receivedConfig: WorkerConfig? = null
+        var receivedWorkers: WorkerRegistry? = null
+        val factory = WorkManagerFactory { config, workers ->
+            receivedConfig = config
+            receivedWorkers = workers
+            stub
+        }
+        val cfg = WorkerConfig()
+        val workers = workerRegistry { }
+        val koin = startKoin {
+            modules(workKoinModule(config = cfg, workers = workers, factory = factory))
+        }.koin
+        // Resolution triggers factory.create — assert it received our inputs.
+        koin.get<WorkManager>()
+        assertSame(cfg, receivedConfig)
+        assertSame(workers, receivedWorkers)
+    }
+
+    @Test
+    fun workKoinModule_exposesConfigAndRegistryAsSingles() {
+        val stub = StubWorkManager()
+        val factory = WorkManagerFactory { _, _ -> stub }
+        val cfg = WorkerConfig()
+        val workers = workerRegistry { }
+        val koin = startKoin {
+            modules(workKoinModule(config = cfg, workers = workers, factory = factory))
+        }.koin
+        assertSame(cfg, koin.get<WorkerConfig>())
+        assertSame(workers, koin.get<WorkerRegistry>())
     }
 }
 

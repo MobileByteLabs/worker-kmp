@@ -8,18 +8,18 @@ import io.github.mobilebytelabs.worker.CoroutineWorker
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
 import io.github.mobilebytelabs.worker.NetworkType
 import io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder
-import io.github.mobilebytelabs.worker.PeriodicWorkRequest
 import io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder
 import io.github.mobilebytelabs.worker.RetryConfig
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkProgress
 import io.github.mobilebytelabs.worker.WorkResult
 import io.github.mobilebytelabs.worker.WorkerContext
+import io.github.mobilebytelabs.worker.config.WebWorkerConfig
+import io.github.mobilebytelabs.worker.config.WorkerConfig
+import io.github.mobilebytelabs.worker.registry.workerRegistry
 import io.github.mobilebytelabs.worker.web.WebWorkManager
-import io.github.mobilebytelabs.worker.web.WebWorkManagerConfig
-import io.github.mobilebytelabs.worker.web.WebWorkerFactory
-import io.github.mobilebytelabs.worker.web.initWebWorkManager
 import io.github.mobilebytelabs.worker.web.isWebWorkManagerSupported
+import io.github.mobilebytelabs.worker.web.webWorkManagerFactory
 import io.github.mobilebytelabs.worker.workDataOf
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -32,6 +32,12 @@ import kotlin.uuid.Uuid
  * Web (Kotlin/JS + Node.js) sample — demonstrates the worker-web API.
  *
  * Run: `./gradlew :cmp-worker-sample:jsNodeRun`
+ *
+ * Refactored in v3.0.0-alpha00.X (Phase 0 deep refactor) — uses the
+ * [webWorkManagerFactory] entry point instead of the removed `initWebWorkManager(...)`.
+ * The factory is consumed by `workKoinModule(...)` for Koin-DI consumers; this sample
+ * constructs the [WebWorkManager] directly to keep the scenario list focused on the
+ * WorkManager API surface rather than DI plumbing.
  */
 fun main() {
     // Progressive enhancement check — always true in browser/Node.js JS runtimes.
@@ -45,18 +51,21 @@ fun main() {
     println("╚══════════════════════════════════════════╝")
     println()
 
-    // Use public factory function — no internal APIs needed.
-    initWebWorkManager(
-        workerFactory = WebSampleWorkerFactory,
-        config = WebWorkManagerConfig(
+    // v3.0.0-alpha00.X deep-refactored API: construct the WorkManager directly via the
+    // factory — no global PlatformWorkManager slot to read from anymore.
+    val factory = webWorkManagerFactory()
+    val config = WorkerConfig(
+        webConfig = WebWorkerConfig(
             constraintCheckIntervalMs = 100,
             enablePersistence = false, // IndexedDB not available in Node.js
         ),
     )
-
-    // Retrieve the configured manager via PlatformWorkManager.
-    // Cast to WebWorkManager so we can call shutdown() at the end.
-    val wm = io.github.mobilebytelabs.worker.PlatformWorkManager() as WebWorkManager
+    val workers = workerRegistry {
+        register<WebImageResizeWorker> { ctx -> WebImageResizeWorker(ctx) }
+        register<WebSyncWorker> { ctx -> WebSyncWorker(ctx) }
+        register<WebHeartbeatWorker> { ctx -> WebHeartbeatWorker(ctx) }
+    }
+    val wm = factory.create(config, workers) as WebWorkManager
 
     MainScope().launch {
         webScenario1_oneTimeWork(wm)
@@ -256,16 +265,5 @@ class WebHeartbeatWorker(context: WorkerContext) : CoroutineWorker(context) {
 
     companion object {
         var runCount = 0
-    }
-}
-
-// ── Worker factory ────────────────────────────────────────────────────────────
-
-private object WebSampleWorkerFactory : WebWorkerFactory {
-    override fun create(workerClass: String, context: WorkerContext): CoroutineWorker = when (workerClass) {
-        "WebImageResizeWorker" -> WebImageResizeWorker(context)
-        "WebSyncWorker" -> WebSyncWorker(context)
-        "WebHeartbeatWorker" -> WebHeartbeatWorker(context)
-        else -> error("Unknown web worker: $workerClass")
     }
 }

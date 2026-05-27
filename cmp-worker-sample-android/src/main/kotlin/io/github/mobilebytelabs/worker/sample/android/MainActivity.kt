@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,11 +27,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.mobilebytelabs.worker.OneTimeWorkRequest
-import io.github.mobilebytelabs.worker.PlatformWorkManager
+import io.github.mobilebytelabs.worker.WorkManager
 import io.github.mobilebytelabs.worker.compose.BackgroundCapabilitiesBanner
 import io.github.mobilebytelabs.worker.compose.WorkMonitorScreen
 import io.github.mobilebytelabs.worker.compose.WorkSchedulerScreen
 import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +50,9 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkerSampleScreen() {
-    val workManager = remember { PlatformWorkManager() }
+    // v3.0.0-alpha00.X deep-refactored API: resolve WorkManager from Koin rather than from
+    // a global PlatformWorkManager() — that global slot has been removed.
+    val workManager = remember { KoinJavaComponent.getKoin().get<WorkManager>() }
     val selectedTab = remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
 

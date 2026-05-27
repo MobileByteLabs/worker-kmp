@@ -12,7 +12,11 @@ import org.koin.dsl.module
  * ```kotlin
  * startKoin {
  *     modules(
- *         workKoinModule(config = WorkerConfig(), workers = workerRegistry { /* ... */ }),
+ *         workKoinModule(
+ *             config = WorkerConfig(),
+ *             workers = workerRegistry { /* ... */ },
+ *             factory = desktopWorkManagerFactory(), // or platform factory of your choice
+ *         ),
  *         workStore5KoinModule,
  *         appModule,
  *     )

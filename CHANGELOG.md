@@ -9,6 +9,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Core API
 
+#### Phase 0 deep refactor (v3.0.0-alpha00.X — per-actual clean-break)
+
+- **Per-actual `WorkManagerFactory` pattern replaces `PlatformWorkManager` global slot** —
+  **BREAKING (clean break — no v2 BC story, no `@Deprecated` grace)**. The legacy
+  `expect object PlatformWorkManager` + `PlatformWorkManager.configure(impl)` global slot,
+  and the four `initializeWorkerXxx(...)` side-effecting init functions have been REMOVED
+  outright. Replaced by a `fun interface WorkManagerFactory` in commonMain and per-platform
+  factory builders (`androidWorkManagerFactory(context)`, `iosWorkManagerFactory()`,
+  `desktopWorkManagerFactory()`, `webWorkManagerFactory()`). The factory is wired through
+  the new third parameter on `workKoinModule(config, workers, factory)`. Consumers now
+  call `startKoin` exactly once per app — no more pre-startKoin platform-init step. See
+  `MIGRATION_FROM_2_x.md`.
+- **`WorkManagerFactory`** — new commonMain `fun interface` in `io.github.mobilebytelabs.worker`.
+  `fun create(config: WorkerConfig, workers: WorkerRegistry): WorkManager`. Implementations
+  ship in each platform module; consumers obtain them via the `xxxWorkManagerFactory(...)`
+  entry-points.
+- **Per-platform sub-configs in commonMain** — new data classes `AndroidWorkerConfig`,
+  `IosWorkerConfig`, `DesktopWorkerConfig`, `WebWorkerConfig` in
+  `io.github.mobilebytelabs.worker.config`. Each mirrors the legacy platform-module config
+  field-by-field. `WorkerConfig` now nests one of each as a default-constructed property —
+  consumers declare platform tuning from commonMain without importing
+  `IosWorkManagerConfig` / `DesktopWorkManagerConfig` / `WebWorkManagerConfig`.
+- **`PlatformContext`** — role refined: remains a commonMain `expect class` with empty
+  `actual` declarations on JVM/iOS/JS/WasmJs. The originally-planned `actual typealias` to
+  `android.content.Context` was **dropped** because Kotlin Multiplatform's `expect`/`actual`
+  contract requires same-module actuals, and `cmp-worker-kmp` is a separate module from
+  `cmp-worker-android` (the latter has no Android target). The factory pattern achieves the
+  same goal (no Android imports in commonMain consumer code) without forcing the same-module
+  pair. See MIGRATION_FROM_2_x.md §4.
+- **`androidWorkManagerFactory(context, ...)`** — new top-level `fun` in
+  `cmp-worker-android` returning a `WorkManagerFactory`. Initialises `androidx.work.WorkManager`
+  with a `KmpWorkerFactory` that consults the consumer's `WorkerRegistry` (registry-first;
+  reflection fallback enabled via `WorkerConfig.androidConfig.useReflectionFactory = true`,
+  the default). Strict mode (`false`) throws on unregistered workers.
+- **`iosWorkManagerFactory()`** — new top-level `fun` in `cmp-worker-ios` (requires
+  `@OptIn(ExperimentalWorkerApi::class)`) returning a `WorkManagerFactory`. Wraps the
+  `WorkerRegistry` in a `WorkerRegistryIosAdapter` (throws on unregistered worker — iOS has
+  no reflection fallback).
+- **`desktopWorkManagerFactory()`** — new top-level `fun` in `cmp-worker-desktop` returning
+  a `WorkManagerFactory`. Threads the registry through a `ChainedDesktopWorkerFactory` that
+  consults the registry first, then falls back to `Class.forName` reflection.
+- **`webWorkManagerFactory()`** — new top-level `fun` in `cmp-worker-web` (requires
+  `@OptIn(ExperimentalWorkerApi::class)`) returning a `WorkManagerFactory`. Lives in
+  commonMain (both JS + WasmJs share the same factory body — per-target `expect`/`actual`
+  shims resolve the constraint evaluator + persistence + online watcher).
+- **Removed** — `PlatformWorkManager` (expect object + 5 platform actuals) /
+  `initializeWorkerAndroid(...)` / `initIosWorkManager(...)` /
+  `initializeWorkerDesktop(...)` / `initWebWorkManager(...)` / `KoinAndroidWorkerFactory`
+  sample-side helper / `WorkManagerProvider(workManager = PlatformWorkManager())` default.
+- **Compose** — `WorkManagerProvider(workManager: WorkManager, content)` no longer has a
+  default `workManager` value. Callers supply the `WorkManager` explicitly (typically from
+  the Koin graph via `koinInject<WorkManager>()` on commonMain or
+  `KoinJavaComponent.getKoin().get<WorkManager>()` on Android).
+- Tests refactored: `cmp-worker-koin:WorkKoinModuleTest` + `WorkKoinModuleJvmTest` now use
+  a test `WorkManagerFactory` instead of `PlatformWorkManager.configure(...)`. Two new
+  assertions cover (a) factory invocation receives the consumer-supplied config + workers,
+  and (b) `WorkerConfig` + `WorkerRegistry` are exposed as Koin singles.
+- BCV snapshots regenerated for `cmp-worker-kmp`, `cmp-worker-koin`, `cmp-worker-desktop`.
+  `cmp-worker-android` + `cmp-worker-ios` klib snapshots compile clean (klib api dump task
+  is a no-op in their gradle config — pre-existing state, not regressed).
+- Sample apps (`cmp-worker-sample-android`, `cmp-worker-sample` JVM + JS) updated to the
+  new pattern — single `startKoin` call wiring config + registry + factory.
+
+#### Phase 0 base refactor (v3.0.0-alpha00 — prior baseline retained below for history)
+
 - **`workKoinModule` val → function** — **BREAKING (source-only)**: the previously `val`-shaped
   Koin module is now a `fun` with two optional parameters. Existing call sites need a 1-line edit:
   `modules(workKoinModule, ...)` → `modules(workKoinModule(), ...)`. Binary callers (Java consumers

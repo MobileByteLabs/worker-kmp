@@ -1,14 +1,14 @@
 package io.github.mobilebytelabs.worker.sample
 
 import io.github.mobilebytelabs.worker.CoroutineWorker
-import io.github.mobilebytelabs.worker.WorkData
 import io.github.mobilebytelabs.worker.WorkManager
 import io.github.mobilebytelabs.worker.WorkResult
 import io.github.mobilebytelabs.worker.WorkerContext
-import io.github.mobilebytelabs.worker.desktop.DesktopWorkerFactory
-import io.github.mobilebytelabs.worker.desktop.initializeWorkerDesktop
+import io.github.mobilebytelabs.worker.config.WorkerConfig
+import io.github.mobilebytelabs.worker.desktop.desktopWorkManagerFactory
 import io.github.mobilebytelabs.worker.koin.workKoinModule
 import io.github.mobilebytelabs.worker.oneTimeWorkRequest
+import io.github.mobilebytelabs.worker.registry.workerRegistry
 import io.github.mobilebytelabs.worker.workDataOf
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -41,7 +41,8 @@ class KoinGreetingWorker(context: WorkerContext, private val repo: GreetingRepos
 }
 
 // ---------------------------------------------------------------------------
-// App Koin module — registers both the repository and WorkManager
+// App Koin module — only app-specific bindings now; worker registration lives
+// inside workKoinModule(workers = ...)
 // ---------------------------------------------------------------------------
 val appModule = module {
     single<GreetingRepository> { DefaultGreetingRepository() }
@@ -53,21 +54,24 @@ fun main() = runBlocking {
     println("╚══════════════════════════════════════════╝")
     println()
 
-    // 1. Init desktop WorkManager with a factory that delegates to Koin
-    initializeWorkerDesktop(
-        workerFactory = object : DesktopWorkerFactory {
-            override fun create(workerClass: String, context: WorkerContext): CoroutineWorker {
-                val koin = getKoin()
-                return when (workerClass) {
-                    "KoinGreetingWorker" -> KoinGreetingWorker(context, koin.get())
-                    else -> error("Unknown worker: $workerClass")
-                }
-            }
-        },
-    )
-
-    // 2. Start Koin with workKoinModule (provides WorkManager) + appModule (provides repo)
-    startKoin { modules(workKoinModule, appModule) }
+    // v3.0.0-alpha00.X deep-refactored API: a single startKoin call wires both the
+    // WorkManager backend (via desktopWorkManagerFactory) and the consumer registry.
+    // No more pre-startKoin initializeWorkerDesktop(...) step — that legacy entry
+    // point + the PlatformWorkManager global slot have been removed outright.
+    startKoin {
+        modules(
+            workKoinModule(
+                config = WorkerConfig(),
+                workers = workerRegistry {
+                    register<KoinGreetingWorker> { ctx ->
+                        KoinGreetingWorker(ctx, getKoin().get())
+                    }
+                },
+                factory = desktopWorkManagerFactory(),
+            ),
+            appModule,
+        )
+    }
 
     println("Koin started — WorkManager and GreetingRepository registered.")
     println()

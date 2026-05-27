@@ -6,10 +6,10 @@ package io.github.mobilebytelabs.worker.web
  * Always `true` on Kotlin/JS and Kotlin/Wasm targets (browser or Node.js).
  * Always `false` on JVM (used for test infrastructure only — no real web runtime).
  *
- * Use this for progressive enhancement before calling [initWebWorkManager]:
+ * Use this for progressive enhancement before wiring [webWorkManagerFactory] into Koin:
  * ```kotlin
  * if (isWebWorkManagerSupported()) {
- *     initWebWorkManager(workerFactory)
+ *     startKoin { modules(workKoinModule(factory = webWorkManagerFactory(), workers = ...)) }
  * } else {
  *     // Fall back to platform-native scheduling or disable background work.
  * }

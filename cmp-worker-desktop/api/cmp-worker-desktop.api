@@ -36,8 +36,7 @@ public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerCon
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerInitKt {
-	public static final fun initializeWorkerDesktop (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;)V
-	public static synthetic fun initializeWorkerDesktop$default (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;ILjava/lang/Object;)V
+	public static final fun desktopWorkManagerFactory ()Lio/github/mobilebytelabs/worker/WorkManagerFactory;
 }
 
 public abstract interface class io/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory {
