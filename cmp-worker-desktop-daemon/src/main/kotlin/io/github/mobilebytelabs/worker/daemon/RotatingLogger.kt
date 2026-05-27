@@ -50,7 +50,8 @@ internal object RotatingLogger {
                 logFile.absolutePath + ".%g",
                 MAX_BYTES,
                 MAX_FILES,
-                /* append = */ true,
+                /* append = */
+                true,
             )
             handler.formatter = SimpleLineFormatter
             handler.level = Level.ALL
@@ -59,7 +60,9 @@ internal object RotatingLogger {
             jul.addHandler(handler)
             jul.level = Level.ALL
             installed = true
-            log.i { "RotatingLogger installed at ${logFile.absolutePath}.{0..${MAX_FILES - 1}} (max ${MAX_BYTES}B each)" }
+            log.i {
+                "RotatingLogger installed at ${logFile.absolutePath}.{0..${MAX_FILES - 1}} (max ${MAX_BYTES}B each)"
+            }
         } catch (e: Exception) {
             log.w { "RotatingLogger.install failed: ${e.message} — file logging disabled, stdout only" }
         }

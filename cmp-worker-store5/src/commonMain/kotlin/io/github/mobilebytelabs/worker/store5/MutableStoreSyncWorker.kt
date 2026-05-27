@@ -43,28 +43,34 @@ public abstract class MutableStoreSyncWorker<K : Any, V : Any>(
     private val value: V,
 ) : CoroutineWorker(context) {
 
-    override suspend fun doWork(): WorkResult {
-        return runCatching {
-            val request: StoreWriteRequest<K, V, Any> = StoreWriteRequest.of(key, value)
-            mutableStore.write(request)
-        }.fold(
-            onSuccess = { response ->
-                when (response) {
-                    is StoreWriteResponse.Success -> WorkResult.success(mapWriteResponseToWorkData(response))
-                    is StoreWriteResponse.Error.Exception -> {
-                        val e = response.error
-                        if (e.isRetryable()) WorkResult.retry(e.message ?: "Store5 mutation retryable error")
-                        else WorkResult.failure(e.message ?: "Store5 mutation fatal error")
+    override suspend fun doWork(): WorkResult = runCatching {
+        val request: StoreWriteRequest<K, V, Any> = StoreWriteRequest.of(key, value)
+        mutableStore.write(request)
+    }.fold(
+        onSuccess = { response ->
+            when (response) {
+                is StoreWriteResponse.Success -> WorkResult.success(mapWriteResponseToWorkData(response))
+
+                is StoreWriteResponse.Error.Exception -> {
+                    val e = response.error
+                    if (e.isRetryable()) {
+                        WorkResult.retry(e.message ?: "Store5 mutation retryable error")
+                    } else {
+                        WorkResult.failure(e.message ?: "Store5 mutation fatal error")
                     }
-                    is StoreWriteResponse.Error.Message -> WorkResult.failure(response.message)
                 }
-            },
-            onFailure = { e ->
-                if (e.isRetryable()) WorkResult.retry(e.message ?: "Store5 mutation retryable error")
-                else WorkResult.failure(e.message ?: "Store5 mutation fatal error")
-            },
-        )
-    }
+
+                is StoreWriteResponse.Error.Message -> WorkResult.failure(response.message)
+            }
+        },
+        onFailure = { e ->
+            if (e.isRetryable()) {
+                WorkResult.retry(e.message ?: "Store5 mutation retryable error")
+            } else {
+                WorkResult.failure(e.message ?: "Store5 mutation fatal error")
+            }
+        },
+    )
 
     /**
      * Map the [MutableStore.write] success response to worker output data.

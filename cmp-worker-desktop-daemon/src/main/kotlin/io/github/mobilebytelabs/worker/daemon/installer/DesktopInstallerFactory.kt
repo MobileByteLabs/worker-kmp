@@ -28,8 +28,7 @@ private class UnsupportedOsInstaller(private val osName: String) : DesktopBackgr
     override fun install(config: DesktopBackgroundConfig): InstallResult =
         InstallResult.Failure("Unsupported OS: $osName")
 
-    override fun uninstall(appId: String): InstallResult =
-        InstallResult.Failure("Unsupported OS: $osName")
+    override fun uninstall(appId: String): InstallResult = InstallResult.Failure("Unsupported OS: $osName")
 
     override fun isInstalled(appId: String): Boolean = false
 

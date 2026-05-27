@@ -34,9 +34,12 @@ internal class WindowsTaskInstaller : DesktopBackgroundInstaller {
         val xmlFile = createTaskXml(config)
         return try {
             val proc = ProcessBuilder(
-                "schtasks", "/Create",
-                "/XML", xmlFile.absolutePath,
-                "/TN", taskName,
+                "schtasks",
+                "/Create",
+                "/XML",
+                xmlFile.absolutePath,
+                "/TN",
+                taskName,
                 "/F", // force overwrite if exists
             ).redirectErrorStream(true).start()
             val exit = proc.waitFor()
@@ -126,7 +129,9 @@ internal class WindowsTaskInstaller : DesktopBackgroundInstaller {
             append("  <Actions Context=\"Author\">\n")
             append("    <Exec>\n")
             append("      <Command>$javaCmd</Command>\n")
-            append("      <Arguments>-jar \"${config.daemonJarPath}\" --persistence-dir \"$persistenceDir\"</Arguments>\n")
+            append(
+                "      <Arguments>-jar \"${config.daemonJarPath}\" --persistence-dir \"$persistenceDir\"</Arguments>\n",
+            )
             append("    </Exec>\n")
             append("  </Actions>\n")
             append("</Task>\n")

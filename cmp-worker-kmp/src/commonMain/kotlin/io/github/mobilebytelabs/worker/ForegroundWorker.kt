@@ -153,7 +153,5 @@ public expect suspend fun runAsForeground(worker: ForegroundWorker, info: Foregr
  * Added in v3.0.0-alpha01.
  */
 @ExperimentalForegroundApi
-public class ForegroundNotSupportedException(
-    public val platform: String,
-    public val reason: String,
-) : RuntimeException("Foreground promotion not supported on $platform: $reason")
+public class ForegroundNotSupportedException(public val platform: String, public val reason: String) :
+    RuntimeException("Foreground promotion not supported on $platform: $reason")

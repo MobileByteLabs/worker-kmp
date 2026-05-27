@@ -42,15 +42,21 @@ private fun showOrCloseInJs(title: String, body: String, tag: String, progress: 
             "if(typeof Notification==='undefined')return;" +
             "if(Notification.permission!=='granted')return;" +
             "if(p>=100){" +
-            "if(typeof navigator!=='undefined' && navigator.serviceWorker && navigator.serviceWorker.ready && navigator.serviceWorker.ready.then){" +
-            "navigator.serviceWorker.ready.then(function(reg){reg.getNotifications({tag:g}).then(function(ns){ns.forEach(function(n){n.close();});});}).catch(function(){});" +
+            "if(typeof navigator!=='undefined' && navigator.serviceWorker && " +
+            "navigator.serviceWorker.ready && navigator.serviceWorker.ready.then){" +
+            "navigator.serviceWorker.ready.then(function(reg){" +
+            "reg.getNotifications({tag:g}).then(function(ns){" +
+            "ns.forEach(function(n){n.close();});" +
+            "});}).catch(function(){});" +
             "}" +
             "return;" +
             "}" +
             "var opts={body:b,tag:g,silent:true,renotify:true};" +
             "if(p>=0 && p<100){opts.body=b+' ('+p+'%)';}" +
-            "if(typeof navigator!=='undefined' && navigator.serviceWorker && navigator.serviceWorker.ready && navigator.serviceWorker.ready.then){" +
-            "navigator.serviceWorker.ready.then(function(reg){reg.showNotification(t,opts);}).catch(function(){new Notification(t,opts);});" +
+            "if(typeof navigator!=='undefined' && navigator.serviceWorker && " +
+            "navigator.serviceWorker.ready && navigator.serviceWorker.ready.then){" +
+            "navigator.serviceWorker.ready.then(function(reg){reg.showNotification(t,opts);})" +
+            ".catch(function(){new Notification(t,opts);});" +
             "}else{" +
             "new Notification(t,opts);" +
             "}" +

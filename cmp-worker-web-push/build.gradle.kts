@@ -132,7 +132,9 @@ mavenPublishing {
     )
     pom {
         name.set("worker-web-push")
-        description.set("WorkManager-equivalent for Kotlin Multiplatform — Web Push universal-browser background module")
+        description.set(
+            "WorkManager-equivalent for Kotlin Multiplatform — Web Push universal-browser background module",
+        )
         url.set("https://github.com/MobileByteLabs/worker-kmp")
         inceptionYear.set("2026")
         licenses {

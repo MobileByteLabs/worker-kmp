@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.work.ForegroundInfo as AndroidForegroundInfo
 import co.touchlab.kermit.Logger
 import io.github.mobilebytelabs.worker.ExperimentalForegroundApi
 import io.github.mobilebytelabs.worker.ForegroundInfo
@@ -17,6 +16,7 @@ import io.github.mobilebytelabs.worker.ForegroundServiceType
 import io.github.mobilebytelabs.worker.ForegroundWorker
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.uuid.Uuid
+import androidx.work.ForegroundInfo as AndroidForegroundInfo
 
 /**
  * Android-side bridge invoked reflectively by `cmp-worker-kmp`'s JVM actual of
@@ -159,18 +159,32 @@ internal fun ForegroundServiceType.toAndroidConstantOrNull(): Int? {
     val api34 = Build.VERSION.SDK_INT >= 34
     if (!api29) return null
     return when (this) {
-        ForegroundServiceType.DATA_SYNC -> if (api29) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC else null
-        ForegroundServiceType.MEDIA_PLAYBACK -> if (api29) ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK else null
-        ForegroundServiceType.MEDIA_PROJECTION -> if (api29) ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION else null
-        ForegroundServiceType.CONNECTED_DEVICE -> if (api29) ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE else null
-        ForegroundServiceType.PHONE_CALL -> if (api29) ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL else null
+        ForegroundServiceType.DATA_SYNC -> ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+
+        ForegroundServiceType.MEDIA_PLAYBACK -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+
+        ForegroundServiceType.MEDIA_PROJECTION -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+
+        ForegroundServiceType.CONNECTED_DEVICE -> ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+
+        ForegroundServiceType.PHONE_CALL -> ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
+
         ForegroundServiceType.CAMERA -> if (api30) ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA else null
+
         ForegroundServiceType.MICROPHONE -> if (api30) ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE else null
-        ForegroundServiceType.LOCATION -> if (api29) ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else null
+
+        ForegroundServiceType.LOCATION -> ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+
         ForegroundServiceType.HEALTH -> if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH else null
-        ForegroundServiceType.REMOTE_MESSAGING -> if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING else null
+
+        ForegroundServiceType.REMOTE_MESSAGING ->
+            if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING else null
+
         ForegroundServiceType.SHORT_SERVICE -> if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE else null
+
         ForegroundServiceType.SPECIAL_USE -> if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else null
-        ForegroundServiceType.SYSTEM_EXEMPTED -> if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED else null
+
+        ForegroundServiceType.SYSTEM_EXEMPTED ->
+            if (api34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED else null
     }
 }

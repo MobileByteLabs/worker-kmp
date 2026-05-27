@@ -68,7 +68,9 @@ mavenPublishing {
     )
     pom {
         name.set("worker-storeflow")
-        description.set("WorkManager-equivalent for Kotlin Multiplatform — worker-anchored Store-flow + submit-outbox bridge")
+        description.set(
+            "WorkManager-equivalent for Kotlin Multiplatform — worker-anchored Store-flow + submit-outbox bridge",
+        )
         url.set("https://github.com/MobileByteLabs/worker-kmp")
         inceptionYear.set("2026")
         licenses {

@@ -52,29 +52,20 @@ public sealed class WorkEvent {
      *   [PeriodicWorkRequestBuilder.addTag], or `null` if none.
      * @property inputData the [WorkData] supplied via `setInputData(...)`.
      */
-    public data class Enqueued(
-        override val id: Uuid,
-        public val tag: String?,
-        public val inputData: WorkData,
-    ) : WorkEvent()
+    public data class Enqueued(override val id: Uuid, public val tag: String?, public val inputData: WorkData) :
+        WorkEvent()
 
     /**
      * Work has begun executing — i.e. transitioned to [WorkInfo.State.RUNNING].
      *
      * @property attemptCount 1-indexed attempt counter; >1 indicates a retry.
      */
-    public data class Started(
-        override val id: Uuid,
-        public val attemptCount: Int,
-    ) : WorkEvent()
+    public data class Started(override val id: Uuid, public val attemptCount: Int) : WorkEvent()
 
     /**
      * Worker reported progress via [CoroutineWorker.setProgress].
      */
-    public data class Progress(
-        override val id: Uuid,
-        public val progress: WorkProgress,
-    ) : WorkEvent()
+    public data class Progress(override val id: Uuid, public val progress: WorkProgress) : WorkEvent()
 
     /**
      * Work reached a terminal state ([WorkResult.Success], [WorkResult.Failure],
@@ -83,9 +74,6 @@ public sealed class WorkEvent {
      * @property durationMs wall-clock duration from [Started] to this event;
      *   sum across retries.
      */
-    public data class Resulted(
-        override val id: Uuid,
-        public val result: WorkResult,
-        public val durationMs: Long,
-    ) : WorkEvent()
+    public data class Resulted(override val id: Uuid, public val result: WorkResult, public val durationMs: Long) :
+        WorkEvent()
 }

@@ -11,8 +11,4 @@ package io.github.mobilebytelabs.worker.webpush
  * @property p256dh BASE64URL P-256 public key for end-to-end push payload encryption.
  * @property auth BASE64URL random 16-byte auth secret for payload authentication.
  */
-public data class WebPushSubscription(
-    public val endpoint: String,
-    public val p256dh: String,
-    public val auth: String,
-)
+public data class WebPushSubscription(public val endpoint: String, public val p256dh: String, public val auth: String)

@@ -96,8 +96,7 @@ private fun ensureTrayIcon(tray: SystemTray, info: ForegroundInfo): TrayIcon =
         icon
     }
 
-private fun formatTooltip(info: ForegroundInfo): String =
-    "${info.title} — ${info.message} (${info.progress.progress}%)"
+private fun formatTooltip(info: ForegroundInfo): String = "${info.title} — ${info.message} (${info.progress.progress}%)"
 
 // ── Android bridge dispatch (reflective — keeps Android dependencies out of cmp-worker-kmp) ──
 
@@ -113,18 +112,16 @@ private fun isAndroidRuntime(): Boolean {
         vmName.contains("ART", ignoreCase = true)
 }
 
-private fun dispatchToAndroidBridge(worker: ForegroundWorker, info: ForegroundInfo): Boolean {
-    return runCatching {
-        val cls = Class.forName(ANDROID_BRIDGE_FQCN)
-        val instance = cls.getField(ANDROID_BRIDGE_INSTANCE_FIELD).get(null)
-        val method = cls.getMethod(ANDROID_BRIDGE_METHOD, ForegroundWorker::class.java, ForegroundInfo::class.java)
-        method.invoke(instance, worker, info)
-        true
-    }.getOrElse { t ->
-        Logger.withTag("worker-kmp.foreground").w(t) {
-            "Android runtime detected but $ANDROID_BRIDGE_FQCN unavailable — " +
-                "include cmp-worker-android in your dependencies for foreground tasks."
-        }
-        false
+private fun dispatchToAndroidBridge(worker: ForegroundWorker, info: ForegroundInfo): Boolean = runCatching {
+    val cls = Class.forName(ANDROID_BRIDGE_FQCN)
+    val instance = cls.getField(ANDROID_BRIDGE_INSTANCE_FIELD).get(null)
+    val method = cls.getMethod(ANDROID_BRIDGE_METHOD, ForegroundWorker::class.java, ForegroundInfo::class.java)
+    method.invoke(instance, worker, info)
+    true
+}.getOrElse { t ->
+    Logger.withTag("worker-kmp.foreground").w(t) {
+        "Android runtime detected but $ANDROID_BRIDGE_FQCN unavailable — " +
+            "include cmp-worker-android in your dependencies for foreground tasks."
     }
+    false
 }

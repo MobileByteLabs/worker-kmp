@@ -13,8 +13,10 @@ package io.github.mobilebytelabs.worker.storeflow.policy
 public enum class FetchPolicy {
     /** Emit cached data immediately (if present), then trigger a background network fetch. Default. */
     CACHE_THEN_NETWORK,
+
     /** Skip cache entirely; always fetch from network. */
     NETWORK_ONLY,
+
     /** Read only from cache; never perform a network request. */
     CACHE_ONLY,
 }

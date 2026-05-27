@@ -53,8 +53,7 @@ public actual suspend fun runAsForeground(worker: ForegroundWorker, info: Foregr
 
 private const val IOS_17 = 17
 
-internal fun parseMajorIosVersion(systemVersion: String): Int =
-    systemVersion.substringBefore('.').toIntOrNull() ?: 0
+internal fun parseMajorIosVersion(systemVersion: String): Int = systemVersion.substringBefore('.').toIntOrNull() ?: 0
 
 private fun scheduleProcessingWithNotification(info: ForegroundInfo) {
     val identifier = "worker-kmp.foreground.${info.notificationId}"
@@ -93,8 +92,7 @@ private fun postUserNotification(identifier: String, info: ForegroundInfo) {
 // Suppressed — referenced only via the deferred BGContinuedProcessingTaskRequest path,
 // retained as scaffolding for the alpha01.X.1 follow-up.
 @Suppress("UnusedPrivateMember", "unused")
-private fun nowPlus(seconds: Double): NSDate =
-    NSDate().dateByAddingTimeInterval(seconds)
+private fun nowPlus(seconds: Double): NSDate = NSDate().dateByAddingTimeInterval(seconds)
 
 @Suppress("UnusedPrivateMember", "unused")
 private fun emptyDateComponents(): NSDateComponents = NSDateComponents()

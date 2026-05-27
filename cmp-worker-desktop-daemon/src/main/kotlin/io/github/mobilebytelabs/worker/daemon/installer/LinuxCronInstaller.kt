@@ -26,41 +26,37 @@ internal class LinuxCronInstaller : DesktopBackgroundInstaller {
 
     private val log = Logger.withTag("worker-kmp-daemon")
 
-    override fun install(config: DesktopBackgroundConfig): InstallResult {
-        return try {
-            val javaCmd = config.runtimeJavaHome ?: "/usr/bin/java"
-            val marker = "# worker-kmp:${config.appId}"
-            val persistenceDir = config.resolvedPersistenceDir()
-            val newLine = "*/${config.pollIntervalMin} * * * * $javaCmd -jar ${config.daemonJarPath} " +
-                "--persistence-dir $persistenceDir $marker"
-            val existing = readCrontab().filterNot { it.endsWith(marker) }
-            val updated = existing + newLine
-            val result = writeCrontab(updated)
-            if (result.exit == 0) {
-                writeDaemonJarHash(config)
-                log.i { "LinuxCronInstaller.install: cron line added for ${config.appId}" }
-                InstallResult.Success
-            } else {
-                InstallResult.Failure("crontab write exit=${result.exit}; ${result.out}")
-            }
-        } catch (e: Exception) {
-            InstallResult.Failure("LinuxCronInstaller.install threw: ${e.message}")
+    override fun install(config: DesktopBackgroundConfig): InstallResult = try {
+        val javaCmd = config.runtimeJavaHome ?: "/usr/bin/java"
+        val marker = "# worker-kmp:${config.appId}"
+        val persistenceDir = config.resolvedPersistenceDir()
+        val newLine = "*/${config.pollIntervalMin} * * * * $javaCmd -jar ${config.daemonJarPath} " +
+            "--persistence-dir $persistenceDir $marker"
+        val existing = readCrontab().filterNot { it.endsWith(marker) }
+        val updated = existing + newLine
+        val result = writeCrontab(updated)
+        if (result.exit == 0) {
+            writeDaemonJarHash(config)
+            log.i { "LinuxCronInstaller.install: cron line added for ${config.appId}" }
+            InstallResult.Success
+        } else {
+            InstallResult.Failure("crontab write exit=${result.exit}; ${result.out}")
         }
+    } catch (e: Exception) {
+        InstallResult.Failure("LinuxCronInstaller.install threw: ${e.message}")
     }
 
-    override fun uninstall(appId: String): InstallResult {
-        return try {
-            val marker = "# worker-kmp:$appId"
-            val existing = readCrontab().filterNot { it.endsWith(marker) }
-            val result = writeCrontab(existing)
-            if (result.exit == 0) {
-                InstallResult.Success
-            } else {
-                InstallResult.Failure("crontab write exit=${result.exit}; ${result.out}")
-            }
-        } catch (e: Exception) {
-            InstallResult.Failure("LinuxCronInstaller.uninstall threw: ${e.message}")
+    override fun uninstall(appId: String): InstallResult = try {
+        val marker = "# worker-kmp:$appId"
+        val existing = readCrontab().filterNot { it.endsWith(marker) }
+        val result = writeCrontab(existing)
+        if (result.exit == 0) {
+            InstallResult.Success
+        } else {
+            InstallResult.Failure("crontab write exit=${result.exit}; ${result.out}")
         }
+    } catch (e: Exception) {
+        InstallResult.Failure("LinuxCronInstaller.uninstall threw: ${e.message}")
     }
 
     override fun isInstalled(appId: String): Boolean {
@@ -88,17 +84,18 @@ internal class LinuxCronInstaller : DesktopBackgroundInstaller {
         )
     }
 
-    private fun readCrontab(): List<String> {
-        return try {
-            val proc = ProcessBuilder("crontab", "-l").redirectErrorStream(true).start()
-            val text = proc.inputStream.bufferedReader().readText()
-            proc.waitFor()
-            // `crontab -l` exits 1 when no crontab exists; treat as empty.
-            if (text.startsWith("no crontab", ignoreCase = true)) emptyList()
-            else text.lines().filter { it.isNotBlank() }
-        } catch (_: Exception) {
+    private fun readCrontab(): List<String> = try {
+        val proc = ProcessBuilder("crontab", "-l").redirectErrorStream(true).start()
+        val text = proc.inputStream.bufferedReader().readText()
+        proc.waitFor()
+        // `crontab -l` exits 1 when no crontab exists; treat as empty.
+        if (text.startsWith("no crontab", ignoreCase = true)) {
             emptyList()
+        } else {
+            text.lines().filter { it.isNotBlank() }
         }
+    } catch (_: Exception) {
+        emptyList()
     }
 
     private data class RunOut(val exit: Int, val out: String)

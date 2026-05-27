@@ -16,7 +16,9 @@ package io.github.mobilebytelabs.worker.web
  *   still poll IndexedDB on the existing constraint-check interval).
  * - **JVM** — no-op (no browser runtime).
  */
-public expect fun openWorkerKmpBroadcastChannel(onMessage: (eventType: String, payload: String) -> Unit): WorkerKmpBroadcastSubscription
+public expect fun openWorkerKmpBroadcastChannel(
+    onMessage: (eventType: String, payload: String) -> Unit,
+): WorkerKmpBroadcastSubscription
 
 /**
  * Closeable handle returned by [openWorkerKmpBroadcastChannel]. Call [close] when the

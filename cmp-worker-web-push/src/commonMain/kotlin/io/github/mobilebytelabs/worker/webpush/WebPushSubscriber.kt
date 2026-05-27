@@ -28,7 +28,7 @@ public interface WebPushSubscriber {
     public suspend fun currentSubscription(): WebPushSubscription?
 
     public val pushSupported: Boolean
-    public val requiresPwaInstall: Boolean   // iOS Safari quirk
+    public val requiresPwaInstall: Boolean // iOS Safari quirk
 }
 
 /**

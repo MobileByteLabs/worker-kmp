@@ -59,8 +59,11 @@ public abstract class StoreFreshnessWorker<K : Any, Output : Any>(
         }.fold(
             onSuccess = { WorkResult.success(workDataOf()) },
             onFailure = { e ->
-                if (e.isRetryable()) WorkResult.retry(e.message ?: "Store5 retryable error")
-                else WorkResult.failure(e.message ?: "Store5 fatal error")
+                if (e.isRetryable()) {
+                    WorkResult.retry(e.message ?: "Store5 retryable error")
+                } else {
+                    WorkResult.failure(e.message ?: "Store5 fatal error")
+                }
             },
         )
     }
@@ -79,8 +82,11 @@ public abstract class StoreFreshnessWorker<K : Any, Output : Any>(
                     data = response.value
                     true
                 }
+
                 is StoreReadResponse.NoNewData -> true
+
                 is StoreReadResponse.Error -> true
+
                 else -> false
             }
         }

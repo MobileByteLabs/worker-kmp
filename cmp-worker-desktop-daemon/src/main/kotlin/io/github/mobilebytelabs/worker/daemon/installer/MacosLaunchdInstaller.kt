@@ -95,7 +95,9 @@ internal class MacosLaunchdInstaller : DesktopBackgroundInstaller {
         val persistenceDir = config.resolvedPersistenceDir()
         return buildString {
             append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-            append("<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n")
+            append(
+                "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n",
+            )
             append("<plist version=\"1.0\">\n")
             append("<dict>\n")
             append("    <key>Label</key><string>${config.appId}.worker-kmp</string>\n")

@@ -45,28 +45,26 @@ public abstract class StoreBackedWorker<K : Any, Output : Any>(
     private val key: K,
 ) : CoroutineWorker(context) {
 
-    override suspend fun doWork(): WorkResult {
-        return runCatching {
-            // Force fresh fetch — Store5 will bypass cache + invoke the fetcher + write back.
-            // We collect the first terminal response (Data or any Error variant) and propagate it.
-            // Loading / NoNewData / Initial are filtered out (transient signals).
-            val terminal: StoreReadResponse<Output> = store
-                .stream(StoreReadRequest.fresh(key))
-                .first { response -> response is StoreReadResponse.Data || response is StoreReadResponse.Error }
-            // requireData() returns Output on Data, and throws the underlying Throwable on
-            // any Error variant (Exception / Message / Custom) — exactly the surface we want.
-            terminal.requireData()
-        }.fold(
-            onSuccess = { output -> WorkResult.success(mapOutputToWorkData(output)) },
-            onFailure = { e ->
-                if (e.isRetryable()) {
-                    WorkResult.retry(e.message ?: "Store5 retryable error")
-                } else {
-                    WorkResult.failure(e.message ?: "Store5 fatal error")
-                }
-            },
-        )
-    }
+    override suspend fun doWork(): WorkResult = runCatching {
+        // Force fresh fetch — Store5 will bypass cache + invoke the fetcher + write back.
+        // We collect the first terminal response (Data or any Error variant) and propagate it.
+        // Loading / NoNewData / Initial are filtered out (transient signals).
+        val terminal: StoreReadResponse<Output> = store
+            .stream(StoreReadRequest.fresh(key))
+            .first { response -> response is StoreReadResponse.Data || response is StoreReadResponse.Error }
+        // requireData() returns Output on Data, and throws the underlying Throwable on
+        // any Error variant (Exception / Message / Custom) — exactly the surface we want.
+        terminal.requireData()
+    }.fold(
+        onSuccess = { output -> WorkResult.success(mapOutputToWorkData(output)) },
+        onFailure = { e ->
+            if (e.isRetryable()) {
+                WorkResult.retry(e.message ?: "Store5 retryable error")
+            } else {
+                WorkResult.failure(e.message ?: "Store5 fatal error")
+            }
+        },
+    )
 
     /**
      * Maps the freshly-loaded [Output] to [WorkData] for worker output.

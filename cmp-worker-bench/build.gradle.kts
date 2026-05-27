@@ -53,7 +53,9 @@ jmh {
     resultFormat.set(providers.gradleProperty("jmh.resultFormat").orElse("TEXT"))
     resultsFile.set(
         layout.file(
-            providers.gradleProperty("jmh.resultsFile").map { file(it) }
+            providers
+                .gradleProperty("jmh.resultsFile")
+                .map { file(it) }
                 .orElse(layout.buildDirectory.file("results/jmh/results.txt").map { it.asFile }),
         ),
     )

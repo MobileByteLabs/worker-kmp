@@ -32,7 +32,12 @@ public data class WorkerConfig(
  * Added in v3.0.0-alpha00.
  */
 public enum class LogLevel {
-    VERBOSE, DEBUG, INFO, WARN, ERROR, SILENT;
+    VERBOSE,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR,
+    SILENT,
 }
 
 /**

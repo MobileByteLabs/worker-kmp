@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Repo layout
+
+- **Samples moved to `samples/`** — `cmp-worker-sample`, `cmp-worker-sample-android`,
+  `cmp-worker-sample-ios`, and `cmp-worker-sample-hilt` are now under `samples/` at
+  repo root. Gradle paths shifted accordingly:
+  - `:cmp-worker-sample` → `:samples:cmp-worker-sample`
+  - `:cmp-worker-sample-android` → `:samples:cmp-worker-sample-android`
+  Run targets become `./gradlew :samples:cmp-worker-sample:jvmRun` etc. Internal-only
+  scaffold dirs (`cmp-worker-sample-ios`, `cmp-worker-sample-hilt`) are README-only
+  and not Gradle projects, so their move is purely filesystem (no task path change).
+  Web-push sample servers `samples/web-push-server-node` + `samples/web-push-server-ktor`
+  are untouched — they were already in `samples/`.
+
 ### Core API
 
 #### Desktop true-background daemon (Phase 8 alpha05.X)

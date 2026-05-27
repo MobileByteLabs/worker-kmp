@@ -48,20 +48,18 @@ internal class LinuxSystemdInstaller : DesktopBackgroundInstaller {
         }
     }
 
-    override fun uninstall(appId: String): InstallResult {
-        return try {
-            val unitDir = unitDir()
-            val serviceFile = File(unitDir, "$appId.worker-kmp.service")
-            val timerFile = File(unitDir, "$appId.worker-kmp.timer")
-            // Best-effort stop+disable before deleting; tolerate non-zero exit (e.g., already stopped).
-            run("systemctl", "--user", "disable", "--now", "$appId.worker-kmp.timer")
-            serviceFile.delete()
-            timerFile.delete()
-            run("systemctl", "--user", "daemon-reload")
-            InstallResult.Success
-        } catch (e: Exception) {
-            InstallResult.Failure("LinuxSystemdInstaller.uninstall threw: ${e.message}")
-        }
+    override fun uninstall(appId: String): InstallResult = try {
+        val unitDir = unitDir()
+        val serviceFile = File(unitDir, "$appId.worker-kmp.service")
+        val timerFile = File(unitDir, "$appId.worker-kmp.timer")
+        // Best-effort stop+disable before deleting; tolerate non-zero exit (e.g., already stopped).
+        run("systemctl", "--user", "disable", "--now", "$appId.worker-kmp.timer")
+        serviceFile.delete()
+        timerFile.delete()
+        run("systemctl", "--user", "daemon-reload")
+        InstallResult.Success
+    } catch (e: Exception) {
+        InstallResult.Failure("LinuxSystemdInstaller.uninstall threw: ${e.message}")
     }
 
     override fun isInstalled(appId: String): Boolean {
@@ -78,7 +76,10 @@ internal class LinuxSystemdInstaller : DesktopBackgroundInstaller {
         val cron = try {
             // `crontab -l` exits 0 (entries exist) or 1 (no crontab yet) when crontab is installed;
             // non-zero from "command not found" surfaces via IOException above.
-            ProcessBuilder("crontab", "-l").redirectErrorStream(true).start().let { it.waitFor(); true }
+            ProcessBuilder("crontab", "-l").redirectErrorStream(true).start().let {
+                it.waitFor()
+                true
+            }
         } catch (_: Exception) {
             false
         }
@@ -112,8 +113,7 @@ internal class LinuxSystemdInstaller : DesktopBackgroundInstaller {
         """.trimMargin()
     }
 
-    private fun buildTimerUnit(config: DesktopBackgroundConfig): String {
-        return """
+    private fun buildTimerUnit(config: DesktopBackgroundConfig): String = """
             |[Unit]
             |Description=worker-kmp timer for ${config.appId}
             |
@@ -125,8 +125,7 @@ internal class LinuxSystemdInstaller : DesktopBackgroundInstaller {
             |[Install]
             |WantedBy=timers.target
             |
-        """.trimMargin()
-    }
+    """.trimMargin()
 
     private fun checkLinger() {
         try {

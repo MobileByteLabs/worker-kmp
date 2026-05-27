@@ -41,9 +41,7 @@ public class WorkerRegistry internal constructor() {
      * @throws WorkerRegistryAlreadyLoadedException if invoked after Koin has loaded
      *   the registry (i.e. after workKoinModule(...) appears in startKoin's modules).
      */
-    public inline fun <reified T : CoroutineWorker> register(
-        noinline factory: (WorkerContext) -> T,
-    ) {
+    public inline fun <reified T : CoroutineWorker> register(noinline factory: (WorkerContext) -> T) {
         register(T::class.simpleName ?: error("Worker class must have simpleName"), factory)
     }
 
@@ -65,7 +63,9 @@ public class WorkerRegistry internal constructor() {
      * `cmp-worker-koin` when the module is loaded. Application code should not call this
      * directly — registrations should always happen inside the `workerRegistry { ... }` block.
      */
-    public fun lock() { locked = true }
+    public fun lock() {
+        locked = true
+    }
 
     /**
      * The set of registered FQCNs. Intended for diagnostics + Koin integration.
@@ -80,12 +80,10 @@ public class WorkerRegistry internal constructor() {
     }
 }
 
-public fun workerRegistry(block: WorkerRegistry.() -> Unit): WorkerRegistry =
-    WorkerRegistry().apply(block)
+public fun workerRegistry(block: WorkerRegistry.() -> Unit): WorkerRegistry = WorkerRegistry().apply(block)
 
-public class WorkerRegistryAlreadyLoadedException(
-    public val attemptedRegistration: String,
-) : IllegalStateException(
-    "Cannot register worker '$attemptedRegistration' after the WorkerRegistry has been loaded into Koin. " +
-        "Move all register<T>() calls into the workerRegistry { ... } block passed to workKoinModule(...).",
-)
+public class WorkerRegistryAlreadyLoadedException(public val attemptedRegistration: String) :
+    IllegalStateException(
+        "Cannot register worker '$attemptedRegistration' after the WorkerRegistry has been loaded into Koin. " +
+            "Move all register<T>() calls into the workerRegistry { ... } block passed to workKoinModule(...).",
+    )

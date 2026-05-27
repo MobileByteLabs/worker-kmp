@@ -43,7 +43,9 @@ public fun main(args: Array<String>) {
     }
 
     RotatingLogger.install(flags.persistenceDir)
-    logger.i { "Desktop daemon starting. persistence-dir=${flags.persistenceDir} max-runtime=${flags.maxRuntimeSeconds}s" }
+    logger.i {
+        "Desktop daemon starting. persistence-dir=${flags.persistenceDir} max-runtime=${flags.maxRuntimeSeconds}s"
+    }
 
     val lockFile = LockFile(flags.persistenceDir)
     if (!lockFile.tryAcquire()) {
@@ -78,10 +80,17 @@ internal fun parseFlags(args: Array<String>): DaemonFlags {
     var i = 0
     while (i < args.size) {
         when (args[i]) {
-            "--persistence-dir" -> { persistenceDir = args[++i]; logFile = "$persistenceDir/daemon.log" }
+            "--persistence-dir" -> {
+                persistenceDir = args[++i]
+                logFile = "$persistenceDir/daemon.log"
+            }
+
             "--max-runtime-seconds" -> maxRuntimeSeconds = args[++i].toInt()
+
             "--log-file" -> logFile = args[++i]
+
             "--probe" -> probe = true
+
             else -> { /* ignore unknown — forward-compatible */ }
         }
         i++
@@ -125,7 +134,9 @@ private fun runPendingWorkLoop(flags: DaemonFlags, logger: Logger) {
 
     for (file in files) {
         if (System.currentTimeMillis() > deadline) {
-            logger.w { "Deadline exceeded mid-scan; exiting (processed=${enqueued + running + succeeded + failed + cancelled + blocked} of ${files.size})." }
+            logger.w {
+                "Deadline exceeded mid-scan; exiting (processed=${enqueued + running + succeeded + failed + cancelled + blocked} of ${files.size})."
+            }
             break
         }
         val props = Properties()
@@ -139,27 +150,37 @@ private fun runPendingWorkLoop(flags: DaemonFlags, logger: Logger) {
         when (props.getProperty("state")) {
             "ENQUEUED" -> {
                 enqueued++
+                val name = file.nameWithoutExtension
                 logger.i {
-                    "ENQUEUED work ${file.nameWithoutExtension} — daemon cannot dispatch without full request payload; " +
-                        "consumer app will pick up on next launch (alpha05.X.Y schema rev will close this gap)."
+                    "ENQUEUED work $name — daemon cannot dispatch without payload; " +
+                        "consumer app picks it up on next launch (alpha05.X.Y will close the gap)."
                 }
             }
+
             "RUNNING" -> {
                 running++
                 // The consumer app crashed mid-execution. Flip back to ENQUEUED.
                 props.setProperty("state", "ENQUEUED")
                 runCatching {
-                    file.outputStream().use { props.store(it, "Healed by worker-kmp daemon (was RUNNING after consumer-app death)") }
+                    file.outputStream().use {
+                        props.store(it, "Healed by worker-kmp daemon (was RUNNING after consumer-app death)")
+                    }
                     healed++
                 }.onFailure {
                     logger.w { "Failed to heal RUNNING→ENQUEUED for ${file.name}: ${it.message}" }
                 }
             }
+
             "SUCCEEDED" -> succeeded++
+
             "FAILED" -> failed++
+
             "CANCELLED" -> cancelled++
+
             "BLOCKED" -> blocked++
+
             null -> logger.w { "Skipping file=${file.name}: no `state` property" }
+
             else -> logger.w { "Skipping file=${file.name}: unknown state=${props.getProperty("state")}" }
         }
     }

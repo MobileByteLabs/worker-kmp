@@ -63,8 +63,11 @@ private fun showNotification(title: String, body: String, tag: String) {
             "try{" +
             "if(typeof Notification==='undefined')return;" +
             "if(Notification.permission!=='granted')return;" +
-            "if(typeof navigator!=='undefined' && navigator.serviceWorker && navigator.serviceWorker.ready && navigator.serviceWorker.ready.then){" +
-            "navigator.serviceWorker.ready.then(function(reg){reg.showNotification(t,{body:b,tag:g,silent:true,renotify:true});}).catch(function(){new Notification(t,{body:b,tag:g,silent:true});});" +
+            "if(typeof navigator!=='undefined' && navigator.serviceWorker && " +
+            "navigator.serviceWorker.ready && navigator.serviceWorker.ready.then){" +
+            "navigator.serviceWorker.ready.then(function(reg){" +
+            "reg.showNotification(t,{body:b,tag:g,silent:true,renotify:true});" +
+            "}).catch(function(){new Notification(t,{body:b,tag:g,silent:true});});" +
             "}else{" +
             "new Notification(t,{body:b,tag:g,silent:true});" +
             "}" +

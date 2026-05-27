@@ -30,7 +30,9 @@ internal class JsWebPushSubscriber : WebPushSubscriber {
 
     override val pushSupported: Boolean
         get() = try {
-            js("(typeof navigator !== 'undefined') && ('serviceWorker' in navigator) && (typeof window !== 'undefined') && ('PushManager' in window)")
+            js(
+                "(typeof navigator !== 'undefined') && ('serviceWorker' in navigator) && (typeof window !== 'undefined') && ('PushManager' in window)",
+            )
                 .unsafeCast<Boolean>()
         } catch (_: Throwable) {
             false
@@ -38,7 +40,9 @@ internal class JsWebPushSubscriber : WebPushSubscriber {
 
     override val requiresPwaInstall: Boolean
         get() = try {
-            js("(typeof navigator !== 'undefined') && (/iPad|iPhone|iPod/.test(navigator.userAgent)) && !navigator.standalone")
+            js(
+                "(typeof navigator !== 'undefined') && (/iPad|iPhone|iPod/.test(navigator.userAgent)) && !navigator.standalone",
+            )
                 .unsafeCast<Boolean>()
         } catch (_: Throwable) {
             false
@@ -91,8 +95,7 @@ internal class JsWebPushSubscriber : WebPushSubscriber {
     private fun registerServiceWorker(scriptUrl: String): Promise<dynamic> =
         js("navigator.serviceWorker.register(scriptUrl)").unsafeCast<Promise<dynamic>>()
 
-    private fun ready(): Promise<dynamic> =
-        js("navigator.serviceWorker.ready").unsafeCast<Promise<dynamic>>()
+    private fun ready(): Promise<dynamic> = js("navigator.serviceWorker.ready").unsafeCast<Promise<dynamic>>()
 
     private fun getSubscription(reg: dynamic): Promise<dynamic> =
         js("reg.pushManager.getSubscription()").unsafeCast<Promise<dynamic>>()
@@ -114,9 +117,10 @@ internal class JsWebPushSubscriber : WebPushSubscriber {
         )
     }
 
-    private fun encodeArrayBufferAsBase64Url(buffer: dynamic): String =
-        js("btoa(String.fromCharCode.apply(null, new Uint8Array(buffer))).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+${'$'}/, '')")
-            .unsafeCast<String>()
+    private fun encodeArrayBufferAsBase64Url(buffer: dynamic): String = js(
+        "btoa(String.fromCharCode.apply(null, new Uint8Array(buffer))).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+${'$'}/, '')",
+    )
+        .unsafeCast<String>()
 
     private suspend fun postSubscriptionToServer(config: WebPushConfig, sub: WebPushSubscription) {
         if (config.serverEndpoint.isBlank()) {
@@ -129,7 +133,9 @@ internal class JsWebPushSubscriber : WebPushSubscriber {
             val body = """{"endpoint":"${sub.endpoint}","p256dh":"${sub.p256dh}","auth":"${sub.auth}"}"""
             val headerToken = authHeader
             // fetch() returns a Promise<Response>; we fire-and-forget (consumer may retry on its own).
-            js("fetch(endpointUrl, { method: 'POST', headers: headerToken ? { 'Content-Type': 'application/json', 'Authorization': headerToken } : { 'Content-Type': 'application/json' }, body: body })")
+            js(
+                "fetch(endpointUrl, { method: 'POST', headers: headerToken ? { 'Content-Type': 'application/json', 'Authorization': headerToken } : { 'Content-Type': 'application/json' }, body: body })",
+            )
         } catch (e: Throwable) {
             log.w { "POST subscription to ${config.serverEndpoint} failed: ${e.message}" }
         }
