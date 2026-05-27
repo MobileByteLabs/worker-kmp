@@ -15,6 +15,17 @@ plugins {
     id("io.github.mobilebytelabs.spotless")
     id("io.github.mobilebytelabs.dokka")
     id("io.github.mobilebytelabs.detekt")
+    // Phase 10 (security threat model) — CycloneDX SBOM generation for supply-chain transparency.
+    // Applied at root to aggregate a full-project SBOM via the `cyclonedxBom` task.
+    // CI consumed by .github/workflows/security-scan.yml (sbom-cyclonedx job).
+    id("org.cyclonedx.bom") version "1.10.0"
+}
+
+// Phase 10 — CycloneDX SBOM output configuration.
+// Emits build/reports/bom.json which the security-scan workflow uploads as artifact.
+tasks.named("cyclonedxBom") {
+    // Defaults are correct: JSON format at build/reports/bom.json.
+    // Future tightening (alpha04+): pin schemaVersion, restrict includeConfigs.
 }
 
 allprojects {
