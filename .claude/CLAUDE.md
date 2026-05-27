@@ -49,3 +49,31 @@ Libraries use the `cmp-{name}/` module pattern:
 - **Static Analysis**: Detekt with project baseline
 - **Testing**: JVM tests required, iOS/macOS/Linux tests when applicable
 - **CI**: All checks must pass before merge
+
+## Plan-driven development (claude-product-cycle framework)
+
+This repo is consumed by the [claude-product-cycle](https://github.com/MobileByteLabs/claude-product-cycle) framework at `workspaces/mbs/worker-kmp/`. All v3+ feature work is plan-driven through the framework.
+
+- **Plans live at:** `plan-layer/project-plans/mbs/worker-kmp/active/`
+- **Start work:** invoke the framework's `/idea-plan` → `/gap-planning-project` → `/gap-implement-project` workflow from the framework root.
+- **Methodology:** [superpowers](https://github.com/obra/superpowers) — design-first, RED→GREEN→REFACTOR, two-stage review (spec compliance + code quality), evidence before "done."
+- **PR discipline:** the PR template at `.github/PULL_REQUEST_TEMPLATE.md` enforces the methodology. Every feature PR must link to a sub-plan, declare a RED test commit, and pass both Spec + Quality reviews.
+
+See `workspaces/mbs/worker-kmp/idea-layer/idea-plan.yaml` for the canonical feature roster + release-plan.
+
+### How to start a new sub-plan
+
+1. From the framework root, ensure the session is bound: `/context-start mbs-worker-kmp`
+2. Pick the next sub-plan per the master `sub_plans:` dependency order in [`PLAN.md`](../../../../../../plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-v3-foreground-storeflow/PLAN.md).
+3. Lock the sub-plan: edit its frontmatter `status: draft → locked`.
+4. Open an isolated worktree off this repo:
+   ```bash
+   bash scripts/start-subplan.sh <full-sub-plan-slug>
+   # e.g. bash scripts/start-subplan.sh worker-kmp-v3-foreground-storeflow-01-foreground-tasks
+   ```
+   This creates a worktree at `../worker-kmp-{slug}/` on branch `feat/{slug}`.
+5. `cd` into the worktree. Execute the sub-plan's tasks in order (each task = one RED commit + one GREEN commit + optional REFACTOR).
+6. When all tasks complete: push the branch, open a PR using `.github/PULL_REQUEST_TEMPLATE.md`. Request Spec review THEN Quality review.
+7. After both reviews LGTM: merge, then mark the sub-plan frontmatter `status: locked → complete`.
+
+(The `scripts/start-subplan.sh` convenience script lands in Phase 6 Tier D.)
