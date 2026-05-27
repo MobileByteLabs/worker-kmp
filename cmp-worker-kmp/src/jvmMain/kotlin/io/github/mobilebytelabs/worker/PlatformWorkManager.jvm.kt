@@ -9,7 +9,7 @@ actual object PlatformWorkManager {
                 "Add the worker-desktop module to jvmMain dependencies.",
         )
 
-    fun configure(workManager: WorkManager) {
+    fun configure(workManager: WorkManager?) {
         _delegate = workManager
     }
 }

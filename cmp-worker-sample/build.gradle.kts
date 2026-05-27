@@ -32,6 +32,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation(project(":cmp-worker-desktop"))
+                implementation(project(":cmp-worker-koin"))
                 implementation(libs.kotlinx.coroutines.core)
             }
         }

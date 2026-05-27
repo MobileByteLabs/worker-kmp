@@ -632,6 +632,146 @@ if (caps.supportsPersistence) {
 | Web (JS) | ✓ | — |
 | Web (WasmJs) | — | — |
 
+## Dependency Injection
+
+### Koin
+
+Add the Koin integration artifact:
+
+```kotlin
+// gradle/libs.versions.toml
+worker-koin = { module = "io.github.mobilebytelabs:worker-koin", version.ref = "worker" }
+koin        = { module = "io.insert-koin:koin-core", version = "4.0.4" }
+
+// commonMain dependencies
+implementation(libs.worker.koin)
+```
+
+Then include `workKoinModule` in your Koin setup. Call the platform init **before** `startKoin`
+so that `PlatformWorkManager` is configured when the singleton is first resolved:
+
+```kotlin
+// Desktop — call before startKoin
+initializeWorkerDesktop(
+    workerFactory = object : DesktopWorkerFactory {
+        override fun create(workerClass: String, context: WorkerContext): CoroutineWorker {
+            val koin = KoinPlatform.getKoin()
+            return when (workerClass) {
+                "SyncWorker" -> SyncWorker(context, koin.get())
+                else         -> error("Unknown worker: $workerClass")
+            }
+        }
+    },
+)
+
+// Start Koin — WorkManager + your app dependencies
+startKoin {
+    modules(
+        workKoinModule,   // provides single<WorkManager> { PlatformWorkManager() }
+        appModule,        // your repositories, use-cases, etc.
+    )
+}
+
+// Anywhere in shared code — resolve WorkManager from the graph
+val workManager: WorkManager = get()   // inside a Koin component
+// or
+val workManager: WorkManager by inject()   // in a class with KoinComponent
+```
+
+**Registering workers with dependencies:**
+
+```kotlin
+// Declare workers as Koin factories — WorkerContext comes in at runtime
+val workerModule = module {
+    factory { (ctx: WorkerContext) -> SyncWorker(ctx, get<SyncRepository>()) }
+    factory { (ctx: WorkerContext) -> CacheCleanupWorker(ctx, get<CacheManager>()) }
+}
+
+// Bridge Koin to the platform factory
+initializeWorkerDesktop(
+    workerFactory = object : DesktopWorkerFactory {
+        override fun create(workerClass: String, context: WorkerContext): CoroutineWorker {
+            val koin = KoinPlatform.getKoin()
+            return when (workerClass) {
+                "SyncWorker"         -> koin.get { parametersOf(context) }
+                "CacheCleanupWorker" -> koin.get { parametersOf(context) }
+                else                 -> error("Unknown worker: $workerClass")
+            }
+        }
+    },
+)
+```
+
+---
+
+### Dagger / Hilt (Android)
+
+Hilt is Android-specific. The recommended pattern is a custom `AndroidWorkerFactory`
+that delegates to Hilt's `EntryPointAccessors`:
+
+```kotlin
+// 1. Define an entry point to expose workers from the Hilt graph
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface WorkerEntryPoint {
+    fun syncWorkerFactory(): SyncWorker.Factory
+}
+
+// 2. Implement a worker factory that looks up workers via the entry point
+class HiltWorkerFactory(private val context: Context) : AndroidWorkerFactory {
+    override fun create(workerClassName: String, ctx: WorkerContext): CoroutineWorker? {
+        val ep = EntryPointAccessors.fromApplication(context, WorkerEntryPoint::class.java)
+        return when (workerClassName) {
+            "SyncWorker" -> ep.syncWorkerFactory().create(ctx)
+            else         -> null
+        }
+    }
+}
+
+// 3. Bind WorkManager in a Hilt module
+@Module @InstallIn(SingletonComponent::class)
+abstract class WorkerBindingsModule {
+    @Binds abstract fun bindWorkerFactory(impl: HiltWorkerFactory): AndroidWorkerFactory
+}
+
+// 4. Init in Application.onCreate() — Hilt provides HiltWorkerFactory via injection
+@HiltAndroidApp
+class MyApp : Application() {
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override fun onCreate() {
+        super.onCreate()
+        initializeWorkerAndroid(
+            context       = this,
+            workerFactory = workerFactory,
+        )
+    }
+}
+```
+
+**Worker with injected dependencies:**
+
+```kotlin
+class SyncWorker(
+    context: WorkerContext,
+    private val repo: SyncRepository,
+) : CoroutineWorker(context) {
+    override suspend fun doWork(): WorkResult {
+        repo.sync()
+        return WorkResult.success()
+    }
+
+    // Hilt-assisted factory
+    class Factory @AssistedInject constructor(
+        private val repo: SyncRepository,
+    ) {
+        fun create(@Assisted context: WorkerContext) = SyncWorker(context, repo)
+    }
+}
+```
+
+---
+
 ## Testing
 
 Add the test artifact to your test source set (use the same version as your other worker artifacts):

@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Koin DI Integration (`cmp-worker-koin`) — new artifact
+
+- **`cmp-worker-koin`** — new optional artifact `io.github.mobilebytelabs:worker-koin` that
+  provides first-class Koin 4.x dependency-injection support.
+- **`workKoinModule`** — a Koin `Module` that registers `WorkManager` as a process-scoped
+  singleton backed by `PlatformWorkManager()`. Consumers include it in their `startKoin` block:
+  ```kotlin
+  startKoin { modules(workKoinModule, appModule) }
+  ```
+  Resolving `get<WorkManager>()` anywhere in the Koin graph returns the same platform-configured
+  instance without passing it by hand.
+- Targets: JVM, iOS (iosArm64 + iosSimulatorArm64), JS (IR), WasmJs — same platform matrix
+  as `worker-kmp`.
+- 6 tests in `WorkKoinModuleTest` (JVM + common): singleton semantics, override pattern,
+  `workKoinModule` object non-null, JVM platform-wired resolution, same-instance assertion.
+- **Hilt integration guide** added to README — copy-pasteable `HiltWorkerFactory`,
+  `WorkerBindingsModule`, and `@EntryPoint` pattern for Android Hilt consumers.
+- Koin worker-factory bridge pattern documented — shows how to register workers as Koin
+  `factory { (ctx: WorkerContext) -> ... }` entries and bridge them to each platform's
+  worker factory interface via `parametersOf(context)`.
+- **`KoinSampleApp`** — new runnable JVM sample (`cmp-worker-sample/jvmMain`) that demonstrates
+  the full Koin DI flow: init desktop WorkManager with a Koin-backed factory, start Koin with
+  `workKoinModule + appModule`, resolve `WorkManager` from the container, enqueue a
+  `KoinGreetingWorker` with an injected `GreetingRepository`, and observe the result.
+
 #### Common API (`cmp-worker-kmp`)
 
 - **`BackgroundCapabilities`** — new data class (`supportsPersistence: Boolean`,
