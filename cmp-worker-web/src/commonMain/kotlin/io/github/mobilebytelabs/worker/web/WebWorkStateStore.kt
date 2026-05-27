@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.uuid.Uuid
 
@@ -29,49 +30,59 @@ internal class WebWorkStateStore(
     }
 
     fun initWork(id: Uuid, tags: Set<String>) {
-        val current = store.value
-        if (current[id] != null) return
-        val info = WorkInfo(id = id, state = WorkInfo.State.ENQUEUED, tags = tags)
-        store.value = current + (id to info)
-        persist(info)
+        var added = false
+        store.update { map ->
+            if (map[id] != null) return@update map
+            added = true
+            map + (id to WorkInfo(id = id, state = WorkInfo.State.ENQUEUED, tags = tags))
+        }
+        if (added) store.value[id]?.let { persist(it) }
     }
 
     fun transitionToRunning(id: Uuid): Boolean {
-        val current = store.value
-        val info = current[id] ?: return false
-        if (info.state == WorkInfo.State.CANCELLED) return false
-        val updated = info.copy(state = WorkInfo.State.RUNNING)
-        store.value = current + (id to updated)
-        persist(updated)
-        return true
+        // Uses CAS-loop (update{}) so a concurrent cancelWorkById sets CANCELLED atomically;
+        // on retry the CANCELLED check fires and returns false rather than overwriting with RUNNING.
+        // Periodic work re-runs from SUCCEEDED state, so we only block on CANCELLED (not all states).
+        var didTransition = false
+        store.update { map ->
+            val info = map[id]
+            if (info == null || info.state == WorkInfo.State.CANCELLED) {
+                didTransition = false
+                return@update map
+            }
+            didTransition = true
+            map + (id to info.copy(state = WorkInfo.State.RUNNING))
+        }
+        if (didTransition) store.value[id]?.let { persist(it) }
+        return didTransition
     }
 
     fun updateState(id: Uuid, state: WorkInfo.State, outputData: WorkData = WorkData.EMPTY) {
-        val current = store.value
-        val info = current[id] ?: WorkInfo(id = id, state = state, outputData = outputData)
-        val updated = info.copy(state = state, outputData = outputData)
-        store.value = current + (id to updated)
+        store.update { map ->
+            val info = map[id] ?: WorkInfo(id = id, state = state, outputData = outputData)
+            map + (id to info.copy(state = state, outputData = outputData))
+        }
         if (state.isTerminal()) {
             deleteFromPersistence(id)
         } else {
-            persist(updated)
+            store.value[id]?.let { persist(it) }
         }
     }
 
     fun updateProgress(id: Uuid, progress: WorkProgress) {
-        val current = store.value
-        val info = current[id] ?: return
-        val updated = info.copy(progress = progress)
-        store.value = current + (id to updated)
-        persist(updated)
+        store.update { map ->
+            val info = map[id] ?: return@update map
+            map + (id to info.copy(progress = progress))
+        }
+        store.value[id]?.let { persist(it) }
     }
 
     fun incrementAttempt(id: Uuid) {
-        val current = store.value
-        val info = current[id] ?: return
-        val updated = info.copy(runAttemptCount = info.runAttemptCount + 1)
-        store.value = current + (id to updated)
-        persist(updated)
+        store.update { map ->
+            val info = map[id] ?: return@update map
+            map + (id to info.copy(runAttemptCount = info.runAttemptCount + 1))
+        }
+        store.value[id]?.let { persist(it) }
     }
 
     suspend fun getById(id: Uuid): WorkInfo? = store.value[id]
