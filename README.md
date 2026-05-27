@@ -13,13 +13,14 @@ A Kotlin Multiplatform background task scheduler — the `WorkManager` API you k
 | Android | `worker-android` | ✅ | ✅ via `androidx.work` | API 21 |
 | Desktop (JVM) | `worker-desktop` | ✅ | ✅ in-process | JDK 11 |
 | iOS | `worker-ios` | ✅ | ⚠️ foreground only¹ | iOS 14.0 |
-| Web (JS/WasmJs) | `worker-web` | ✅ | ⚠️ foreground only¹ | Chrome/Node |
+| Web (JS/WasmJs) | `worker-web` | ✅ | ⚠️ opt-in via Background Sync¹ | Chrome/Node |
 | Compose Multiplatform | `worker-compose` | ✅ | — | — |
 | All (common API) | `worker-kmp` | ✅ | — | — |
 
-> ¹ **iOS and Web** are marked `@ExperimentalWorkerApi`. Work runs only while the app is in the
-> foreground. Background execution (BGAppRefreshTask on iOS, Service Worker on Web) is planned
-> for a future release. Opt in at the call site with `@OptIn(ExperimentalWorkerApi::class)`.
+> ¹ **iOS** is marked `@ExperimentalWorkerApi` — work runs only while the app is in the foreground
+> (BGAppRefreshTask integration planned for a future release). **Web** is `@ExperimentalWorkerApi`
+> and supports opt-in [Browser Background Sync](#browser-background-sync) so constrained work
+> can survive tab focus changes on supported browsers. Opt in with `@OptIn(ExperimentalWorkerApi::class)`.
 
 ## Setup
 
@@ -462,9 +463,11 @@ fun main() {
                 }
         },
         config = WebWorkManagerConfig(
-            constraintCheckIntervalMs = 5_000, // how often to re-check unsatisfied constraints
-            enablePersistence = true,           // persist work state in IndexedDB
-            persistenceDbName = "my-app-worker", // override when sharing an origin with other apps
+            constraintCheckIntervalMs = 5_000,        // how often to re-check unsatisfied constraints
+            enablePersistence = true,                  // persist work state in IndexedDB
+            persistenceDbName = "my-app-worker",       // override when sharing an origin with other apps
+            enableBackgroundSync = false,              // set true to enable Browser Background Sync
+            serviceWorkerScript = "/worker-kmp-sw.js", // path to bundled SW (when enableBackgroundSync)
         ),
     )
     val wm = PlatformWorkManager()
@@ -634,7 +637,7 @@ class SyncFeatureTest {
 
 ## Web Platform
 
-The `worker-web` module targets Kotlin/JS (`jsMain`) and Kotlin/Wasm (`wasmJsMain`). Work runs in the current page or Node.js process — it is **foreground-only** (no Service Worker / background sync in the current release).
+The `worker-web` module targets Kotlin/JS (`jsMain`) and Kotlin/Wasm (`wasmJsMain`). Work runs in the current page or Node.js process. Opt-in [Browser Background Sync](#browser-background-sync) allows constrained work to survive tab focus changes on supported browsers.
 
 ### Progressive enhancement
 
@@ -657,12 +660,16 @@ if (isWebWorkManagerSupported()) {
 | `constraintCheckIntervalMs` | `5_000` | How often to re-evaluate unsatisfied constraints (ms). Lower values are more responsive but burn more CPU on battery-constrained devices. |
 | `enablePersistence` | `true` | When `true`, work state is written to IndexedDB so pending and running work survives page reloads. |
 | `persistenceDbName` | `"worker-kmp"` | IndexedDB database name. Override when multiple apps share the same origin to avoid key collisions. |
+| `enableBackgroundSync` | `false` | When `true`, registers a Background Sync tag so constrained work can be woken by the browser even across tab focus changes. Requires a Service Worker at `serviceWorkerScript`. |
+| `serviceWorkerScript` | `"/worker-kmp-sw.js"` | Path to the worker-kmp Service Worker file served by your host. Only used when `enableBackgroundSync = true`. |
 
 ```kotlin
 WebWorkManagerConfig(
     constraintCheckIntervalMs = 2_000,
     enablePersistence         = true,
     persistenceDbName         = "my-app",
+    enableBackgroundSync      = true,         // opt-in
+    serviceWorkerScript       = "/sw.js",     // default: "/worker-kmp-sw.js"
 )
 ```
 
@@ -692,6 +699,60 @@ Conservative fallback: when a browser API is unavailable (e.g. Battery Status AP
 ### Online/offline event-driven re-evaluation
 
 The constraint loop does not just poll every `constraintCheckIntervalMs`. It also wires `window.addEventListener("online", …)` and `window.addEventListener("offline", …)` so that a transition from offline → online wakes up constrained work **immediately** instead of waiting up to 5 seconds.
+
+### Browser Background Sync
+
+Enable opt-in Background Sync so the browser can wake constrained work even when your tab loses focus:
+
+```kotlin
+initWebWorkManager(
+    workerFactory = ...,
+    config = WebWorkManagerConfig(
+        enableBackgroundSync = true,
+        serviceWorkerScript  = "/worker-kmp-sw.js",
+    ),
+)
+```
+
+**Setup — serve the Service Worker file**
+
+Copy the bundled template to your web server root:
+
+```
+cmp-worker-web/src/jsMain/resources/worker-kmp-sw.js  →  public/worker-kmp-sw.js
+```
+
+Or generate it programmatically (e.g. from a Kotlin/JS `main()` that writes to disk during build):
+
+```kotlin
+import io.github.mobilebytelabs.worker.web.backgroundSyncServiceWorkerScript
+
+val swContent: String = backgroundSyncServiceWorkerScript()
+// write to file or serve dynamically
+```
+
+**How it works**
+
+1. When `WebWorkManager` encounters constrained work (e.g. `NetworkType.CONNECTED`) it registers a
+   sync tag `worker-kmp-{uuid}` via `ServiceWorkerRegistration.sync.register(tag)`.
+2. The browser fires a `sync` event in the Service Worker when connectivity is restored.
+3. The Service Worker posts `{ type: 'WORKER_KMP_SYNC', tag }` to all open window clients.
+4. `backgroundSyncFlow` receives the message and signals `awaitConstraintsSatisfied` to re-evaluate.
+
+The polling fallback and online/offline watcher remain active — Background Sync is an additional
+wake-up source, not a replacement.
+
+**Browser support for Background Sync**
+
+| Browser | Background Sync | Notes |
+|---|---|---|
+| Chrome / Edge 49+ | ✅ | Full SyncManager support |
+| Firefox | ❌ | Falls back to polling + online watcher |
+| Safari | ❌ | Falls back to polling + online watcher |
+| Node.js / WasmJs | ❌ | No SyncManager — fallback always active |
+
+`isBackgroundSyncSupported()` returns `false` when `SyncManager` is unavailable; worker-kmp
+silently falls back to polling + online-event wake-up in that case.
 
 ### Unique periodic work policies
 

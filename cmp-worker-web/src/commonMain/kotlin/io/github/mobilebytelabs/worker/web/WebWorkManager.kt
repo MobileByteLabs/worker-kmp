@@ -153,6 +153,10 @@ class WebWorkManager internal constructor(
 
     private suspend fun awaitConstraintsSatisfied(request: WorkRequest) {
         if (constraintEvaluator.evaluate(request.constraints)) return
+        val syncTag = "worker-kmp-${request.id}"
+        if (config.enableBackgroundSync) {
+            registerBackgroundSyncTag(syncTag, config.serviceWorkerScript)
+        }
         // Timer guarantees we re-check even on platforms without a network watcher.
         // Online-watcher fires immediately on network state changes, short-circuiting the timer.
         val timerFlow = flow {
@@ -161,7 +165,14 @@ class WebWorkManager internal constructor(
                 emit(Unit)
             }
         }
-        merge(timerFlow, onlineWatcher())
+        val sources = buildList {
+            add(timerFlow)
+            add(onlineWatcher())
+            if (config.enableBackgroundSync && isBackgroundSyncSupported()) {
+                add(backgroundSyncFlow(syncTag))
+            }
+        }
+        merge(*sources.toTypedArray())
             .first { constraintEvaluator.evaluate(request.constraints) }
     }
 

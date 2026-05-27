@@ -474,6 +474,57 @@ class WebWorkManagerTest {
         assertEquals(WorkInfo.State.CANCELLED, wm.getWorkInfoById(req1.id)?.state)
         wm.shutdown()
     }
+
+    // ── Background Sync ───────────────────────────────────────────────────────────
+
+    @Test
+    fun backgroundSync_isDisabled_byDefault() {
+        val config = WebWorkManagerConfig()
+        assertEquals(false, config.enableBackgroundSync)
+        assertEquals("/worker-kmp-sw.js", config.serviceWorkerScript)
+    }
+
+    @Test
+    fun backgroundSync_notSupported_onJvm() {
+        // JVM target always returns false — no ServiceWorker/SyncManager available
+        assertEquals(false, isBackgroundSyncSupported())
+    }
+
+    @Test
+    fun backgroundSync_whenNotSupported_constraintStillResolves() = runTest {
+        var evalCount = 0
+        val evaluator = WebConstraintEvaluator {
+            evalCount++
+            evalCount >= 2 // first call: constrained; second call: satisfied
+        }
+        val wm = WebWorkManager(
+            workerFactory = TestWebWorkerFactory,
+            config = WebWorkManagerConfig(
+                constraintCheckIntervalMs = 30,
+                enableBackgroundSync = true, // enabled but isBackgroundSyncSupported()=false on JVM
+            ),
+            constraintEvaluator = evaluator,
+            persistence = InMemoryWorkPersistence(),
+        )
+        val req = OneTimeWorkRequestBuilder<SuccessWebWorker>(
+            SuccessWebWorker::class.simpleName!!,
+        ).setConstraints(Constraints { setRequiredNetworkType(NetworkType.CONNECTED) })
+            .build()
+        wm.enqueue(req)
+        eventually(timeoutMs = 3_000) { wm.getWorkInfoById(req.id)?.state == WorkInfo.State.SUCCEEDED }
+        assertEquals(WorkInfo.State.SUCCEEDED, wm.getWorkInfoById(req.id)?.state)
+        wm.shutdown()
+    }
+
+    @Test
+    fun backgroundSyncServiceWorkerScript_containsSyncAndMessageHandlers() {
+        val script = backgroundSyncServiceWorkerScript()
+        assertTrue(script.contains("self.addEventListener('sync'"), "should handle sync event")
+        assertTrue(script.contains("WORKER_KMP_SYNC"), "should relay WORKER_KMP_SYNC message")
+        assertTrue(script.contains("self.addEventListener('message'"), "should handle message event")
+        assertTrue(script.contains("WORKER_KMP_PING"), "should respond to WORKER_KMP_PING")
+        assertTrue(script.contains("worker-kmp-"), "sync tag prefix must match registration")
+    }
 }
 
 // ── Test workers ──────────────────────────────────────────────────────────────

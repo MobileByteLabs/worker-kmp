@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Web (`cmp-worker-web`)
+
+- **Browser Background Sync API integration** (opt-in, `enableBackgroundSync = false` by default) —
+  when enabled, `WebWorkManager` registers a Service Worker sync tag for constrained work so the
+  browser can wake the page when connectivity is restored, even across tab focus changes.
+- `WebWorkManagerConfig.enableBackgroundSync: Boolean = false` — opt-in flag; when `true`,
+  `awaitConstraintsSatisfied` merges a third wake-up source: `backgroundSyncFlow(syncTag)`.
+- `WebWorkManagerConfig.serviceWorkerScript: String = "/worker-kmp-sw.js"` — path to the Service
+  Worker file served by the host application. Defaults to `/worker-kmp-sw.js`.
+- `backgroundSyncServiceWorkerScript(): String` — returns the worker-kmp Service Worker script as
+  a `String` so consumers can embed or serve it dynamically without copying a static `.js` resource.
+- `cmp-worker-web/src/jsMain/resources/worker-kmp-sw.js` — bundled Service Worker template; copy
+  to your web server root (or use `backgroundSyncServiceWorkerScript()` for dynamic serving).
+- `expect`/`actual` `isBackgroundSyncSupported(): Boolean` — returns `true` only on JS targets where
+  both `serviceWorker` and `SyncManager` are available; `false` on JVM and WasmJs (conservative
+  fallback to polling + online-watcher when unsupported).
+- `expect`/`actual` `backgroundSyncFlow(tag): Flow<Unit>` — `callbackFlow` that listens for
+  `postMessage` events from the Service Worker with `{ type: 'WORKER_KMP_SYNC', tag }`.
+- `expect`/`actual` `registerBackgroundSyncTag(tag, swScript)` — registers the Service Worker (if
+  not already registered) and calls `registration.sync.register(tag)`; errors are swallowed so
+  polling + online-watcher handle the constraint wait as a fallback.
+- 4 new Background Sync tests (total: 33 in `WebWorkManagerTest`):
+  - `backgroundSync_isDisabled_byDefault`
+  - `backgroundSync_notSupported_onJvm`
+  - `backgroundSync_whenNotSupported_constraintStillResolves`
+  - `backgroundSyncServiceWorkerScript_containsSyncAndMessageHandlers`
+
 ## [2.0.0] - 2026-05-26
 
 ### Added
