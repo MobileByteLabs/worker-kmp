@@ -192,7 +192,7 @@ private suspend fun DesktopWorkManager.awaitFinished(id: Uuid, timeoutMs: Long =
 
 // ── Worker factory ────────────────────────────────────────────────────────────
 
-private object SampleWorkerFactory : DesktopWorkerFactory {
+public object SampleWorkerFactory : DesktopWorkerFactory {
     override fun create(workerClass: String, context: WorkerContext): CoroutineWorker = when (workerClass) {
         "ImageResizeWorker" -> ImageResizeWorker(context)
         "DataSyncWorker" -> DataSyncWorker(context)

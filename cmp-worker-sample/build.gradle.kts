@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
 }
 
 group = "io.github.mobilebytelabs"
@@ -15,7 +17,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
         mainRun {
-            mainClass.set("io.github.mobilebytelabs.worker.sample.SampleAppKt")
+            mainClass.set("io.github.mobilebytelabs.worker.sample.ComposeSampleAppKt")
         }
     }
     js(IR) {
@@ -29,11 +31,22 @@ kotlin {
     }
 
     sourceSets {
+        commonMain {
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.material3)
+                implementation(compose.foundation)
+                implementation(compose.ui)
+            }
+        }
         jvmMain {
             dependencies {
                 implementation(project(":cmp-worker-desktop"))
+                implementation(project(":cmp-worker-compose"))
                 implementation(project(":cmp-worker-koin"))
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(compose.desktop.currentOs)
+                implementation(compose.preview)
             }
         }
         jsMain {
