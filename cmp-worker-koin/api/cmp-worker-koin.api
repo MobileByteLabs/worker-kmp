@@ -1,0 +1,4 @@
+public final class io/github/mobilebytelabs/worker/koin/WorkKoinModuleKt {
+	public static final fun getWorkKoinModule ()Lorg/koin/core/module/Module;
+}
+

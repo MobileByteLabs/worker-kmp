@@ -20,6 +20,7 @@ kotlin {
 dependencies {
     compileOnly(libs.detekt.gradlePlugin)
     compileOnly(libs.spotless.gradle)
+    compileOnly(libs.dokka.gradle)
 }
 
 tasks {
@@ -40,6 +41,11 @@ gradlePlugin {
             id = "io.github.mobilebytelabs.spotless"
             implementationClass = "SpotlessConventionPlugin"
             description = "Configures spotless code formatting for worker-kmp modules"
+        }
+        register("dokka") {
+            id = "io.github.mobilebytelabs.dokka"
+            implementationClass = "DokkaConventionPlugin"
+            description = "Configures Dokka HTML documentation for worker-kmp modules"
         }
     }
 }

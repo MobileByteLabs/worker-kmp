@@ -1,0 +1,46 @@
+public final class io/github/mobilebytelabs/worker/web/BackgroundSyncScriptKt {
+	public static final fun backgroundSyncServiceWorkerScript ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/github/mobilebytelabs/worker/WorkManager {
+	public fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;)V
+	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public final fun shutdown ()V
+}
+
+public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig {
+	public static final field Companion Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Companion;
+	public fun <init> ()V
+	public fun <init> (JZLjava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (JZLjava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (JZLjava/lang/String;ZLjava/lang/String;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;JZLjava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConstraintCheckIntervalMs ()J
+	public final fun getEnableBackgroundSync ()Z
+	public final fun getEnablePersistence ()Z
+	public final fun getPersistenceDbName ()Ljava/lang/String;
+	public final fun getServiceWorkerScript ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Companion {
+	public final fun getDEFAULT ()Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+}
+
+public final class io/github/mobilebytelabs/worker/web/WebWorkManagerSupportKt {
+	public static final fun isWebWorkManagerSupported ()Z
+}
+

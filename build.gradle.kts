@@ -7,12 +7,21 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.vanniktech.publish) apply false
+    alias(libs.plugins.binary.compatibility.validator)
+    alias(libs.plugins.dokka)
     id("io.github.mobilebytelabs.spotless")
+    id("io.github.mobilebytelabs.dokka")
     id("io.github.mobilebytelabs.detekt")
 }
 
 allprojects {
     group = "io.github.mobilebytelabs"
+}
+
+// BCV — only track public API modules (not sample or test helpers)
+apiValidation {
+    ignoredProjects += listOf("cmp-worker-sample", "cmp-worker-test")
+    nonPublicMarkers += listOf("io.github.mobilebytelabs.worker.ExperimentalWorkerApi")
 }
 
 tasks.named("check") {
