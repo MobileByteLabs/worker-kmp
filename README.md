@@ -1105,3 +1105,16 @@ You may obtain a copy of the License at
 
     https://www.apache.org/licenses/LICENSE-2.0
 ```
+
+## Plan-driven development
+
+This repo is consumed by the [claude-product-cycle](https://github.com/MobileByteLabs/claude-product-cycle) framework. All v3+ feature work is plan-driven via the framework's `worker-kmp-v3-foreground-storeflow/` epic (see `.claude/CLAUDE.md` § "Plan-driven development").
+
+To start work on a sub-plan:
+
+```bash
+bash scripts/start-subplan.sh <sub-plan-slug>
+# e.g. bash scripts/start-subplan.sh worker-kmp-v3-foreground-storeflow-01-foreground-tasks
+```
+
+PR template at `.github/PULL_REQUEST_TEMPLATE.md` enforces the two-stage review discipline (Spec compliance → Code quality).

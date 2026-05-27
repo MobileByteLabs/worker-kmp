@@ -1,47 +1,30 @@
-## Description
+This template enforces the planning-rigor methodology used by the worker-kmp v3 epic: every change is tied to a sub-plan, every fix starts with a failing test (RED→GREEN→REFACTOR), and review happens in two stages — spec first (does the diff match the plan?), quality second (is the code shippable?). Hotfixes and docs-only PRs that don't fit this shape should use `.github/pull_request_template/red-green-refactor.md` instead.
 
-<!-- Please describe your changes here -->
+## Linked plan / sub-plan
 
-## Type of Change
+- [ ] `plan-layer/project-plans/mbs/worker-kmp/active/{epic}/{NN}-{name}.md`
+- [ ] Task IDs covered: `T#-T#`
 
-<!-- Please check the relevant option -->
+## RED test commit
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Refactoring (no functional changes)
-- [ ] Build/CI changes
+- [ ] First commit on this branch is a `test:` commit with a failing test for the change
+- [ ] Test name: `<class>.<method>`
+- [ ] Commit SHA: `<paste>`
 
-## Related Issues
+## Spec review (gate 1 — required before quality review)
 
-<!-- Link to related issues using "Fixes #123" or "Closes #123" -->
+- [ ] Diff matches the sub-plan body
+- [ ] No scope creep beyond listed tasks
+- [ ] @reviewer signs off → `LGTM-SPEC`
 
-Fixes #
+## Quality review (gate 2 — required before merge)
 
-## Checklist
+- [ ] `./gradlew check` GREEN locally
+- [ ] `./gradlew spotlessCheck detekt` clean
+- [ ] kdoc complete on new public API
+- [ ] BCV snapshot updated if public API changed
+- [ ] @reviewer signs off → `LGTM-QUALITY`
 
-- [ ] My code follows the code style of this project
-- [ ] I have run `./gradlew spotlessApply` to format my code
-- [ ] I have run `./gradlew detekt` and fixed any issues
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] All new and existing tests passed
-- [ ] I have updated the documentation accordingly
-- [ ] I have added/updated KDoc comments for public APIs
+## Risk acknowledgments
 
-## Testing
-
-<!-- Describe how you tested your changes -->
-
-- [ ] Unit tests pass on JVM
-- [ ] Unit tests pass on Android
-- [ ] Unit tests pass on iOS
-- [ ] Manual testing performed
-
-## Screenshots (if applicable)
-
-<!-- Add screenshots to help explain your changes -->
-
-## Additional Notes
-
-<!-- Any additional information that reviewers should know -->
+- [ ] Read the sub-plan's `## Risk + mitigation` section; no unmitigated risks introduced
