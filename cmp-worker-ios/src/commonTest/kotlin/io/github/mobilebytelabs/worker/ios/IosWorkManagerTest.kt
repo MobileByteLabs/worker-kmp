@@ -29,7 +29,11 @@ import kotlin.uuid.Uuid
 
 class IosWorkManagerTest {
 
-    private fun workManager() = IosWorkManager(workerFactory = TestIosWorkerFactory)
+    private fun workManager(persistence: IosWorkPersistence = InMemoryIosWorkPersistence()) = IosWorkManager(
+        workerFactory = TestIosWorkerFactory,
+        config = IosWorkManagerConfig.DEFAULT,
+        persistence = persistence,
+    )
 
     @Test
     fun enqueue_returnsId() = runTest {
@@ -190,6 +194,65 @@ class IosWorkManagerTest {
         wm.enqueueUniquePeriodicWork("unique-ios", ExistingPeriodicWorkPolicy.REPLACE, req2)
         eventually { wm.getWorkInfoById(req1.id)?.isFinished == true }
         assertEquals(WorkInfo.State.CANCELLED, wm.getWorkInfoById(req1.id)?.state)
+    }
+
+    // ── Config + persistence tests ────────────────────────────────────────────
+
+    @Test
+    fun config_defaults_disableBackgroundTasksAndEnablePersistence() {
+        val config = IosWorkManagerConfig.DEFAULT
+        assertEquals(false, config.enableBackgroundTasks)
+        assertEquals("", config.bgProcessingTaskIdentifier)
+        assertEquals(true, config.enablePersistence)
+        assertEquals("worker-kmp-ios", config.persistenceKey)
+    }
+
+    @Test
+    fun config_canEnableBackgroundTasks() {
+        val config = IosWorkManagerConfig(
+            enableBackgroundTasks = true,
+            bgProcessingTaskIdentifier = "com.example.sync",
+        )
+        assertEquals(true, config.enableBackgroundTasks)
+        assertEquals("com.example.sync", config.bgProcessingTaskIdentifier)
+    }
+
+    @Test
+    fun persistence_save_isCalledOnEnqueue() = runTest {
+        val persistence = InMemoryIosWorkPersistence()
+        val wm = workManager(persistence = persistence)
+        val req = OneTimeWorkRequestBuilder<SuccessIosWorker>(
+            SuccessIosWorker::class.simpleName!!,
+        ).build()
+        wm.enqueue(req)
+        eventually { persistence.loadAll().any { it.id == req.id } }
+        assertTrue(persistence.loadAll().isNotEmpty())
+    }
+
+    @Test
+    fun persistence_restore_reEnqueuesInterruptedWork() = runTest {
+        val persistence = InMemoryIosWorkPersistence()
+        // Simulate a work item that was RUNNING when app was killed.
+        val id = kotlin.uuid.Uuid.random()
+        persistence.save(WorkInfo(id = id, state = WorkInfo.State.RUNNING, tags = setOf("sync")))
+
+        val wm = workManager(persistence = persistence)
+        // Give the restore coroutine a moment to run.
+        eventually { wm.getWorkInfoById(id) != null }
+        val restored = wm.getWorkInfoById(id)
+        // RUNNING → ENQUEUED on restore.
+        assertEquals(WorkInfo.State.ENQUEUED, restored?.state)
+    }
+
+    @Test
+    fun persistence_restore_keepsFinalStates() = runTest {
+        val persistence = InMemoryIosWorkPersistence()
+        val id = kotlin.uuid.Uuid.random()
+        persistence.save(WorkInfo(id = id, state = WorkInfo.State.SUCCEEDED, tags = emptySet()))
+
+        val wm = workManager(persistence = persistence)
+        eventually { wm.getWorkInfoById(id) != null }
+        assertEquals(WorkInfo.State.SUCCEEDED, wm.getWorkInfoById(id)?.state)
     }
 }
 

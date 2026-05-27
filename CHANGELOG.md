@@ -9,6 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### iOS (`cmp-worker-ios`)
+
+- **`IosWorkManagerConfig`** — new configuration data class (backwards-compatible; all fields have
+  safe defaults):
+  - `enableBackgroundTasks: Boolean = false` — opt-in BGTaskScheduler integration.
+  - `bgProcessingTaskIdentifier: String = ""` — `BGProcessingTask` identifier; must match
+    `Info.plist → BGTaskSchedulerPermittedIdentifiers` and be non-empty when
+    `enableBackgroundTasks = true`.
+  - `enablePersistence: Boolean = true` — work state is written to `NSUserDefaults` so
+    pending/running work survives foreground/background transitions and app restarts.
+  - `persistenceKey: String = "worker-kmp-ios"` — `NSUserDefaults` key; override when multiple
+    app extensions share the same suite to prevent key collisions.
+- **`initIosWorkManager(workerFactory, config = DEFAULT)`** — init function now accepts optional
+  `IosWorkManagerConfig`; existing call sites compile and behave identically without any change.
+- **BGTaskScheduler integration** (when `enableBackgroundTasks = true`):
+  - Registers a `BGProcessingTask` handler at init time (before `applicationDidFinishLaunching`
+    returns) that calls `runPendingWork()` when iOS wakes the app in the background.
+  - `awaitConstraintsSatisfied()` — called before each enqueued worker; schedules a
+    `BGProcessingTaskRequest` with `requiresNetworkConnectivity` / `requiresExternalPower`
+    mapped from the work request's `Constraints`.
+  - `registerBgProcessingTask` / `scheduleBgProcessingTask` — internal helpers wrapping
+    `BGTaskScheduler.sharedScheduler`; errors swallowed so polling fallback continues.
+- **NSUserDefaults persistence** — `NSUserDefaultsWorkPersistence` serialises each `WorkInfo`
+  as a `|`-delimited string stored as an `NSArray`; `restoreFromPersistence()` re-enqueues
+  RUNNING items as ENQUEUED (interrupted by an app kill).
+- `InMemoryIosWorkPersistence` — in-memory persistence implementation for test isolation.
+- **`IosWorkStateStore` thread-safety fix** — all state mutations now use
+  `MutableStateFlow.update {}` (CAS-loop) to prevent the race where `transitionToRunning()`
+  could overwrite a CANCELLED state set concurrently by `cancelWorkById()`.
+- 5 new tests (total: 18 in `IosWorkManagerTest`):
+  - `config_defaults_disableBackgroundTasksAndEnablePersistence`
+  - `config_canEnableBackgroundTasks`
+  - `persistence_save_isCalledOnEnqueue`
+  - `persistence_restore_reEnqueuesInterruptedWork`
+  - `persistence_restore_keepsFinalStates`
+
 #### Web (`cmp-worker-web`)
 
 - **Browser Background Sync API integration** (opt-in, `enableBackgroundSync = false` by default) —

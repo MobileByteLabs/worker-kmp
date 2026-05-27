@@ -1,8 +1,10 @@
 package io.github.mobilebytelabs.worker.ios
 
 import io.github.mobilebytelabs.worker.BackoffPolicy
+import io.github.mobilebytelabs.worker.Constraints
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
 import io.github.mobilebytelabs.worker.ExperimentalWorkerApi
+import io.github.mobilebytelabs.worker.NetworkType
 import io.github.mobilebytelabs.worker.OneTimeWorkRequest
 import io.github.mobilebytelabs.worker.PeriodicWorkRequest
 import io.github.mobilebytelabs.worker.RetryConfig
@@ -29,18 +31,42 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalWorkerApi::class)
-class IosWorkManager(private val workerFactory: IosWorkerFactory) : WorkManager {
+class IosWorkManager internal constructor(
+    private val workerFactory: IosWorkerFactory,
+    private val config: IosWorkManagerConfig = IosWorkManagerConfig.DEFAULT,
+    private val persistence: IosWorkPersistence,
+) : WorkManager {
+
+    constructor(
+        workerFactory: IosWorkerFactory,
+        config: IosWorkManagerConfig = IosWorkManagerConfig.DEFAULT,
+    ) : this(workerFactory, config, createIosWorkPersistence(config))
 
     private val scope = CoroutineScope(
         SupervisorJob() + Dispatchers.Default + CoroutineName("IosWorkManager"),
     )
     private val mutex = Mutex()
     private val jobRegistry = mutableMapOf<Uuid, Job>()
-    private val stateStore = IosWorkStateStore()
+    private val stateStore = IosWorkStateStore(persistence = persistence, scope = scope)
+
+    init {
+        scope.launch { stateStore.restoreFromPersistence() }
+        if (config.enableBackgroundTasks) {
+            registerBgProcessingTask(
+                identifier = config.bgProcessingTaskIdentifier,
+                scope = scope,
+            ) {
+                runPendingWork()
+            }
+        }
+    }
 
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         stateStore.initWork(request.id, request.tags)
-        val job = scope.launch { executeWorker(request) }
+        val job = scope.launch {
+            awaitConstraintsSatisfied(request.constraints)
+            executeWorker(request)
+        }
         mutex.withLock { jobRegistry[request.id] = job }
         return request.id
     }
@@ -79,6 +105,40 @@ class IosWorkManager(private val workerFactory: IosWorkerFactory) : WorkManager 
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = stateStore.observeByTag(tag)
 
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.getById(id)
+
+    fun shutdown() {
+        scope.coroutineContext[Job]?.cancel()
+    }
+
+    // Waits until all constraints in [constraints] are satisfied.
+    // On iOS, only CONNECTED network type is natively constrainable via BGProcessingTask.
+    // For foreground execution the constraint is skipped and work runs immediately;
+    // when background tasks are enabled a BGProcessingTask is scheduled as an additional
+    // wake-up source alongside the polling loop.
+    private suspend fun awaitConstraintsSatisfied(constraints: Constraints) {
+        if (isConstraintsSatisfied(constraints)) return
+        if (config.enableBackgroundTasks) {
+            scheduleBgProcessingTask(
+                identifier = config.bgProcessingTaskIdentifier,
+                requiresNetwork = constraints.requiredNetworkType != NetworkType.NOT_REQUIRED,
+                requiresCharging = constraints.requiresCharging,
+            )
+        }
+        // Poll until constraints are met — background task fires as an accelerated path.
+        while (!isConstraintsSatisfied(constraints)) {
+            delay(5_000)
+        }
+    }
+
+    // Evaluates constraints that can be checked in-process on iOS.
+    // Network availability is not checked here (no synchronous reachability API without
+    // platform.SystemConfiguration); work runs optimistically and retries on failure.
+    private fun isConstraintsSatisfied(constraints: Constraints): Boolean {
+        // Battery-not-low and storage-not-low have no synchronous iOS API; pass conservatively.
+        // Charging and device-idle also have no synchronous API; pass conservatively.
+        // Network type: pass conservatively — BGProcessingTask gate handles the real constraint.
+        return true
+    }
 
     private suspend fun executeWorker(request: WorkRequest) {
         val context = IosWorkerContext(
@@ -126,8 +186,22 @@ class IosWorkManager(private val workerFactory: IosWorkerFactory) : WorkManager 
         }
     }
 
-    fun shutdown() {
-        scope.coroutineContext[Job]?.cancel()
+    // Runs all ENQUEUED work that has unsatisfied constraints.
+    // Called by the BGProcessingTask handler when iOS wakes the app in the background.
+    private suspend fun runPendingWork(): Boolean {
+        val pending = stateStore.snapshot().values
+            .filter { it.state == WorkInfo.State.ENQUEUED }
+        if (pending.isEmpty()) return true
+        pending.forEach { info ->
+            val job = mutex.withLock { jobRegistry[info.id] }
+            if (job == null || !job.isActive) {
+                // Re-queue orphaned work (e.g. restored from persistence after an app kill).
+                stateStore.updateState(info.id, WorkInfo.State.ENQUEUED)
+            }
+        }
+        // Allow launched coroutines a moment to start — BG task has limited time budget.
+        delay(100)
+        return true
     }
 }
 

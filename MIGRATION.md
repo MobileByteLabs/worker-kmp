@@ -172,7 +172,7 @@ BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.example.sync", using
     self.handleSyncTask(task as! BGProcessingTask)
 }
 
-// After — Kotlin (shared module, called from Swift AppDelegate)
+// After — Kotlin (shared module, called from Swift AppDelegate before didFinishLaunching returns)
 @OptIn(ExperimentalWorkerApi::class)
 fun initApp() {
     initIosWorkManager(
@@ -182,7 +182,11 @@ fun initApp() {
                     "SyncWorker" -> SyncWorker(context)
                     else         -> null
                 }
-        }
+        },
+        config = IosWorkManagerConfig(
+            enableBackgroundTasks      = true,
+            bgProcessingTaskIdentifier = "com.example.sync",  // must match Info.plist
+        ),
     )
 }
 ```

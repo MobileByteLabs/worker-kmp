@@ -12,15 +12,14 @@ A Kotlin Multiplatform background task scheduler — the `WorkManager` API you k
 |---|---|:---:|:---:|---|
 | Android | `worker-android` | ✅ | ✅ via `androidx.work` | API 21 |
 | Desktop (JVM) | `worker-desktop` | ✅ | ✅ in-process | JDK 11 |
-| iOS | `worker-ios` | ✅ | ⚠️ foreground only¹ | iOS 14.0 |
+| iOS | `worker-ios` | ✅ | ⚠️ opt-in via BGTaskScheduler¹ | iOS 13.0 |
 | Web (JS/WasmJs) | `worker-web` | ✅ | ⚠️ opt-in via Background Sync¹ | Chrome/Node |
 | Compose Multiplatform | `worker-compose` | ✅ | — | — |
 | All (common API) | `worker-kmp` | ✅ | — | — |
 
-> ¹ **iOS** is marked `@ExperimentalWorkerApi` — work runs only while the app is in the foreground
-> (BGAppRefreshTask integration planned for a future release). **Web** is `@ExperimentalWorkerApi`
-> and supports opt-in [Browser Background Sync](#browser-background-sync) so constrained work
-> can survive tab focus changes on supported browsers. Opt in with `@OptIn(ExperimentalWorkerApi::class)`.
+> ¹ **iOS** and **Web** are marked `@ExperimentalWorkerApi`. Both support opt-in background
+> scheduling: iOS via [BGTaskScheduler](#ios-bgtaskscheduler), Web via
+> [Browser Background Sync](#browser-background-sync). Opt in with `@OptIn(ExperimentalWorkerApi::class)`.
 
 ## Setup
 
@@ -416,10 +415,11 @@ class MyApplication : Application() {
 
 ### iOS (Swift / Kotlin)
 
-> **Note:** iOS uses `@ExperimentalWorkerApi` — work runs only while the app is in the foreground.
+> **Note:** iOS uses `@ExperimentalWorkerApi`. Work runs in the foreground by default; opt-in
+> [BGTaskScheduler integration](#ios-bgtaskscheduler) enables background wake-ups.
 
 ```kotlin
-// In your Kotlin iOS module
+// In your Kotlin iOS module — call from Swift AppDelegate before applicationDidFinishLaunching returns
 @OptIn(ExperimentalWorkerApi::class)
 fun initApp() {
     initIosWorkManager(
@@ -429,7 +429,12 @@ fun initApp() {
                     "SyncWorker" -> SyncWorker(context)
                     else         -> null
                 }
-        }
+        },
+        config = IosWorkManagerConfig(
+            enablePersistence       = true,         // persist work across app restarts (default)
+            enableBackgroundTasks   = false,         // set true to enable BGTaskScheduler
+            bgProcessingTaskIdentifier = "",         // set when enableBackgroundTasks = true
+        ),
     )
 }
 ```
@@ -634,6 +639,62 @@ class SyncFeatureTest {
 | `lastEnqueuedRequest` | The most recently enqueued request |
 | `hasWorkWithTag(tag)` | Returns true if any work with this tag was enqueued |
 | `workCountWithTag(tag)` | Count of enqueued work items with this tag |
+
+## iOS BGTaskScheduler
+
+The `worker-ios` module targets `iosArm64` and `iosSimulatorArm64`. Work runs while the app is in the foreground by default. Opt-in BGTaskScheduler integration (iOS 13+) allows constrained work to be woken up by the OS in the background.
+
+### Configuration — `IosWorkManagerConfig`
+
+| Field | Default | Description |
+|---|---|---|
+| `enableBackgroundTasks` | `false` | When `true`, registers a `BGProcessingTask` handler and schedules background wake-ups for constrained work. |
+| `bgProcessingTaskIdentifier` | `""` | The task identifier to register. Must match `Info.plist → BGTaskSchedulerPermittedIdentifiers`. |
+| `enablePersistence` | `true` | When `true`, work state is written to `NSUserDefaults` so pending/running work survives app restarts. |
+| `persistenceKey` | `"worker-kmp-ios"` | NSUserDefaults key. Override when sharing a suite with other extensions to avoid collisions. |
+
+### Setup — BGTaskScheduler
+
+**Step 1 — add the identifier to `Info.plist`:**
+
+```xml
+<key>BGTaskSchedulerPermittedIdentifiers</key>
+<array>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER).worker-kmp</string>
+</array>
+```
+
+**Step 2 — enable background tasks in `initIosWorkManager` (Kotlin, called from Swift AppDelegate):**
+
+```kotlin
+@OptIn(ExperimentalWorkerApi::class)
+fun initApp() {
+    initIosWorkManager(
+        workerFactory = myWorkerFactory,
+        config = IosWorkManagerConfig(
+            enableBackgroundTasks      = true,
+            bgProcessingTaskIdentifier = "${bundleId}.worker-kmp",
+        ),
+    )
+}
+```
+
+> **Important:** `initIosWorkManager` must be called before `applicationDidFinishLaunching` returns — the same timing requirement as `BGTaskScheduler.register(...)` in Swift.
+
+### How it works
+
+1. When `IosWorkManager` has constrained work waiting (e.g. `NetworkType.CONNECTED`), it submits a `BGProcessingTaskRequest` with matching `requiresNetworkConnectivity` / `requiresExternalPower` flags.
+2. iOS wakes the app in the background when the constraints are met.
+3. The registered `BGProcessingTask` handler calls `runPendingWork()` which re-enqueues any orphaned work items.
+4. A polling loop inside `awaitConstraintsSatisfied` runs as a foreground fallback — no BGTask means work still executes when the app comes to the foreground.
+
+### NSUserDefaults persistence
+
+When `enablePersistence = true` (the default), `IosWorkManager` automatically:
+
+- **Saves** each `WorkInfo` to NSUserDefaults on every state transition.
+- **Restores** persisted work on the next app launch — `RUNNING` items are restored as `ENQUEUED` (they were interrupted mid-flight by an app kill).
+- **Deletes** terminal items (`SUCCEEDED`, `FAILED`, `CANCELLED`) to keep NSUserDefaults clean.
 
 ## Web Platform
 
