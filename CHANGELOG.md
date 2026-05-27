@@ -88,6 +88,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - CycloneDX SBOM Gradle plugin (`org.cyclonedx.bom` v1.10.0) registered at root build.gradle.kts. `./gradlew cyclonedxBom` produces `build/reports/bom.json`.
 
+### Release process + samples
+
+- **`RELEASE.md`** — process doc for v3.0.0-beta01 → rc1 → rc2 → GA progression. Per Phase 14 of the v3.0.0 epic.
+- **`POSTMORTEM_TEMPLATE.md`** — template for post-release retros (within 14 days of GA per Phase 14).
+- **`.github/ISSUE_TEMPLATE/v3-beta-feedback.md`** — community feedback during beta/RC burn-in.
+- **`cmp-worker-sample-ios/`** — scaffold dir + Info.plist guidance. Full Xcode project at v3.0.0-alpha07.
+- **`cmp-worker-sample-hilt/`** — scaffold dir + Hilt integration pattern doc. Full Android APK at v3.0.0-alpha07.
+- **`cmp-worker-sample/WEB_BROWSER.md`** — marks the alpha07 wasmJsBrowserMain Compose-for-Web sample path.
+
 ## [2.1.0] - 2026-05-27
 
 ### Infrastructure
