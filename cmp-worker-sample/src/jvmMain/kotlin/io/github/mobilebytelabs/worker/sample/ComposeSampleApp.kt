@@ -12,8 +12,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +36,7 @@ import java.io.File
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
-        title = "worker-kmp Compose Desktop Demo"
+        title = "worker-kmp Compose Desktop Demo",
     ) {
         ComposeSampleApp()
     }
@@ -48,7 +48,7 @@ fun ComposeSampleApp() {
     val workManager = remember {
         DesktopWorkManager(
             config = DesktopWorkManagerConfig(
-                persistencePath = File(System.getProperty("user.home")).resolve(".worker-sample")
+                persistencePath = File(System.getProperty("user.home")).resolve(".worker-sample"),
             ),
             workerFactory = SampleWorkerFactory,
         )
@@ -60,18 +60,18 @@ fun ComposeSampleApp() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("worker-kmp Compose Desktop Demo") }
+                title = { Text("worker-kmp Compose Desktop Demo") },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(16.dp),
         ) {
             BackgroundCapabilitiesBanner(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -89,8 +89,9 @@ fun ComposeSampleApp() {
                                     workManager.enqueue(workRequest as OneTimeWorkRequest)
                                 }
                             }
-                        }
+                        },
                     )
+
                     1 -> WorkMonitorScreen(tag = "sample-work")
                 }
             }
@@ -106,7 +107,7 @@ private fun TabBar(selected: Int, onTabSelected: (Int) -> Unit) {
             Tab(
                 selected = selected == index,
                 onClick = { onTabSelected(index) },
-                text = { Text(title) }
+                text = { Text(title) },
             )
         }
     }

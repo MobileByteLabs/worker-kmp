@@ -55,13 +55,13 @@ fun WorkerSampleScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("worker-kmp Android Sample") }) }
+        topBar = { TopAppBar(title = { Text("worker-kmp Android Sample") }) },
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp),
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -74,7 +74,7 @@ fun WorkerSampleScreen() {
                     Tab(
                         selected = selectedTab.value == i,
                         onClick = { selectedTab.value = i },
-                        text = { Text(title) }
+                        text = { Text(title) },
                     )
                 }
             }
@@ -88,8 +88,9 @@ fun WorkerSampleScreen() {
                             coroutineScope.launch {
                                 workManager.enqueue(request as OneTimeWorkRequest)
                             }
-                        }
+                        },
                     )
+
                     1 -> WorkMonitorScreen(tag = "sample-work")
                 }
             }
