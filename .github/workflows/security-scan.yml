@@ -1,0 +1,119 @@
+# Security Scan Workflow — Phase 10 security threat model + STRIDE
+#
+# Runs on every PR + push to development/main, plus weekly Monday 06:00 UTC.
+# Jobs:
+#   1. owasp-dependency-check — CVE scanning via Gradle dependencyCheckAggregate
+#   2. gitleaks               — Secret scanner across full git history
+#   3. sbom-cyclonedx         — CycloneDX SBOM generation for supply-chain transparency
+#   4. npm-audit-samples      — npm audit for Web Push server samples (conditional)
+#
+# Commented-out placeholders (T36/T37) document upcoming phases:
+#   - daemon-jar-integrity   (enabled at v3.0.0-alpha05 with Phase 8)
+#   - service-worker-static  (enabled at v3.0.0-alpha06 with Phase 9)
+
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [ development, main ]
+  push:
+    branches: [ development, main ]
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 06:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  owasp-dependency-check:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Run OWASP dependencyCheckAggregate
+        run: ./gradlew dependencyCheckAggregate --no-daemon --info
+        continue-on-error: true  # OWASP can be flaky on transient network — don't block PR
+      - name: Upload OWASP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-dependency-check-report
+          path: build/reports/dependency-check-report.html
+
+  gitleaks:
+    name: Gitleaks secret scanner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sbom-cyclonedx:
+    name: SBOM (CycloneDX)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Generate CycloneDX SBOM
+        run: ./gradlew cyclonedxBom --no-daemon
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: build/reports/bom.json
+
+  npm-audit-samples:
+    name: npm audit (Web Push server samples)
+    runs-on: ubuntu-latest
+    if: hashFiles('samples/web-push-server-node/package.json') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: npm audit
+        working-directory: samples/web-push-server-node
+        run: npm audit --audit-level=high
+        continue-on-error: true  # warn, don't block
+
+  security-doc-coverage:
+    name: SECURITY.md surface coverage gate
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Verify SECURITY.md updated on surface change
+        run: bash scripts/security-doc-coverage.sh origin/${{ github.base_ref }} HEAD
+
+  # daemon-jar-integrity:
+  #   name: Desktop daemon JAR integrity tests
+  #   runs-on: ubuntu-latest
+  #   # ENABLED at v3.0.0-alpha05 when Phase 8 lands cmp-worker-desktop-daemon.
+  #   # See Phase 10 plan Tier I T36 + Phase 8 plan Tier I CI.
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - run: ./gradlew :cmp-worker-desktop-daemon:test
+
+  # service-worker-static-check:
+  #   name: Web Push SW static analysis (no-eval, no-document-write)
+  #   runs-on: ubuntu-latest
+  #   # ENABLED at v3.0.0-alpha06 when Phase 9 lands cmp-worker-web-push + worker-kmp-sw.js
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-node@v4
+  #     - run: npx eslint --config cmp-worker-web/src/jsMain/eslint.config.js cmp-worker-web/src/jsMain/resources/worker-kmp-sw.js

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **STRIDE threat model** — `SECURITY.md` (28-row matrix) + `SECURITY_ASSUMPTIONS.md` (trust assumptions) + `THREAT_MODEL_TEMPLATE.md` (consumer-extension template) land at the source repo root. Per Phase 10 of the worker-kmp v3.0.0 epic.
+- **CI security-scan workflow** — `.github/workflows/security-scan.yml` runs 4 active jobs on every PR + weekly Monday 06:00 UTC: OWASP dependency-check (continue-on-error), gitleaks secret scanner, CycloneDX SBOM generation (org.cyclonedx.bom v1.10.0 Gradle plugin), npm audit (web-push-server-node sample). 2 placeholder jobs (daemon JAR integrity at v3.0.0-alpha05; Service Worker static check at v3.0.0-alpha06) reserved for Phase 8 + Phase 9.
+- **SECURITY.md surface-coverage CI gate** — `scripts/security-doc-coverage.sh` + workflow job fails CI when an attack-surface directory is touched without a corresponding SECURITY.md row update.
+- **PR template `## Security review` section** — `.github/PULL_REQUEST_TEMPLATE.md` gains a checkbox section between Spec + Quality review stages. Required when attack surface touched.
+
+### Internal
+
+- CycloneDX SBOM Gradle plugin (`org.cyclonedx.bom` v1.10.0) registered at root build.gradle.kts. `./gradlew cyclonedxBom` produces `build/reports/bom.json`.
+
 ## [2.1.0] - 2026-05-27
 
 ### Infrastructure
