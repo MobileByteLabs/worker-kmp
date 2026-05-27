@@ -38,14 +38,17 @@ import io.github.mobilebytelabs.worker.registry.WorkerRegistry
  */
 @ExperimentalWorkerApi
 public fun iosWorkManagerFactory(): WorkManagerFactory = WorkManagerFactory { config, workers ->
+    val iosConfig = IosWorkManagerConfig(
+        enableBackgroundTasks = config.iosConfig.enableBackgroundTasks,
+        bgProcessingTaskIdentifier = config.iosConfig.bgProcessingTaskIdentifier,
+        enablePersistence = config.iosConfig.enablePersistence,
+        persistenceKey = config.iosConfig.persistenceKey,
+        appRefreshTaskIdentifier = config.iosConfig.appRefreshTaskIdentifier,
+    )
+    validateInfoPlist(iosConfig)
     IosWorkManager(
         workerFactory = WorkerRegistryIosAdapter(workers),
-        config = IosWorkManagerConfig(
-            enableBackgroundTasks = config.iosConfig.enableBackgroundTasks,
-            bgProcessingTaskIdentifier = config.iosConfig.bgProcessingTaskIdentifier,
-            enablePersistence = config.iosConfig.enablePersistence,
-            persistenceKey = config.iosConfig.persistenceKey,
-        ),
+        config = iosConfig,
     )
 }
 

@@ -64,6 +64,8 @@ class IosWorkManager internal constructor(
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         stateStore.initWork(request.id, request.tags)
         val job = scope.launch {
+            val delayMs = request.initialDelay.inWholeMilliseconds
+            if (delayMs > 0) delay(delayMs)
             awaitConstraintsSatisfied(request.constraints)
             executeWorker(request)
         }
@@ -80,7 +82,19 @@ class IosWorkManager internal constructor(
             cancelAllWorkByTag(uniqueWorkName)
         }
         stateStore.initWork(request.id, request.tags + uniqueWorkName)
+        // quickRefresh: schedule BGAppRefreshTaskRequest instead of BGProcessingTaskRequest.
+        if (request.quickRefresh &&
+            config.enableBackgroundTasks &&
+            config.appRefreshTaskIdentifier.isNotEmpty()
+        ) {
+            scheduleBgAppRefreshTask(
+                identifier = config.appRefreshTaskIdentifier,
+                earliestBeginInSeconds = request.initialDelay.inWholeMilliseconds / 1000.0,
+            )
+        }
         val job = scope.launch {
+            val delayMs = request.initialDelay.inWholeMilliseconds
+            if (delayMs > 0) delay(delayMs)
             while (isActive) {
                 executeWorker(request)
                 delay(request.repeatInterval.inWholeMilliseconds)

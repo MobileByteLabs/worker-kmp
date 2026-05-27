@@ -7,6 +7,126 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Core API
+
+#### Phase 1 alpha01.X — real foreground impls (v3.0.0-alpha01.X)
+
+Replaces the log-only `runAsForeground` stubs from alpha01 with platform-native
+implementations across all 5 target platforms (Android via cmp-worker-android,
+iOS, Desktop/JVM, JS, WasmJs).
+
+- **Desktop (JVM)** — `cmp-worker-kmp/src/jvmMain/.../ForegroundWorker.jvm.kt`:
+  surfaces foreground tasks via `java.awt.SystemTray`. Per-`notificationId` icon
+  reuse (matches Android's notificationId semantics), tooltip updates with
+  `title — message (progress%)`, automatic icon removal at `progress >= 100`.
+  Graceful degradation to log-only WARN when `SystemTray.isSupported()` is false
+  (headless JVM, missing `java.desktop`, JLink images).
+- **iOS** — `cmp-worker-kmp/src/iosMain/.../ForegroundWorker.ios.kt`:
+  schedules `BGProcessingTaskRequest` to extend the app's background lifetime
+  AND posts a `UNNotification` for user visibility. Detects iOS version via
+  `UIDevice.currentDevice.systemVersion`; routes iOS 17+ consumers through the
+  same shim path until Kotlin/Native ships a `BGContinuedProcessingTaskRequest`
+  binding (tracked for alpha01.X.1 follow-up).
+- **JS** — `cmp-worker-kmp/src/jsMain/.../ForegroundWorker.js.kt`: requests
+  Notification permission idempotently, posts progress-bearing tag-de-duped
+  notifications. Routes through `ServiceWorker.showNotification()` when an SW
+  is registered for better browser eviction resistance; otherwise uses the
+  page-scope `new Notification(...)` API.
+- **WasmJs** — `cmp-worker-kmp/src/wasmJsMain/.../ForegroundWorker.wasmJs.kt`:
+  mirrors the JS behaviour via `@JsFun`-bound interop helpers.
+- **Android** — `cmp-worker-android/.../AndroidForegroundBridge.kt` (new):
+  Android-side hook that performs the actual `setForegroundAsync` call on
+  `androidx.work.CoroutineWorker`. Builds a `NotificationCompat` notification
+  on a worker-kmp notification channel (`worker-kmp.foreground`), wires the
+  Android-14+ `foregroundServiceType` constant from `ForegroundServiceType`.
+  Lifecycle: `KmpAndroidWorker` registers itself in a `ConcurrentHashMap<Uuid, KmpAndroidWorker>`
+  before delegating to the user's KMP worker, unregisters in a `try/finally`.
+  Reflectively dispatched from `cmp-worker-kmp`'s JVM actual when an Android
+  runtime is detected — keeps cmp-worker-kmp Android-dependency-free.
+
+**Pragmatic deviation from the alpha01.X dispatch (Option A vs B)**: the dispatch
+proposed adding `android()` as a target on `cmp-worker-kmp` so the Android actual
+lives in the same KMP module. We chose Option B (Android bridge in
+`cmp-worker-android` + reflective dispatch from the JVM actual) because adding
+`android()` to `cmp-worker-kmp` would require the
+`com.android.kotlin.multiplatform.library` plugin and create overlapping
+publication coordinates with `cmp-worker-android`. The chosen design keeps the
+publication graph clean (one Android module = `cmp-worker-android`) at the cost
+of one reflective `Class.forName` lookup per `setForeground()` call on Android —
+acceptable given that foreground promotion is a low-frequency event.
+
+#### Phase 7 alpha04.X — native API parity wiring (v3.0.0-alpha04.X)
+
+Wires the previously-scaffolded native-API surfaces into the per-platform work managers.
+
+- **`OneTimeWorkRequestBuilder.setExpedited(OutOfQuotaPolicy)`** (commonMain) —
+  requests Android 12+ expedited execution. Maps to
+  `androidx.work.OneTimeWorkRequest.Builder.setExpedited(...)` when SDK_INT ≥ 31;
+  no-op (debug-logged) on Android <31 / iOS / Desktop / Web.
+- **`OneTimeWorkRequestBuilder.setInitialDelay(Duration)`** +
+  **`PeriodicWorkRequestBuilder.setInitialDelay(Duration)`** (commonMain) —
+  delays the first attempt. Android: native `setInitialDelay(...)`.
+  iOS: `BGProcessingTaskRequest.earliestBeginDate` when background tasks are
+  enabled; otherwise coroutine `delay()`. Desktop + Web: coroutine `delay()`.
+- **`ForegroundServiceType` → Android-14+ enforcement** (cmp-worker-android) —
+  `AndroidForegroundBridge` translates `ForegroundServiceType` to
+  `ServiceInfo.FOREGROUND_SERVICE_TYPE_*` constants per the active SDK level
+  (API 29+ for `DATA_SYNC/MEDIA_PLAYBACK/...`, API 30+ for `CAMERA/MICROPHONE`,
+  API 34+ for `HEALTH/REMOTE_MESSAGING/SHORT_SERVICE/SPECIAL_USE/SYSTEM_EXEMPTED`).
+  Falls back to the no-serviceType constructor on Android <14 (which doesn't enforce).
+- **`PeriodicWorkRequestBuilder.setQuickRefresh(Boolean)`** + new
+  `IosWorkerConfig.appRefreshTaskIdentifier` (commonMain) — iOS-only hint: when
+  `true` AND `appRefreshTaskIdentifier` is set, the iOS scheduler issues a
+  `BGAppRefreshTaskRequest` (short, frequent wake-ups for keep-alive polling)
+  instead of `BGProcessingTaskRequest`. No-op on Android / Desktop / Web.
+- **Info.plist validation at iOS init time** (cmp-worker-ios) — new
+  `InfoPlistValidator.kt`. When `iosWorkManagerFactory()` constructs an
+  `IosWorkManager`, the validator inspects `NSBundle.mainBundle.infoDictionary`
+  and emits actionable kermit ERROR entries when:
+  - `enableBackgroundTasks=true` but `UIBackgroundModes` lacks `"processing"`
+    OR `BGTaskSchedulerPermittedIdentifiers` lacks `bgProcessingTaskIdentifier`.
+  - `appRefreshTaskIdentifier` is set but `UIBackgroundModes` lacks `"fetch"`
+    OR `BGTaskSchedulerPermittedIdentifiers` lacks `appRefreshTaskIdentifier`.
+  Log-only — does not throw — so a misconfigured Info.plist degrades gracefully.
+- **Web Periodic Background Sync** (cmp-worker-web) — new `enablePeriodicBackgroundSync`
+  field on `WebWorkerConfig`/`WebWorkManagerConfig`. When `true`, periodic workers
+  register a tag via `ServiceWorkerRegistration.periodicSync.register(tag, { minInterval })`.
+  Best-effort: browsers gate the API behind PWA-install heuristics — falls back to
+  the existing polling/timer path on unsupported origins. New top-level expect:
+  `registerPeriodicSyncTag(tag, minIntervalMs, swScript)` with actuals for js/wasmJs/jvm.
+- **Web Notifications API** (cmp-worker-web) — new public surface in commonMain:
+  - `enum class NotificationPermission { GRANTED, DENIED, DEFAULT }`
+  - `suspend fun requestNotificationPermission(): NotificationPermission`
+  - `fun showWorkerNotification(id, title, body, progress)` — tag-de-duped,
+    SW-aware, auto-closes when `progress >= 100`.
+  Used internally by the JS/WasmJs `runAsForeground` actuals; exposed publicly
+  for app-level re-use.
+
+#### Phase 1 + Phase 7 surface area summary
+
+`cmp-worker-kmp` public additions:
+- `OneTimeWorkRequest.{initialDelay, expeditedPolicy}` properties
+- `PeriodicWorkRequest.{initialDelay, quickRefresh}` properties
+- `OneTimeWorkRequestBuilder.{setInitialDelay, setExpedited}` builders
+- `PeriodicWorkRequestBuilder.{setInitialDelay, setQuickRefresh}` builders
+- `IosWorkerConfig.appRefreshTaskIdentifier` field
+- `WebWorkerConfig.enablePeriodicBackgroundSync` field
+
+`cmp-worker-android` public additions:
+- `AndroidForegroundBridge` object (`promote(worker, info)` — reflectively
+  invoked by cmp-worker-kmp's JVM actual)
+
+`cmp-worker-ios` public additions:
+- `IosWorkManagerConfig.appRefreshTaskIdentifier` field
+
+`cmp-worker-web` public additions:
+- `NotificationPermission` enum
+- `requestNotificationPermission()` / `showWorkerNotification(...)` functions
+- `WebWorkManagerConfig.enablePeriodicBackgroundSync` field
+
+All additions retain backward compatibility with v3.0.0-alpha01..alpha06 callers
+(new fields/builders have defaults). BCV dumps updated under `*/api/`.
+
 ### Documentation
 
 - Reorganized source repo docs into a Wiki-friendly structure under `docs/`:

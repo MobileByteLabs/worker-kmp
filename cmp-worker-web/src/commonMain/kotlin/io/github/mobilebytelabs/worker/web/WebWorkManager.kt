@@ -55,6 +55,8 @@ class WebWorkManager internal constructor(
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         stateStore.initWork(request.id, request.tags)
         val job = scope.launch {
+            val initialDelayMs = request.initialDelay.inWholeMilliseconds
+            if (initialDelayMs > 0) delay(initialDelayMs)
             if (!constraintEvaluator.evaluate(request.constraints)) {
                 awaitConstraintsSatisfied(request)
             }
@@ -79,7 +81,14 @@ class WebWorkManager internal constructor(
             -> cancelAllWorkByTag(uniqueWorkName)
         }
         stateStore.initWork(request.id, request.tags + uniqueWorkName)
+        // Periodic Background Sync registration (best-effort — falls back to polling).
+        if (config.enablePeriodicBackgroundSync) {
+            val tag = "worker-kmp-periodic-${request.id}"
+            registerPeriodicSyncTag(tag, request.repeatInterval.inWholeMilliseconds, config.serviceWorkerScript)
+        }
         val job = scope.launch {
+            val initialDelayMs = request.initialDelay.inWholeMilliseconds
+            if (initialDelayMs > 0) delay(initialDelayMs)
             while (isActive) {
                 executeWorker(request)
                 delay(request.repeatInterval.inWholeMilliseconds)

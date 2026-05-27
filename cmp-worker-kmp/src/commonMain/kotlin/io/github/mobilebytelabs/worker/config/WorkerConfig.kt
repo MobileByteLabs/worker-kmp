@@ -80,6 +80,15 @@ public data class IosWorkerConfig(
     public val bgProcessingTaskIdentifier: String = "",
     public val enablePersistence: Boolean = true,
     public val persistenceKey: String = "worker-kmp-ios",
+    /**
+     * BGAppRefreshTask identifier used by periodic workers that opt-in via
+     * `PeriodicWorkRequestBuilder.setQuickRefresh(true)`. Must match an entry in
+     * `Info.plist → BGTaskSchedulerPermittedIdentifiers` AND `UIBackgroundModes`
+     * must include `"fetch"`.
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    public val appRefreshTaskIdentifier: String = "",
 )
 
 /**
@@ -129,4 +138,13 @@ public data class WebWorkerConfig(
     public val constraintCheckIntervalMs: Long = 5_000L,
     public val enableBackgroundSync: Boolean = false,
     public val serviceWorkerScript: String = "/worker-kmp-sw.js",
+    /**
+     * Set to `true` to register a Browser Periodic Background Sync tag for periodic
+     * workers. Requires a Service Worker at [serviceWorkerScript] AND the origin to be
+     * a PWA installed by the user (browsers gate the API behind install heuristics).
+     * Falls back to polling/timer when the API is unavailable.
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    public val enablePeriodicBackgroundSync: Boolean = false,
 )

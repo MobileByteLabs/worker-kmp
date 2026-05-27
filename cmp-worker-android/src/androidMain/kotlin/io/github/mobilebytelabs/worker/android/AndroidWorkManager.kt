@@ -1,10 +1,12 @@
 package io.github.mobilebytelabs.worker.android
 
 import android.content.Context
+import android.os.Build
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
+import co.touchlab.kermit.Logger
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkManager
@@ -55,7 +57,7 @@ class AndroidWorkManager(context: Context) : WorkManager {
 
     private fun io.github.mobilebytelabs.worker.OneTimeWorkRequest.toAndroidOneTime(): OneTimeWorkRequest {
         val data = buildInputData(workerClass, id, inputData)
-        return OneTimeWorkRequestBuilder<KmpAndroidWorker>()
+        val builder = OneTimeWorkRequestBuilder<KmpAndroidWorker>()
             .setInputData(data)
             .setConstraints(constraints.toAndroid())
             .setBackoffCriteria(
@@ -65,19 +67,41 @@ class AndroidWorkManager(context: Context) : WorkManager {
             )
             .addTag(id.toTag())
             .apply { tags.forEach { addTag(it) } }
-            .build()
+        if (initialDelay.inWholeMilliseconds > 0) {
+            builder.setInitialDelay(initialDelay.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+        }
+        expeditedPolicy?.let { policy ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                builder.setExpedited(policy.toAndroid())
+            } else {
+                Logger.withTag("worker-kmp.android").d {
+                    "setExpedited() requested but SDK_INT=${Build.VERSION.SDK_INT} < 31 (Android 12). " +
+                        "Request will run as ordinary background work."
+                }
+            }
+        }
+        return builder.build()
     }
 
     private fun io.github.mobilebytelabs.worker.PeriodicWorkRequest.toAndroidPeriodic(): PeriodicWorkRequest {
         val data = buildInputData(workerClass, id, inputData)
         val intervalMs = repeatInterval.inWholeMilliseconds
             .coerceAtLeast(PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS)
-        return PeriodicWorkRequestBuilder<KmpAndroidWorker>(intervalMs, TimeUnit.MILLISECONDS)
+        val builder = PeriodicWorkRequestBuilder<KmpAndroidWorker>(intervalMs, TimeUnit.MILLISECONDS)
             .setInputData(data)
             .setConstraints(constraints.toAndroid())
             .addTag(id.toTag())
             .apply { tags.forEach { addTag(it) } }
-            .build()
+        if (initialDelay.inWholeMilliseconds > 0) {
+            builder.setInitialDelay(initialDelay.inWholeMilliseconds, TimeUnit.MILLISECONDS)
+        }
+        // quickRefresh is iOS-only — no Android mapping (logged once if set).
+        if (quickRefresh) {
+            Logger.withTag("worker-kmp.android").d {
+                "setQuickRefresh(true) requested but is iOS-only — ignored on Android."
+            }
+        }
+        return builder.build()
     }
 
     private fun buildInputData(

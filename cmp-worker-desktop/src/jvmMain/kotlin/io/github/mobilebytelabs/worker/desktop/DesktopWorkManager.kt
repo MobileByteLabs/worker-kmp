@@ -53,6 +53,8 @@ class DesktopWorkManager internal constructor(
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         stateStore.initWork(request.id, request.tags)
         val job = scope.launch {
+            val initialDelayMs = request.initialDelay.inWholeMilliseconds
+            if (initialDelayMs > 0) delay(initialDelayMs)
             if (!constraintEvaluator.evaluate(request.constraints)) {
                 awaitConstraintsSatisfied(request)
             }
@@ -72,6 +74,8 @@ class DesktopWorkManager internal constructor(
         }
         stateStore.initWork(request.id, request.tags + uniqueWorkName)
         val job = scope.launch {
+            val initialDelayMs = request.initialDelay.inWholeMilliseconds
+            if (initialDelayMs > 0) delay(initialDelayMs)
             while (isActive) {
                 executeWorker(request)
                 delay(request.repeatInterval.inWholeMilliseconds)

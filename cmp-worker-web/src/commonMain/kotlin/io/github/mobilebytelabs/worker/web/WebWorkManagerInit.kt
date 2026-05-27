@@ -49,6 +49,7 @@ public fun webWorkManagerFactory(): WorkManagerFactory = WorkManagerFactory { co
             persistenceDbName = config.webConfig.persistenceDbName,
             enableBackgroundSync = config.webConfig.enableBackgroundSync,
             serviceWorkerScript = config.webConfig.serviceWorkerScript,
+            enablePeriodicBackgroundSync = config.webConfig.enablePeriodicBackgroundSync,
         ),
     )
 }
