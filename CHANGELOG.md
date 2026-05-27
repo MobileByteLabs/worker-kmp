@@ -62,6 +62,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`OBSERVERS.md`** — public docs at source repo root; documents SPI + LoggingWorkObserver + 3 bridge patterns (OTel / Sentry / Firebase Perf) + per-platform actual wiring roadmap.
 - Per-platform observer emission lands in Phases 1/7/8/9 as those phases ship their actual implementations. v2.2.0 ships the SPI + LoggingWorkObserver + TestWorkManager recording.
 
+### Foreground tasks
+
+- **`ForegroundWorker`** — new abstract `CoroutineWorker` subclass in `cmp-worker-kmp` commonMain.
+  Long-running, user-visible work that runs outside the platform's background execution window.
+  Subclass + override `doWork()` + call `setForeground(ForegroundInfo)` to promote.
+- **`ForegroundInfo`** — notification + progress descriptor (`notificationId`, `title`, `message`,
+  `progress`, `serviceType`, `cancelAction`).
+- **`ForegroundServiceType`** — enum mirroring Android 14's `ServiceInfo.FOREGROUND_SERVICE_TYPE_*`
+  constants (13 variants: `DATA_SYNC`, `MEDIA_PLAYBACK`, `MEDIA_PROJECTION`, `CONNECTED_DEVICE`,
+  `PHONE_CALL`, `CAMERA`, `MICROPHONE`, `LOCATION`, `HEALTH`, `REMOTE_MESSAGING`, `SHORT_SERVICE`,
+  `SPECIAL_USE`, `SYSTEM_EXEMPTED`). No-op on iOS/Desktop/Web.
+- **`ForegroundNotSupportedException`** — thrown when the platform cannot honor a
+  `setForeground` call (e.g. iOS <17 without UNNotifications permission).
+- **`ExperimentalForegroundApi`** — `@RequiresOptIn(level = WARNING)` annotation gating the
+  foreground APIs until v3.0.0 GA. Opt-in: `@OptIn(ExperimentalForegroundApi::class)` at use site.
+- **`runAsForeground(worker, info)`** — `expect suspend fun` per-platform bridge. **alpha01
+  scaffolds log-only stubs across all 4 actuals (jvm, ios, js, wasmJs)** — kermit INFO log only,
+  no actual platform promotion. Per-platform actuals land in alpha01.X follow-ups:
+  - Android `setForeground(ForegroundInfo)` via androidx.work + Manifest `foregroundServiceType`
+  - iOS 17+ `BGContinuedProcessingTaskRequest` + `BGContinuedProcessingTaskUpdate` progress
+  - iOS 13-16 `BGProcessingTaskRequest` + `UNNotification` shim
+  - Desktop `java.awt.SystemTray` icon + supervisor-scope keepAlive
+  - Web persistent Service Worker + Notifications API
+- **`FOREGROUND_TASKS.md`** — new source-repo-root doc covering when-to-use, per-platform behavior
+  table, current alpha01 stub state, consumer usage example, Android Manifest + iOS Info.plist
+  snippets for the alpha01.X landing.
+- **`TRUE_BACKGROUND_MATRIX.md`** — scaffold doc for the `TrueBackgroundLevel` enum (lands in
+  `BackgroundCapabilities` alpha05 per Phase 8) + per-platform equivalence target matrix.
+- 4 new tests in `ForegroundWorkerTest` (cmp-worker-kmp commonTest): defaults sanity,
+  service-type field carry, 13-variant enum coverage, `setForeground` smoke test against the
+  stub `runAsForeground` actual.
+
 ### Performance
 
 - **JMH benchmark module** (`cmp-worker-bench`) — JVM-only module with JMH 1.37 (Gradle plugin `me.champeau.jmh` v0.7.2). Initial benchmarks: `EnqueueBenchmark` (one-time + constraints) and `PersistenceBenchmark` (TestWorkManager in-memory state at N=10/100/1000). `ObserverChainBenchmark` is a stub awaiting Phase 4's `WorkObserver` SPI.
