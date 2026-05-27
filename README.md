@@ -184,14 +184,14 @@ data.getStringArray("tags")  // ["admin", "user"]
 val request = OneTimeWorkRequestBuilder<SyncWorker>("SyncWorker")
     .setInputData(workDataOf("since" to lastSyncTimestamp))
     .addTag("sync")
-    .setRetryConfig(
+    .setBackoffCriteria(
+        BackoffPolicy.EXPONENTIAL,
         RetryConfig(
             maxAttempts = 3,
             initialDelay = 5.seconds,
-            backoffPolicy = BackoffPolicy.EXPONENTIAL,
-            multiplier = 2.0,
             maxDelay = 60.seconds,
-        )
+            multiplier = 2.0,
+        ),
     )
     .build()
 
@@ -264,15 +264,15 @@ val constraints = Constraints {
 
 ```kotlin
 val retryConfig = RetryConfig(
-    maxAttempts    = 5,
-    initialDelay   = 2.seconds,
-    maxDelay       = 5.minutes,
-    backoffPolicy  = BackoffPolicy.EXPONENTIAL,
-    multiplier     = 2.0,
+    maxAttempts   = 5,
+    initialDelay  = 2.seconds,
+    maxDelay      = 5.minutes,
+    backoffPolicy = BackoffPolicy.EXPONENTIAL,
+    multiplier    = 2.0,
 )
 
 val request = OneTimeWorkRequestBuilder<NetworkWorker>("NetworkWorker")
-    .setRetryConfig(retryConfig)
+    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, retryConfig)
     .build()
 ```
 
@@ -734,6 +734,11 @@ Check the badge at the top of this README for the latest release.
 | `worker-web` | JS/browser + Node.js implementation |
 | `worker-compose` | Compose Multiplatform integration — `LocalWorkManager`, `WorkStatusChip`, `WorkProgressIndicator`, `WorkInfoCard`, `WorkMonitorScreen`, `WorkSchedulerScreen` |
 | `worker-test` | Test utilities (`TestWorkManager`) |
+
+## Migration
+
+Coming from AndroidX WorkManager, iOS BGTaskScheduler, or a custom web polling loop?
+See **[MIGRATION.md](MIGRATION.md)** for step-by-step migration instructions and an API quick-reference.
 
 ## License
 
