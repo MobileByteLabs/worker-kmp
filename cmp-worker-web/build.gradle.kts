@@ -21,9 +21,7 @@ kotlin {
         browser {
             testTask { enabled = false }
         }
-        nodejs {
-            testTask { enabled = false }
-        }
+        nodejs()
     }
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {

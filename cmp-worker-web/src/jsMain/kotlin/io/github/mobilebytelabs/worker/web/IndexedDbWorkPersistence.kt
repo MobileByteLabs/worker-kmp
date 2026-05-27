@@ -140,7 +140,7 @@ private object NoOpPersistence : WebWorkPersistence {
 }
 
 internal actual fun createWebWorkPersistence(config: WebWorkManagerConfig): WebWorkPersistence =
-    if (config.enablePersistence) {
+    if (config.enablePersistence && isIndexedDbAvailable()) {
         IndexedDbWorkPersistence(config.persistenceDbName)
     } else {
         NoOpPersistence
