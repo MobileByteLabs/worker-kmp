@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- Reorganized source repo docs into a Wiki-friendly structure under `docs/`:
+  - `docs/Home.md` — KMP-centric overview (new)
+  - `docs/_Sidebar.md` — GitHub Wiki nav (new)
+  - `docs/getting-started/` — installation + quick-start + migration
+  - `docs/platform-support/` — per-platform setup + API matrix + true-background matrix
+  - `docs/features/` — foreground tasks + observers + Web Push server
+  - `docs/operations/` — security + performance
+  - `docs/release/` — release process + postmortem template
+- Rewrote `README.md` as tight (~100 lines) KMP-centric front page emphasizing
+  Kotlin Multiplatform + Compose Multiplatform out-of-box positioning.
+- All previously-top-level markdown files moved via `git mv` (history preserved).
+- Updated `.github/PULL_REQUEST_TEMPLATE.md` + `.github/workflows/security-scan.yml`
+  + `scripts/security-doc-coverage.sh` to reference `docs/operations/security.md`.
+
 ### Core API
 
 #### Phase 0 deep refactor (v3.0.0-alpha00.X — per-actual clean-break)

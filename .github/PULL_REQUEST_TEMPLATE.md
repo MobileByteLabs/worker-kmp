@@ -19,10 +19,10 @@ This template enforces the planning-rigor methodology used by the worker-kmp v3 
 
 ## Security review (only required when attack surface touched)
 
-- [ ] Does this PR add a new surface listed in [`SECURITY.md`](../SECURITY.md)?
-      If YES: append a new row to the SECURITY.md STRIDE table with mitigation OR explicit ACCEPTED rationale.
+- [ ] Does this PR add a new surface listed in [`docs/operations/security.md`](../docs/operations/security.md)?
+      If YES: append a new row to the security.md STRIDE table with mitigation OR explicit ACCEPTED rationale.
 - [ ] Does this PR change an existing surface's threat profile (e.g. modifies the daemon's persistence format, the Web Push subscription endpoint, the Service Worker code, VAPID key handling, or the Koin worker registry)?
-      If YES: update the relevant SECURITY.md row's Mitigation / Rationale column.
+      If YES: update the relevant security.md row's Mitigation / Rationale column.
 - [ ] N/A — this PR touches no security-relevant surface (purely internal refactor, docs, or test-only change).
 
 ## Quality review (gate 2 — required before merge)

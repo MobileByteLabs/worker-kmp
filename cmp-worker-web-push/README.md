@@ -22,6 +22,6 @@
 
 ## See also
 
-- WEB_PUSH_SERVER_GUIDE.md (alpha06.X) — RFC 8030 protocol + reference servers
-- TRUE_BACKGROUND_MATRIX.md — per-browser Web Push capability levels
+- [docs/features/web-push-server.md](../docs/features/web-push-server.md) (alpha06.X) — RFC 8030 protocol + reference servers
+- [docs/platform-support/true-background-matrix.md](../docs/platform-support/true-background-matrix.md) — per-browser Web Push capability levels
 - Phase 9 sub-plan: `plan-layer/.../09-web-push-background.md`

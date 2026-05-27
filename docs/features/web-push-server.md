@@ -17,7 +17,7 @@ Service Worker push handler); consumer ships:
 3. **Cron job**: every N minutes, fan out pushes to all subscriptions.
 4. **Push payload**: `{ "type": "WORKER_KMP_TRIGGER", "scope": "<tag>" }` — payload size <4KB.
 
-## Server obligations (per SECURITY.md T7-T15)
+## Server obligations (per [operations/security.md](../operations/security.md) T7-T15)
 
 - MUST NOT log raw subscription endpoint URLs — hash them (e.g. `sha256:first8chars`)
 - MUST encrypt subscription rows at rest
@@ -32,5 +32,5 @@ Service Worker push handler); consumer ships:
 ## See also
 
 - Phase 9 sub-plan
-- SECURITY.md T7-T18 (Web Push attack surfaces)
-- TRUE_BACKGROUND_MATRIX.md (per-browser support)
+- [operations/security.md](../operations/security.md) T7-T18 (Web Push attack surfaces)
+- [platform-support/true-background-matrix.md](../platform-support/true-background-matrix.md) (per-browser support)

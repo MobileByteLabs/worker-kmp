@@ -73,7 +73,7 @@ public class WorkerRegistry internal constructor() {
     public fun registeredClassNames(): Set<String> = factories.keys.toSet()
 
     private fun validateClassName(name: String) {
-        // Defends against T22 (per SECURITY.md): reject path-injection and null bytes
+        // Defends against T22 (per docs/operations/security.md): reject path-injection and null bytes
         if (name.contains("..") || name.contains("/") || name.contains(" ")) {
             throw IllegalArgumentException("Invalid worker class name (rejected: ..,/, null byte): $name")
         }

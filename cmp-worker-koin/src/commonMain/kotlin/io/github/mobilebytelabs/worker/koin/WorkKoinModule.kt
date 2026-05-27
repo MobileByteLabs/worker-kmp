@@ -59,14 +59,14 @@ import org.koin.dsl.module
  * **Source-compat break from v3.0.0-alpha00**: the previous default-everything signature
  * `workKoinModule(WorkerConfig, WorkerRegistry)` now requires a third positional
  * [WorkManagerFactory] arg. Migration is a per-platform 1-line edit at the consumer's
- * `startKoin` site — see MIGRATION_FROM_2_x.md §2.
+ * `startKoin` site — see docs/getting-started/migrating-from-v2.md §2.
  */
 public fun workKoinModule(
     config: WorkerConfig = WorkerConfig(),
     workers: WorkerRegistry = workerRegistry { },
     factory: WorkManagerFactory,
 ): Module = module {
-    workers.lock() // Immutable after this point — defends against T23 (per SECURITY.md)
+    workers.lock() // Immutable after this point — defends against T23 (per docs/operations/security.md)
     single { config }
     single { workers }
     single<WorkManager> { factory.create(get(), get()) }

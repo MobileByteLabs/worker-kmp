@@ -77,6 +77,6 @@
 
 ## See also
 
-- FOREGROUND_TASKS.md
-- TRUE_BACKGROUND_MATRIX.md
+- [features/foreground-tasks.md](../features/foreground-tasks.md)
+- [true-background-matrix.md](./true-background-matrix.md)
 - Phase 7 sub-plan: `plan-layer/.../07-native-api-parity.md`

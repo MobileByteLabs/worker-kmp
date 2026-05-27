@@ -91,13 +91,13 @@ jobs:
         continue-on-error: true  # warn, don't block
 
   security-doc-coverage:
-    name: SECURITY.md surface coverage gate
+    name: docs/operations/security.md surface coverage gate
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - name: Verify SECURITY.md updated on surface change
+      - name: Verify docs/operations/security.md updated on surface change
         run: bash scripts/security-doc-coverage.sh origin/${{ github.base_ref }} HEAD
 
   # daemon-jar-integrity:

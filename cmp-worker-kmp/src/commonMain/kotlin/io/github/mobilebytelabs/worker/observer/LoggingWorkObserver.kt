@@ -17,7 +17,7 @@ import io.github.mobilebytelabs.worker.WorkResult
  * - DEBUG — Progress (high-volume; sample if needed in production)
  *
  * Consumers can swap [Logger] for OpenTelemetry / Sentry / Firebase Performance by
- * writing their own [WorkObserver] — see OBSERVERS.md for bridge patterns.
+ * writing their own [WorkObserver] — see docs/features/observers.md for bridge patterns.
  *
  * @property tag Kermit logger tag; defaults to `worker-kmp`.
  *

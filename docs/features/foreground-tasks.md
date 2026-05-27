@@ -76,4 +76,4 @@ class FileUploadWorker(context: WorkerContext) : ForegroundWorker(context) {
 ## See also
 
 - Phase 1 sub-plan: `plan-layer/.../01-foreground-tasks.md`
-- TRUE_BACKGROUND_MATRIX.md — per-platform background equivalence levels (alpha05)
+- [True Background Matrix](../platform-support/true-background-matrix.md) — per-platform background equivalence levels (alpha05)

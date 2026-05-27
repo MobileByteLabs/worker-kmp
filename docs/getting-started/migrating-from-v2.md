@@ -284,7 +284,7 @@ public fun workerRegistry(block: WorkerRegistry.() -> Unit): WorkerRegistry
 
 Type-safe registry of worker factories keyed by simple class name. Locked after Koin loads
 it — late registrations throw `WorkerRegistryAlreadyLoadedException` (defends against T23
-per `SECURITY.md`). Each platform factory threads the registry through a per-platform
+per [security.md](../operations/security.md)). Each platform factory threads the registry through a per-platform
 adapter (`WorkerRegistryAdapter` / `WorkerRegistryIosAdapter` / `ChainedDesktopWorkerFactory`
 / `WorkerRegistryWebAdapter`) so the consumer's commonMain registration becomes the single
 source of worker instances.

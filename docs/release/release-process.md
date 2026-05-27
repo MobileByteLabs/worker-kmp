@@ -26,11 +26,11 @@
 
 A fresh reviewer (not the implementer) signs off on each axis:
 
-- **Security** — re-run STRIDE per SECURITY.md against actual ship code (not design)
+- **Security** — re-run STRIDE per [security.md](../operations/security.md) against actual ship code (not design)
 - **Performance** — re-run benchmarks on clean machine; compare against published baselines
 - **Backward compatibility** — pull worker-kmp:2.1.0 as classpath dep + run real Mifos Money Toolkit fork against worker-kmp:3.0.0-rc1; report any surprises
 - **API ergonomics** — read public API via BCV snapshots end-to-end; list naming/shape/discoverability concerns
-- **Documentation** — read every doc (SECURITY, PERFORMANCE, OBSERVERS, BACKWARD_COMPATIBILITY, MIGRATION, FOREGROUND_TASKS, PLATFORM_API_MATRIX, TRUE_BACKGROUND_MATRIX); flag inconsistency/missing/stale
+- **Documentation** — read every doc under `docs/` (operations/security, operations/performance, features/observers, features/foreground-tasks, getting-started/migrating-from-v2, platform-support/platform-api-matrix, platform-support/true-background-matrix); flag inconsistency/missing/stale
 - **Accessibility** — Compose components have Modifier.semantics + content descriptions + ≥4.5:1 color contrast
 - **Internationalization** — strings extracted to commonMain resource files (not hardcoded English)
 
@@ -56,4 +56,4 @@ Output: `release/v3.0.0-rc1/CONSUMER_REPORTS.md` with per-consumer:
 
 ## Post-mortem (within 14 days of GA)
 
-`archive/<YYYY-MM>/worker-kmp-v3-foreground-storeflow/POSTMORTEM.md` per `POSTMORTEM_TEMPLATE.md` below.
+`archive/<YYYY-MM>/worker-kmp-v3-foreground-storeflow/POSTMORTEM.md` per [postmortem-template.md](./postmortem-template.md).

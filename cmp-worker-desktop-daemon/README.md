@@ -24,5 +24,5 @@ See architecture diagram in Phase 8 sub-plan body:
 
 ## See also
 
-- TRUE_BACKGROUND_MATRIX.md
-- SECURITY.md T1-T6 (daemon supply chain — Phase 10's extension)
+- [docs/platform-support/true-background-matrix.md](../docs/platform-support/true-background-matrix.md)
+- [docs/operations/security.md](../docs/operations/security.md) T1-T6 (daemon supply chain — Phase 10's extension)

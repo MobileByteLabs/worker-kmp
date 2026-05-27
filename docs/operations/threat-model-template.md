@@ -1,7 +1,7 @@
 # Threat Model Template
 
 > Consumer-extension template — copy to your fork's THREAT_MODEL.md and extend with
-> deployment-specific threats. worker-kmp's library-level threat model is at SECURITY.md.
+> deployment-specific threats. worker-kmp's library-level threat model is at [security.md](./security.md).
 
 ---
 
@@ -43,6 +43,6 @@ If your workers handle sensitive data or external network:
 
 ## Auditing your extension
 
-1. Review SECURITY_ASSUMPTIONS.md and confirm each item is true in your deployment.
+1. Review [security-assumptions.md](./security-assumptions.md) and confirm each item is true in your deployment.
 2. Add deployment-specific assumptions to your own ASSUMPTIONS.md.
 3. Re-audit quarterly or after material architecture changes.

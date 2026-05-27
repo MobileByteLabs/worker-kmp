@@ -1,14 +1,14 @@
 # Security Assumptions
 
 > Explicit trust assumptions worker-kmp v3 makes. If any of these is invalid in your
-> deployment, please file a security advisory (see SECURITY.md § Reporting a vulnerability).
+> deployment, please file a security advisory (see [security.md](./security.md) § Reporting a vulnerability).
 
 ---
 
 ## Consumer obligations
 
 1. **Consumer signs their installer + the daemon JAR** with a code-signing certificate (Windows SmartScreen, macOS Gatekeeper, Linux distro-appropriate). worker-kmp produces unsigned artifacts.
-2. **Consumer secures their Web Push server** per WEB_PUSH_SERVER_GUIDE.md (RFC 8030 + VAPID + encrypted subscriptions at rest + rate-limit subscribe endpoint + log redaction).
+2. **Consumer secures their Web Push server** per [features/web-push-server.md](../features/web-push-server.md) (RFC 8030 + VAPID + encrypted subscriptions at rest + rate-limit subscribe endpoint + log redaction).
 3. **Consumer protects their VAPID private key** — stored in framework vault per RULE-SECRETS-VAULT-001; never committed/emailed/pasted; rotated annually; rotated immediately on suspected leak.
 4. **Consumer's app process is trusted**. Workers, observers, persistence files all run at consumer-app user privilege. If the consumer-app process is compromised, worker-kmp's protections do not apply.
 
