@@ -1,4 +1,5 @@
 public final class io/github/mobilebytelabs/worker/koin/WorkKoinModuleKt {
-	public static final fun getWorkKoinModule ()Lorg/koin/core/module/Module;
+	public static final fun workKoinModule (Lio/github/mobilebytelabs/worker/config/WorkerConfig;Lio/github/mobilebytelabs/worker/registry/WorkerRegistry;)Lorg/koin/core/module/Module;
+	public static synthetic fun workKoinModule$default (Lio/github/mobilebytelabs/worker/config/WorkerConfig;Lio/github/mobilebytelabs/worker/registry/WorkerRegistry;ILjava/lang/Object;)Lorg/koin/core/module/Module;
 }
 

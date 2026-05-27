@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Core API
+
+- **`workKoinModule` val → function** — **BREAKING (source-only)**: the previously `val`-shaped
+  Koin module is now a `fun` with two optional parameters. Existing call sites need a 1-line edit:
+  `modules(workKoinModule, ...)` → `modules(workKoinModule(), ...)`. Binary callers (Java consumers
+  via reflection) are unaffected because the BCV surface changed shape too. See `MIGRATION_FROM_2_x.md`.
+- **`WorkerConfig`** — new `data class` in `io.github.mobilebytelabs.worker.config` carrying
+  `logLevel`, `defaultRetryConfig`, and `observers`. Unified commonMain configuration surface;
+  replaces ad-hoc per-platform config classes (which remain in their legacy form for v3.0.0-alpha00
+  and migrate per-actual in v3.0.0-alpha00.X follow-ups).
+- **`LogLevel`** — new public enum (`VERBOSE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `SILENT`) for
+  worker-kmp internal logs (kermit-backed).
+- **`WorkerRegistry`** — new type-safe registry in `io.github.mobilebytelabs.worker.registry`.
+  Consumers declare workers via `workerRegistry { register<SyncWorker> { ctx -> SyncWorker(ctx, get()) } }`
+  in commonMain; platform actuals instantiate by simple class name (matching the
+  `OneTimeWorkRequestBuilder` convention; `KClass::simpleName` is the only portable
+  reflection surface across iOS/JS/Wasm/JVM).
+  Becomes immutable once loaded into Koin; late registration throws `WorkerRegistryAlreadyLoadedException`
+  (defends against T23 per `SECURITY.md`).
+- **`PlatformContext`** — new commonMain `expect class` in `io.github.mobilebytelabs.worker`.
+  Sentinel class on JVM/iOS/JS/WasmJs in v3.0.0-alpha00; becomes `actual typealias` to
+  `android.content.Context` once cmp-worker-android migrates in v3.0.0-alpha00.1.
+- **`MIGRATION_FROM_2_x.md`** — new source-repo-root migration doc covering the `workKoinModule`
+  shape change + the staged per-actual zero-init plan + the future `cmp-worker-migrate` Gradle plugin.
+- **BC test gate verifies legacy v2.1.0 behaviour** — the new module shape is exercised against
+  the `cmp-worker-bc-test` classpath (Phase 13) — failure to keep the v2.x deprecation contract
+  fails CI.
+- 7 new tests in `WorkerRegistryTest` (cmp-worker-kmp commonTest): DSL build, typed-factory
+  storage by qualifiedName, unknown-class returns null, register-after-lock throws, and
+  3 path-injection rejection paths (`..`, `/`, space) per the SECURITY.md T22 mitigation.
+- **`cmp-worker-store5`** (NEW artifact) — Store5 bridge. `StoreBackedWorker<K, Output>` base
+  class + `StoreRefreshScheduler` (`schedulePeriodicRefresh<T>` / `cancelRefresh` /
+  `observeRefreshes`) + `workStore5KoinModule`. Pinned to `org.mobilenativefoundation.store:store5:5.1.0-alpha06`
+  to inherit the full KMP target matrix including wasmJs. Maven Central coordinates
+  `io.github.mobilebytelabs:worker-store5:3.0.0-alpha02`. Future: `MutableStoreSyncWorker` +
+  `StoreFreshnessWorker` ship in alpha02.X follow-ups.
+
 ### Telemetry
 
 - **`WorkObserver` SAM interface + `WorkEvent` sealed class** — public SPI in `cmp-worker-kmp`. 4 lifecycle events (Enqueued / Started / Progress / Resulted). Consumers wire OpenTelemetry / Sentry / Firebase Performance bridges; see OBSERVERS.md for patterns.

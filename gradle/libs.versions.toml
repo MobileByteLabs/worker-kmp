@@ -17,6 +17,11 @@ spotless = "8.5.1"
 detekt = "1.23.8"
 ktlint = "1.8.0"
 vanniktech-publish = "0.36.0"
+# Store5 — Mobile Native Foundation's KMP store/cache library.
+# 5.1.0-alpha06 is the latest published version on Maven Central as of 2026-05-27;
+# 5.0.0 GA lacks wasmJs targets so we track the alpha06 line which matches our
+# full KMP target matrix (jvm + iosArm64 + iosSimulatorArm64 + iosX64 + js + wasmJs).
+store5 = "5.1.0-alpha06"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
@@ -40,6 +45,7 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+store5 = { module = "org.mobilenativefoundation.store:store5", version.ref = "store5" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.05.01" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }

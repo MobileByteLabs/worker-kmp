@@ -40,9 +40,9 @@ class WorkKoinModuleTest {
 
     @Test
     fun workKoinModule_declaresWorkManagerBinding() {
-        // workKoinModule uses PlatformWorkManager() which needs platform config.
+        // workKoinModule() uses PlatformWorkManager() which needs platform config.
         // Verify the module can be created without error — resolution happens lazily.
-        assertNotNull(workKoinModule)
+        assertNotNull(workKoinModule())
     }
 }
 

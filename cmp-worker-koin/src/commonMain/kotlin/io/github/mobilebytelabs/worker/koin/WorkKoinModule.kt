@@ -2,71 +2,53 @@ package io.github.mobilebytelabs.worker.koin
 
 import io.github.mobilebytelabs.worker.PlatformWorkManager
 import io.github.mobilebytelabs.worker.WorkManager
+import io.github.mobilebytelabs.worker.config.WorkerConfig
+import io.github.mobilebytelabs.worker.registry.WorkerRegistry
+import io.github.mobilebytelabs.worker.registry.workerRegistry
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
 /**
- * Koin module that provides [WorkManager] as a process-scoped singleton backed by
- * [PlatformWorkManager].
+ * Koin module factory that wires worker-kmp into the consumer's DI graph.
  *
- * Include in your application's Koin setup:
+ * Added in v3.0.0-alpha00. Replaces the legacy 1-arg `workKoinModule` singleton
+ * which required per-platform initializeWorkerXxx(...) calls BEFORE startKoin.
+ *
+ * Consumer usage (100% commonMain):
  * ```kotlin
  * startKoin {
- *     modules(workKoinModule, appModule)
- * }
- * ```
- *
- * **Important**: the platform-specific initialiser must run *before* [startKoin] so that
- * [PlatformWorkManager] is configured when the singleton is first resolved.
- *
- * | Platform | Init call |
- * |---|---|
- * | Android  | `initializeWorkerAndroid(context, workerFactory)` |
- * | iOS      | `initIosWorkManager(workerFactory, config)` |
- * | Desktop  | `initializeWorkerDesktop(config, workerFactory)` |
- * | Web      | `initWebWorkManager(workerFactory, config)` |
- *
- * ## Wiring workers with Koin
- *
- * Declare each worker as a Koin `factory` keyed by its class name. The worker factory bridge
- * delegates to Koin so workers receive their dependencies from the DI graph:
- *
- * ```kotlin
- * // commonMain / shared module
- * val appModule = module {
- *     single<SyncRepository> { SyncRepositoryImpl(get()) }
- * }
- *
- * // desktopMain
- * fun initDesktop(koin: Koin) {
- *     initializeWorkerDesktop(
- *         workerFactory = object : DesktopWorkerFactory {
- *             override fun create(workerClass: String, context: WorkerContext): CoroutineWorker =
- *                 when (workerClass) {
- *                     "SyncWorker" -> SyncWorker(context, koin.get())
- *                     else         -> error("Unknown worker: $workerClass")
- *                 }
- *         },
+ *     modules(
+ *         workKoinModule(
+ *             config = WorkerConfig(),
+ *             workers = workerRegistry {
+ *                 register<SyncWorker> { ctx -> SyncWorker(ctx, get()) }
+ *             },
+ *         ),
+ *         appModule,
  *     )
  * }
  * ```
  *
- * ## Android / Hilt
+ * **Backward compatibility**: in v3.0.0-alpha00, the per-platform actuals (Android/
+ * iOS/Desktop/Web) STILL require `initializeWorkerXxx()` to be called first. The new
+ * module shape signals consumer intent + carries the [WorkerConfig] + [WorkerRegistry]
+ * into the Koin graph for FUTURE per-actual refactors. Full zero-init wiring lands
+ * per-actual in v3.0.0-alpha00.X follow-ups.
  *
- * On Android you can also use Dagger/Hilt with a custom [AndroidWorkerFactory]:
- * ```kotlin
- * @HiltWorker
- * class SyncWorker @AssistedInject constructor(
- *     @Assisted context: WorkerContext,
- *     private val repo: SyncRepository,
- * ) : CoroutineWorker(context)
+ * Until the per-actual refactors complete, calling `workKoinModule(...)` WITHOUT a
+ * preceding `initializeWorkerXxx()` yields a [WorkManager] that throws on first use.
+ * This is documented + emits a kermit WARN log at module-load time (follow-up).
  *
- * @Module @InstallIn(SingletonComponent::class)
- * abstract class WorkerModule {
- *     @Binds abstract fun bindWorkManager(impl: AndroidWorkManager): WorkManager
- * }
- * ```
+ * **Source-compat break from v2.x**: the previous `val workKoinModule: Module`
+ * is replaced with this function. Migration is a 1-line edit — append `()` parens
+ * at the call site. See MIGRATION_FROM_2_x.md.
  */
-val workKoinModule: Module = module {
+public fun workKoinModule(
+    config: WorkerConfig = WorkerConfig(),
+    workers: WorkerRegistry = workerRegistry { },
+): Module = module {
+    workers.lock() // Immutable after this point — defends against T23 (per SECURITY.md)
+    single { config }
+    single { workers }
     single<WorkManager> { PlatformWorkManager() }
 }

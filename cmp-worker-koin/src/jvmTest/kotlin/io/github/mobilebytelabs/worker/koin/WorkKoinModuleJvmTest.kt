@@ -31,19 +31,19 @@ class WorkKoinModuleJvmTest {
 
     @Test
     fun workKoinModule_resolvesWorkManagerFromPlatform() {
-        val koin = startKoin { modules(workKoinModule) }.koin
+        val koin = startKoin { modules(workKoinModule()) }.koin
         assertNotNull(koin.get<WorkManager>())
     }
 
     @Test
     fun workKoinModule_returnsSameInstanceAsPlatformWorkManager() {
-        val koin = startKoin { modules(workKoinModule) }.koin
+        val koin = startKoin { modules(workKoinModule()) }.koin
         assertSame(fakeWm, koin.get<WorkManager>())
     }
 
     @Test
     fun workKoinModule_workManagerIsSingleton() {
-        val koin = startKoin { modules(workKoinModule) }.koin
+        val koin = startKoin { modules(workKoinModule()) }.koin
         assertSame(koin.get<WorkManager>(), koin.get<WorkManager>())
     }
 }
