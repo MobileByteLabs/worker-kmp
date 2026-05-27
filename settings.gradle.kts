@@ -5,6 +5,7 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
         gradlePluginPortal()
     }
 }
@@ -14,6 +15,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
         ivy {
             name = "Node.js"
             setUrl("https://nodejs.org/dist")
@@ -45,3 +47,4 @@ include(":cmp-worker-test")
 include(":cmp-worker-ios")
 include(":cmp-worker-koin")
 include(":cmp-worker-sample")
+include(":cmp-worker-sample-android")

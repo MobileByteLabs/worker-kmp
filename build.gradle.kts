@@ -1,5 +1,8 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.kotlin.compose) apply false
@@ -20,7 +23,7 @@ allprojects {
 
 // BCV — only track public API modules (not sample or test helpers)
 apiValidation {
-    ignoredProjects += listOf("cmp-worker-sample", "cmp-worker-test")
+    ignoredProjects += listOf("cmp-worker-sample", "cmp-worker-sample-android", "cmp-worker-test")
     nonPublicMarkers += listOf("io.github.mobilebytelabs.worker.ExperimentalWorkerApi")
 }
 
