@@ -71,11 +71,14 @@ jobs:
       - name: Generate iosApp.xcodeproj
         working-directory: samples/cmp-worker-sample-compose-store/iosApp
         run: xcodegen generate
-      - name: xcodebuild iosApp (iOS Simulator)
+      - name: xcodebuild iosApp (iOS Simulator, arm64 only)
         run: |
           xcodebuild \
             -project samples/cmp-worker-sample-compose-store/iosApp/iosApp.xcodeproj \
             -scheme iosApp \
             -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=YES \
+            EXCLUDED_ARCHS= \
             build

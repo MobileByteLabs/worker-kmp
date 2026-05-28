@@ -29,6 +29,14 @@ settings:
     DEVELOPMENT_LANGUAGE: en
     SWIFT_VERSION: "5.10"
     ENABLE_USER_SCRIPT_SANDBOXING: NO
+    # Restrict to arm64 — the Kotlin/Native iOS Simulator framework is built
+    # only for iosSimulatorArm64 (no iosX64 target declared). Linking against
+    # the arm64 framework from an x86_64 slice fails with "found architecture
+    # arm64, required architecture x86_64". Apple Silicon CI runners + modern
+    # iOS Simulators are all arm64, so this is the right floor.
+    ARCHS: arm64
+    EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
+    ONLY_ACTIVE_ARCH: "YES"
     # Path to the Kotlin/Native ComposeApp framework produced by:
     #   ./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosSimulatorArm64
     #   ./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosArm64
