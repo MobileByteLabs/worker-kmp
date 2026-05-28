@@ -34,8 +34,13 @@ allprojects {
 
 // BCV — only track public API modules (not sample or test helpers)
 apiValidation {
-    ignoredProjects += listOf("cmp-worker-sample", "cmp-worker-sample-android", "cmp-worker-test")
     nonPublicMarkers += listOf("io.github.mobilebytelabs.worker.ExperimentalWorkerApi")
+    // worker-kmp-cmp-launchers-01: enable klib BCV so iOS/JS/wasmJs targets get
+    // per-target *.api snapshots alongside JVM. Spec: GOAL.md AC2.
+    @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
+    klib {
+        enabled = true
+    }
 }
 
 tasks.named("check") {

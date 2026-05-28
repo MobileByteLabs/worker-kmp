@@ -23,7 +23,7 @@ public final class io/github/mobilebytelabs/worker/compose/ComposableSingletons$
 }
 
 public final class io/github/mobilebytelabs/worker/compose/LocalWorkManagerKt {
-	public static final fun WorkManagerProvider (Lio/github/mobilebytelabs/worker/WorkManager;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+	public static final fun WorkManagerProvider (Lio/github/mobilebytelabs/worker/WorkManager;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
 	public static final fun getLocalWorkManager ()Landroidx/compose/runtime/ProvidableCompositionLocal;
 	public static final fun rememberWorkManager (Landroidx/compose/runtime/Composer;I)Lio/github/mobilebytelabs/worker/WorkManager;
 }
@@ -57,5 +57,35 @@ public final class io/github/mobilebytelabs/worker/compose/WorkSchedulerScreenKt
 
 public final class io/github/mobilebytelabs/worker/compose/WorkStatusChipKt {
 	public static final fun WorkStatusChip (Lio/github/mobilebytelabs/worker/WorkInfo$State;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
+public final class io/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi : java/lang/Enum {
+	public static final field DRAFTING Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public static final field FAILED Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public static final field IDLE Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public static final field SUBMITTED Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public static final field SUBMITTING Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+}
+
+public final class io/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUiModel {
+	public static final field $stable I
+	public fun <init> (Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lkotlin/jvm/functions/Function0;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUiModel;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUiModel;Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUiModel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getOnCancel ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnRetry ()Lkotlin/jvm/functions/Function0;
+	public final fun getState ()Lio/github/mobilebytelabs/worker/compose/storeflow/SubmitStateUi;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 

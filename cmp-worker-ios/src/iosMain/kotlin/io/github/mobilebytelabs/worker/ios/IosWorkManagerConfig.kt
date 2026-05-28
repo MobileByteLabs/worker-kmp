@@ -19,6 +19,15 @@ data class IosWorkManagerConfig(
     val bgProcessingTaskIdentifier: String = "",
     val enablePersistence: Boolean = true,
     val persistenceKey: String = "worker-kmp-ios",
+    /**
+     * BGAppRefreshTask identifier used by periodic workers that opt-in via
+     * `PeriodicWorkRequestBuilder.setQuickRefresh(true)`. Must match an entry in
+     * `Info.plist → BGTaskSchedulerPermittedIdentifiers` AND `UIBackgroundModes`
+     * must include "fetch".
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    val appRefreshTaskIdentifier: String = "",
 ) {
     companion object {
         val DEFAULT = IosWorkManagerConfig()

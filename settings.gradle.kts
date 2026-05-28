@@ -35,6 +35,18 @@ dependencyResolutionManagement {
             metadataSources { artifact() }
             content { includeModule("com.yarnpkg", "yarn") }
         }
+        // worker-kmp-cmp-launchers-03: wasmJs sample's executable() distribution
+        // needs binaryen for the wasm-opt pass. Standard Compose Multiplatform
+        // wasmJs setup — pulls binaryen from GitHub releases.
+        ivy {
+            name = "Binaryen"
+            setUrl("https://github.com/WebAssembly/binaryen/releases/download")
+            patternLayout {
+                artifact("version_[revision]/[artifact]-version_[revision]-[classifier].[ext]")
+            }
+            metadataSources { artifact() }
+            content { includeModule("com.github.webassembly", "binaryen") }
+        }
     }
 }
 
@@ -46,5 +58,11 @@ include(":cmp-worker-web")
 include(":cmp-worker-test")
 include(":cmp-worker-ios")
 include(":cmp-worker-koin")
-include(":cmp-worker-sample")
-include(":cmp-worker-sample-android")
+include(":cmp-worker-store5")
+include(":cmp-worker-storeflow")
+include(":samples:cmp-worker-sample")
+include(":samples:cmp-worker-sample-android")
+include(":samples:cmp-worker-sample-compose-store")
+include(":cmp-worker-bench")
+include(":cmp-worker-desktop-daemon")
+include(":cmp-worker-web-push")

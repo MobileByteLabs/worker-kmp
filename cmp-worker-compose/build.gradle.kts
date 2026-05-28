@@ -31,6 +31,8 @@ kotlin {
     jvm("desktop") {
         compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
     }
+    iosArm64()
+    iosSimulatorArm64()
     js(IR) {
         browser {
             testTask { enabled = false }

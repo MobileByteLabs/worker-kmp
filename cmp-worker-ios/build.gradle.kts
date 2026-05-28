@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
 }
@@ -8,8 +10,14 @@ group = "io.github.mobilebytelabs"
 version = providers.gradleProperty("worker.version").get()
 
 kotlin {
-    iosArm64()
-    iosSimulatorArm64()
+    // worker-kmp-cmp-launchers-02: ship the iOS framework so SwiftUI / UIKit
+    // consumers can `import WorkerKmpIos` and call `MainViewControllerKt`.
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "WorkerKmpIos"
+            isStatic = true
+        }
+    }
 
     compilerOptions {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
@@ -20,12 +28,17 @@ kotlin {
             dependencies {
                 api(project(":cmp-worker-kmp"))
                 implementation(libs.kotlinx.coroutines.core)
+                // worker-kmp-cmp-launchers-02: launcher API surface
+                implementation(compose.runtime)
+                implementation(compose.ui)
+                implementation(libs.koin.core)
             }
         }
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.koin.test)
             }
         }
     }

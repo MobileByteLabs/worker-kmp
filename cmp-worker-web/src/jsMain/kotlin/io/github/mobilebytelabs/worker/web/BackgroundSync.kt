@@ -55,3 +55,26 @@ internal actual suspend fun registerBackgroundSyncTag(tag: String, swScript: Str
         // SW registration or sync.register() failed — polling fallback takes over.
     }
 }
+
+@Suppress("UnsafeCastFromDynamic")
+private fun isPeriodicSyncSupported(): Boolean = js(
+    "(typeof navigator !== 'undefined' && 'serviceWorker' in navigator)",
+) as Boolean
+
+@Suppress("UnsafeCastFromDynamic")
+private fun periodicSyncRegister(registration: dynamic, tag: String, minIntervalMs: Long): Promise<dynamic> = js(
+    "(function(r, t, m) {" +
+        " if (!r.periodicSync) return Promise.reject(new Error('periodicSync unavailable'));" +
+        " return r.periodicSync.register(t, { minInterval: m });" +
+        "})",
+)(registration, tag, minIntervalMs.toDouble()) as Promise<dynamic>
+
+internal actual suspend fun registerPeriodicSyncTag(tag: String, minIntervalMs: Long, swScript: String) {
+    if (!isPeriodicSyncSupported()) return
+    try {
+        val registration = registerSwAndGetReady(swScript).await()
+        periodicSyncRegister(registration, tag, minIntervalMs).await<Unit>()
+    } catch (_: Exception) {
+        // Periodic Sync unsupported, permission denied, or origin not eligible — polling continues.
+    }
+}

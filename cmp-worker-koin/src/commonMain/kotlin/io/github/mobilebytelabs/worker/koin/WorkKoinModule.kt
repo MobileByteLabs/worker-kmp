@@ -1,72 +1,73 @@
 package io.github.mobilebytelabs.worker.koin
 
-import io.github.mobilebytelabs.worker.PlatformWorkManager
 import io.github.mobilebytelabs.worker.WorkManager
+import io.github.mobilebytelabs.worker.WorkManagerFactory
+import io.github.mobilebytelabs.worker.config.WorkerConfig
+import io.github.mobilebytelabs.worker.registry.WorkerRegistry
+import io.github.mobilebytelabs.worker.registry.workerRegistry
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
 /**
- * Koin module that provides [WorkManager] as a process-scoped singleton backed by
- * [PlatformWorkManager].
+ * Koin module factory that wires worker-kmp into the consumer's DI graph.
  *
- * Include in your application's Koin setup:
+ * Refactored in v3.0.0-alpha00.X (Phase 0 deep refactor). The new signature accepts an
+ * explicit [WorkManagerFactory] supplied by the platform module the consumer added
+ * (`cmp-worker-android` / `cmp-worker-ios` / `cmp-worker-desktop` / `cmp-worker-web`).
+ *
+ * **Clean-break refactor**: the legacy `PlatformWorkManager.configure(...)` global slot
+ * and `initializeWorkerXxx(...)` side-effecting init functions have been REMOVED outright.
+ * Consumers wire the platform implementation via the factory parameter — there is no
+ * pre-`startKoin` setup step anymore.
+ *
+ * Consumer usage (100% commonMain except the factory selection):
+ *
  * ```kotlin
+ * // androidMain
  * startKoin {
- *     modules(workKoinModule, appModule)
- * }
- * ```
- *
- * **Important**: the platform-specific initialiser must run *before* [startKoin] so that
- * [PlatformWorkManager] is configured when the singleton is first resolved.
- *
- * | Platform | Init call |
- * |---|---|
- * | Android  | `initializeWorkerAndroid(context, workerFactory)` |
- * | iOS      | `initIosWorkManager(workerFactory, config)` |
- * | Desktop  | `initializeWorkerDesktop(config, workerFactory)` |
- * | Web      | `initWebWorkManager(workerFactory, config)` |
- *
- * ## Wiring workers with Koin
- *
- * Declare each worker as a Koin `factory` keyed by its class name. The worker factory bridge
- * delegates to Koin so workers receive their dependencies from the DI graph:
- *
- * ```kotlin
- * // commonMain / shared module
- * val appModule = module {
- *     single<SyncRepository> { SyncRepositoryImpl(get()) }
+ *     androidContext(this@App)
+ *     modules(
+ *         workKoinModule(
+ *             config = WorkerConfig(),
+ *             workers = workerRegistry {
+ *                 register<SyncWorker> { ctx -> SyncWorker(ctx, get()) }
+ *             },
+ *             factory = androidWorkManagerFactory(this@App),
+ *         ),
+ *         appModule,
+ *     )
  * }
  *
- * // desktopMain
- * fun initDesktop(koin: Koin) {
- *     initializeWorkerDesktop(
- *         workerFactory = object : DesktopWorkerFactory {
- *             override fun create(workerClass: String, context: WorkerContext): CoroutineWorker =
- *                 when (workerClass) {
- *                     "SyncWorker" -> SyncWorker(context, koin.get())
- *                     else         -> error("Unknown worker: $workerClass")
- *                 }
- *         },
+ * // iosMain
+ * startKoin {
+ *     modules(
+ *         workKoinModule(
+ *             config = WorkerConfig(),
+ *             workers = workerRegistry {
+ *                 register<SyncWorker> { ctx -> SyncWorker(ctx, get()) }
+ *             },
+ *             factory = iosWorkManagerFactory(),
+ *         ),
  *     )
  * }
  * ```
  *
- * ## Android / Hilt
+ * The factory parameter is mandatory — consumers cannot accidentally start Koin without a
+ * platform backend (the previous footgun where `workKoinModule()` returned a
+ * `WorkManager` that threw on first use is gone).
  *
- * On Android you can also use Dagger/Hilt with a custom [AndroidWorkerFactory]:
- * ```kotlin
- * @HiltWorker
- * class SyncWorker @AssistedInject constructor(
- *     @Assisted context: WorkerContext,
- *     private val repo: SyncRepository,
- * ) : CoroutineWorker(context)
- *
- * @Module @InstallIn(SingletonComponent::class)
- * abstract class WorkerModule {
- *     @Binds abstract fun bindWorkManager(impl: AndroidWorkManager): WorkManager
- * }
- * ```
+ * **Source-compat break from v3.0.0-alpha00**: the previous default-everything signature
+ * `workKoinModule(WorkerConfig, WorkerRegistry)` now requires a third positional
+ * [WorkManagerFactory] arg. Migration is a per-platform 1-line edit at the consumer's
+ * `startKoin` site — see docs/getting-started/migrating-from-v2.md §2.
  */
-val workKoinModule: Module = module {
-    single<WorkManager> { PlatformWorkManager() }
+public fun workKoinModule(
+    config: WorkerConfig = WorkerConfig(),
+    workers: WorkerRegistry = workerRegistry { },
+    factory: WorkManagerFactory,
+): Module = module {
+    workers.lock() // Immutable after this point — defends against T23 (per docs/operations/security.md)
+    single { config }
+    single { workers }
+    single<WorkManager> { factory.create(get(), get()) }
 }

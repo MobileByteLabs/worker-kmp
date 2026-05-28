@@ -4,6 +4,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
 }
@@ -23,6 +25,9 @@ kotlin {
             libs.versions.android.minSdk
                 .get()
                 .toInt()
+        // Enable host-side unit tests so androidUnitTest sources run via JVM.
+        // Mirrors cmp-worker-compose's setup. Activates :testHost task.
+        withHostTestBuilder {}.configure {}
         compilerOptions { jvmTarget = JvmTarget.JVM_11 }
     }
     compilerOptions {
@@ -34,12 +39,18 @@ kotlin {
                 api(project(":cmp-worker-kmp"))
                 implementation(libs.kotlinx.coroutines.android)
                 implementation(libs.androidx.work.runtime.ktx)
+                // worker-kmp-cmp-launchers-02: launcher API surface
+                implementation(libs.compose.runtime)
+                implementation(libs.androidx.activity.compose)
+                implementation(libs.koin.android)
             }
         }
-        androidUnitTest {
+        val androidHostTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlin.test.junit)
+                implementation(libs.koin.core)
+                implementation(libs.koin.test)
             }
         }
     }

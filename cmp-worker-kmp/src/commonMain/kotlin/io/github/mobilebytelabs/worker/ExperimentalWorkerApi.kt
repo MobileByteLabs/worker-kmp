@@ -10,7 +10,9 @@ package io.github.mobilebytelabs.worker
  * Opt in at the call site:
  * ```kotlin
  * @OptIn(ExperimentalWorkerApi::class)
- * fun initWorker() { initIosWorkManager(factory) }
+ * fun initWorker() {
+ *     startKoin { modules(workKoinModule(factory = iosWorkManagerFactory(), workers = registry)) }
+ * }
  * ```
  */
 @RequiresOptIn(

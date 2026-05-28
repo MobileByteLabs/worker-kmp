@@ -38,6 +38,11 @@ sealed class WorkRequest {
  * @property constraints execution prerequisites (network, charging, etc.).
  * @property retryConfig retry behaviour on [WorkResult.Retry].
  * @property tags labels for observation and bulk cancellation.
+ * @property initialDelay how long to wait before first attempt; defaults to [Duration.ZERO].
+ *   Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+ * @property expeditedPolicy when non-null, requests Android 12+ expedited execution.
+ *   [OutOfQuotaPolicy] controls behaviour when the expedited quota is exhausted.
+ *   No-op on iOS/Desktop/Web. Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
  */
 @ConsistentCopyVisibility
 data class OneTimeWorkRequest internal constructor(
@@ -47,6 +52,8 @@ data class OneTimeWorkRequest internal constructor(
     override val constraints: Constraints,
     override val retryConfig: RetryConfig,
     override val tags: Set<String>,
+    val initialDelay: Duration = Duration.ZERO,
+    val expeditedPolicy: OutOfQuotaPolicy? = null,
 ) : WorkRequest()
 
 /**
@@ -77,6 +84,8 @@ data class PeriodicWorkRequest internal constructor(
     override val tags: Set<String>,
     val repeatInterval: Duration,
     val flexTimeInterval: Duration = Duration.ZERO,
+    val initialDelay: Duration = Duration.ZERO,
+    val quickRefresh: Boolean = false,
 ) : WorkRequest()
 
 /**
@@ -93,6 +102,8 @@ class OneTimeWorkRequestBuilder<T : CoroutineWorker>(private val workerClass: St
     private var retryConfig: RetryConfig = RetryConfig.DEFAULT
     private val tags: MutableSet<String> = mutableSetOf()
     private var id: Uuid = Uuid.random()
+    private var initialDelay: Duration = Duration.ZERO
+    private var expeditedPolicy: OutOfQuotaPolicy? = null
 
     /** Sets the key-value payload passed to the worker as [CoroutineWorker.inputData]. */
     fun setInputData(data: WorkData): OneTimeWorkRequestBuilder<T> = apply { inputData = data }
@@ -110,6 +121,33 @@ class OneTimeWorkRequestBuilder<T : CoroutineWorker>(private val workerClass: St
     /** Overrides the auto-generated request ID (useful for idempotency). */
     fun setId(id: Uuid): OneTimeWorkRequestBuilder<T> = apply { this.id = id }
 
+    /**
+     * Sets the initial delay before the first attempt.
+     *
+     * Per-platform behaviour:
+     * - **Android**: maps to `androidx.work.WorkRequest.Builder.setInitialDelay(...)`.
+     * - **iOS**: sets `BGProcessingTaskRequest.earliestBeginDate` when background tasks
+     *   are enabled; otherwise the platform polling loop honours the delay via `delay()`.
+     * - **Desktop**: scheduler waits via coroutine `delay()` before invoking `doWork()`.
+     * - **Web**: scheduler waits via coroutine `delay()` before invoking `doWork()`.
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    fun setInitialDelay(delay: Duration): OneTimeWorkRequestBuilder<T> = apply { initialDelay = delay }
+
+    /**
+     * Requests Android 12+ expedited execution. [policy] controls behaviour when the
+     * expedited-work quota is exhausted (see [OutOfQuotaPolicy]).
+     *
+     * Per-platform behaviour:
+     * - **Android (API 31+)**: maps to `androidx.work.OneTimeWorkRequest.Builder.setExpedited(...)`.
+     * - **Android (<31)**: no-op (logged at debug level).
+     * - **iOS / Desktop / Web**: no-op (these platforms have no expedited-work concept).
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    fun setExpedited(policy: OutOfQuotaPolicy): OneTimeWorkRequestBuilder<T> = apply { expeditedPolicy = policy }
+
     /** Constructs the immutable [OneTimeWorkRequest]. */
     fun build(): OneTimeWorkRequest = OneTimeWorkRequest(
         id = id,
@@ -118,6 +156,8 @@ class OneTimeWorkRequestBuilder<T : CoroutineWorker>(private val workerClass: St
         constraints = constraints,
         retryConfig = retryConfig,
         tags = tags.toSet(),
+        initialDelay = initialDelay,
+        expeditedPolicy = expeditedPolicy,
     )
 }
 
@@ -139,6 +179,8 @@ class PeriodicWorkRequestBuilder<T : CoroutineWorker>(
     private var inputData: WorkData = WorkData.EMPTY
     private var constraints: Constraints = Constraints.NONE
     private val tags: MutableSet<String> = mutableSetOf()
+    private var initialDelay: Duration = Duration.ZERO
+    private var quickRefresh: Boolean = false
 
     /** Sets the key-value payload passed to the worker as [CoroutineWorker.inputData]. */
     fun setInputData(data: WorkData): PeriodicWorkRequestBuilder<T> = apply { inputData = data }
@@ -148,6 +190,26 @@ class PeriodicWorkRequestBuilder<T : CoroutineWorker>(
 
     /** Adds a tag for grouping, observation, or bulk cancellation. */
     fun addTag(tag: String): PeriodicWorkRequestBuilder<T> = apply { tags.add(tag) }
+
+    /**
+     * Sets the initial delay before the first attempt. See [OneTimeWorkRequestBuilder.setInitialDelay].
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    fun setInitialDelay(delay: Duration): PeriodicWorkRequestBuilder<T> = apply { initialDelay = delay }
+
+    /**
+     * iOS quick-refresh hint. When `true`, the iOS scheduler uses
+     * `BGAppRefreshTaskRequest` (short, frequent wake-ups) instead of
+     * `BGProcessingTaskRequest` (longer, less frequent). Requires
+     * `appRefreshTaskIdentifier` to be set on `IosWorkerConfig` AND the matching
+     * identifier in `Info.plist → BGTaskSchedulerPermittedIdentifiers`.
+     *
+     * No-op on Android / Desktop / Web.
+     *
+     * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
+     */
+    fun setQuickRefresh(enabled: Boolean): PeriodicWorkRequestBuilder<T> = apply { quickRefresh = enabled }
 
     /** Constructs the immutable [PeriodicWorkRequest]. */
     fun build(): PeriodicWorkRequest = PeriodicWorkRequest(
@@ -159,6 +221,8 @@ class PeriodicWorkRequestBuilder<T : CoroutineWorker>(
         tags = tags.toSet(),
         repeatInterval = repeatInterval,
         flexTimeInterval = flexTimeInterval,
+        initialDelay = initialDelay,
+        quickRefresh = quickRefresh,
     )
 }
 

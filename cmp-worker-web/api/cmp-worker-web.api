@@ -2,7 +2,27 @@ public final class io/github/mobilebytelabs/worker/web/BackgroundSyncScriptKt {
 	public static final fun backgroundSyncServiceWorkerScript ()Ljava/lang/String;
 }
 
+public final class io/github/mobilebytelabs/worker/web/BroadcastChannelBridge_jvmKt {
+	public static final fun openWorkerKmpBroadcastChannel (Lkotlin/jvm/functions/Function2;)Lio/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription;
+}
+
+public final class io/github/mobilebytelabs/worker/web/NotificationPermission : java/lang/Enum {
+	public static final field DEFAULT Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+	public static final field DENIED Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+	public static final field GRANTED Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+}
+
+public final class io/github/mobilebytelabs/worker/web/WebNotificationsKt {
+	public static final fun requestNotificationPermission (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun showWorkerNotification (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
+	public static synthetic fun showWorkerNotification$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
+}
+
 public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/github/mobilebytelabs/worker/WorkManager {
+	public static final field $stable I
 	public fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;)V
 	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -15,20 +35,23 @@ public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/githu
 }
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig {
+	public static final field $stable I
 	public static final field Companion Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Companion;
 	public fun <init> ()V
-	public fun <init> (JZLjava/lang/String;ZLjava/lang/String;)V
-	public synthetic fun <init> (JZLjava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (JZLjava/lang/String;ZLjava/lang/String;Z)V
+	public synthetic fun <init> (JZLjava/lang/String;ZLjava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()J
 	public final fun component2 ()Z
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
 	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (JZLjava/lang/String;ZLjava/lang/String;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;JZLjava/lang/String;ZLjava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+	public final fun component6 ()Z
+	public final fun copy (JZLjava/lang/String;ZLjava/lang/String;Z)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;JZLjava/lang/String;ZLjava/lang/String;ZILjava/lang/Object;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getConstraintCheckIntervalMs ()J
 	public final fun getEnableBackgroundSync ()Z
+	public final fun getEnablePeriodicBackgroundSync ()Z
 	public final fun getEnablePersistence ()Z
 	public final fun getPersistenceDbName ()Ljava/lang/String;
 	public final fun getServiceWorkerScript ()Ljava/lang/String;
@@ -42,5 +65,9 @@ public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Comp
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManagerSupportKt {
 	public static final fun isWebWorkManagerSupported ()Z
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription {
+	public abstract fun close ()V
 }
 

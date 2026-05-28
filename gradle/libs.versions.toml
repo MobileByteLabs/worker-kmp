@@ -9,6 +9,7 @@ android-minSdk = "24"
 android-compileSdk = "36"
 android-targetSdk = "36"
 junit = "4.13.2"
+kermit = "2.0.6"
 bcv = "0.17.0"
 dokka = "2.0.0"
 koin = "4.0.4"
@@ -16,6 +17,11 @@ spotless = "8.5.1"
 detekt = "1.23.8"
 ktlint = "1.8.0"
 vanniktech-publish = "0.36.0"
+# Store5 — Mobile Native Foundation's KMP store/cache library.
+# 5.1.0-alpha06 is the latest published version on Maven Central as of 2026-05-27;
+# 5.0.0 GA lacks wasmJs targets so we track the alpha06 line which matches our
+# full KMP target matrix (jvm + iosArm64 + iosSimulatorArm64 + iosX64 + js + wasmJs).
+store5 = "5.1.0-alpha06"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
@@ -27,10 +33,13 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit" }
@@ -38,6 +47,7 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+store5 = { module = "org.mobilenativefoundation.store:store5", version.ref = "store5" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.05.01" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }

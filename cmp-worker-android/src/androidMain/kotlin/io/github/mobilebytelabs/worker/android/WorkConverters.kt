@@ -5,6 +5,7 @@ import io.github.mobilebytelabs.worker.BackoffPolicy
 import io.github.mobilebytelabs.worker.Constraints
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
 import io.github.mobilebytelabs.worker.NetworkType
+import io.github.mobilebytelabs.worker.OutOfQuotaPolicy
 import io.github.mobilebytelabs.worker.WorkData
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkProgress
@@ -13,6 +14,7 @@ import androidx.work.BackoffPolicy as AndroidBackoffPolicy
 import androidx.work.Constraints as AndroidConstraints
 import androidx.work.ExistingPeriodicWorkPolicy as AndroidExistingPeriodicWorkPolicy
 import androidx.work.NetworkType as AndroidNetworkType
+import androidx.work.OutOfQuotaPolicy as AndroidOutOfQuotaPolicy
 import androidx.work.WorkInfo as AndroidWorkInfo
 
 internal const val KEY_KMP_ID = "kmp_worker_id"
@@ -54,6 +56,11 @@ internal fun Constraints.toAndroid(): AndroidConstraints {
         )
     }
     return builder.build()
+}
+
+internal fun OutOfQuotaPolicy.toAndroid(): AndroidOutOfQuotaPolicy = when (this) {
+    OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST -> AndroidOutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST
+    OutOfQuotaPolicy.DROP_WORK_REQUEST -> AndroidOutOfQuotaPolicy.DROP_WORK_REQUEST
 }
 
 internal fun ExistingPeriodicWorkPolicy.toAndroid(): AndroidExistingPeriodicWorkPolicy = when (this) {

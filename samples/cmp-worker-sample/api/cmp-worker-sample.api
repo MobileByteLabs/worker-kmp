@@ -1,0 +1,83 @@
+public final class io/github/mobilebytelabs/worker/sample/ComposableSingletons$ComposeSampleAppKt {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/sample/ComposableSingletons$ComposeSampleAppKt;
+	public fun <init> ()V
+	public final fun getLambda$-1394178341$cmp_worker_sample ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1422875303$cmp_worker_sample ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1653934485$cmp_worker_sample ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$857109449$cmp_worker_sample ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/ComposeSampleAppKt {
+	public static final fun ComposeSampleApp (Landroidx/compose/runtime/Composer;I)V
+	public static final fun PreviewComposeSampleApp (Landroidx/compose/runtime/Composer;I)V
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class io/github/mobilebytelabs/worker/sample/DefaultGreetingRepository : io/github/mobilebytelabs/worker/sample/GreetingRepository {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun greet (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/sample/GreetingRepository {
+	public abstract fun greet (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/KoinGreetingWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
+	public static final field $stable I
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lio/github/mobilebytelabs/worker/sample/GreetingRepository;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/KoinSampleAppKt {
+	public static final fun getAppModule ()Lorg/koin/core/module/Module;
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class io/github/mobilebytelabs/worker/sample/SampleAppKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class io/github/mobilebytelabs/worker/sample/SampleWorkerFactory : io/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory {
+	public static final field $stable I
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/sample/SampleWorkerFactory;
+	public fun create (Ljava/lang/String;Lio/github/mobilebytelabs/worker/WorkerContext;)Lio/github/mobilebytelabs/worker/CoroutineWorker;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/workers/CacheCleanupWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
+	public static final field $stable I
+	public static final field Companion Lio/github/mobilebytelabs/worker/sample/workers/CacheCleanupWorker$Companion;
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/workers/CacheCleanupWorker$Companion {
+	public final fun getRunCount ()Ljava/util/concurrent/atomic/AtomicInteger;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/workers/DataSyncWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
+	public static final field $stable I
+	public static final field Companion Lio/github/mobilebytelabs/worker/sample/workers/DataSyncWorker$Companion;
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/workers/DataSyncWorker$Companion {
+	public final fun getCallCount ()Ljava/util/concurrent/atomic/AtomicInteger;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/workers/ImageResizeWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
+	public static final field $stable I
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/workers/LongRunningWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
+	public static final field $stable I
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

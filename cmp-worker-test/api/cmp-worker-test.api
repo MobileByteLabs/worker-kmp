@@ -1,0 +1,22 @@
+public final class io/github/mobilebytelabs/worker/test/TestWorkManager : io/github/mobilebytelabs/worker/WorkManager {
+	public fun <init> ()V
+	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getEnqueuedRequests ()Ljava/util/List;
+	public final fun getLastEnqueuedRequest ()Lio/github/mobilebytelabs/worker/WorkRequest;
+	public final fun getUniqueWorkNames ()Ljava/util/List;
+	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public final fun hasWorkWithTag (Ljava/lang/String;)Z
+	public final fun reset ()V
+	public final fun simulateWorkFailure (Lkotlin/uuid/Uuid;)V
+	public final fun simulateWorkProgress (Lkotlin/uuid/Uuid;Lio/github/mobilebytelabs/worker/WorkProgress;)V
+	public final fun simulateWorkRetry (Lkotlin/uuid/Uuid;)V
+	public final fun simulateWorkRunning (Lkotlin/uuid/Uuid;)V
+	public final fun simulateWorkSuccess (Lkotlin/uuid/Uuid;Lio/github/mobilebytelabs/worker/WorkData;)V
+	public static synthetic fun simulateWorkSuccess$default (Lio/github/mobilebytelabs/worker/test/TestWorkManager;Lkotlin/uuid/Uuid;Lio/github/mobilebytelabs/worker/WorkData;ILjava/lang/Object;)V
+	public final fun workCountWithTag (Ljava/lang/String;)I
+}
+
