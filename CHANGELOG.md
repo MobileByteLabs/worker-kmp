@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Samples
+
+- **`samples/cmp-worker-sample-compose-store/`** — new end-to-end Compose Multiplatform
+  sample exercising the full integration story: `cmp-worker-kmp` + `cmp-worker-store5` +
+  `cmp-worker-koin` + `cmp-worker-compose`. A `StoreBackedWorker` refreshes a Store5
+  `Store<String, Article>` from a fake fetcher; the Compose UI observes both the
+  `WorkInfo` flow (via `WorkInfoCard`) and the Store cached stream simultaneously, so
+  the worker's effect on the cache is visible through two independent surfaces. JVM
+  target only for the first cut — `App()` lives in `commonMain` so iOS / wasmJs / Android
+  entry points are a small follow-up. Run: `./gradlew :samples:cmp-worker-sample-compose-store:run`.
+
 ### Repo layout
 
 - **Samples moved to `samples/`** — `cmp-worker-sample`, `cmp-worker-sample-android`,
