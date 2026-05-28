@@ -298,10 +298,16 @@ class DesktopWorkManagerTest {
         val wm = workManager(sharedPersistence)
         val request = OneTimeWorkRequestBuilder<SuccessWorker>(SuccessWorker::class.qualifiedName!!).build()
         val id = wm.enqueue(request)
-        eventually { wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED }
-        // Terminal state (SUCCEEDED) should be deleted from persistence
-        eventually { sharedPersistence.loadAll().none { it.id == id } }
-        assertTrue(sharedPersistence.loadAll().none { it.id == id }, "Succeeded work should not persist")
+        // CI runners (especially under load) can take >2s for the worker to transition
+        // to SUCCEEDED + the post-success persistence cleanup to settle. Bumped from
+        // the default 2s to 10s after a flake on a shared GitHub Actions runner
+        // (a7cf360 commit's first run). Local + warm CI typically clears in <500ms.
+        eventually(timeoutMs = 10_000, description = "work $id reaches SUCCEEDED") {
+            wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED
+        }
+        eventually(timeoutMs = 10_000, description = "persistence cleared of succeeded work $id") {
+            sharedPersistence.loadAll().none { it.id == id }
+        }
         wm.shutdown()
     }
 
@@ -339,7 +345,21 @@ class DesktopWorkManagerTest {
 
 // ── Test utilities ────────────────────────────────────────────────────────────
 
-private suspend fun eventually(timeoutMs: Long = 2_000, intervalMs: Long = 50, condition: suspend () -> Boolean) {
+/**
+ * Poll [condition] every [intervalMs] up to [timeoutMs]; throw [AssertionError] on
+ * timeout. Previously this helper returned silently when the deadline expired —
+ * combined with a following `assertX(...)` checking the same condition, it produced
+ * confusing "AssertionError at line N" failures that masked the underlying timeout.
+ * Loud-on-timeout makes CI flakes (slow runners, missed deadline) immediately
+ * diagnosable. Callers that paired this with a following assertion are now
+ * redundantly-safe — the timeout AssertionError fires first.
+ */
+private suspend fun eventually(
+    timeoutMs: Long = 2_000,
+    intervalMs: Long = 50,
+    description: String = "condition",
+    condition: suspend () -> Boolean,
+) {
     val deadline = System.currentTimeMillis() + timeoutMs
     while (System.currentTimeMillis() < deadline) {
         if (condition()) return
@@ -347,4 +367,5 @@ private suspend fun eventually(timeoutMs: Long = 2_000, intervalMs: Long = 50, c
         // delays in DesktopWorkManager (retries, periodic intervals) can actually progress.
         withContext(Dispatchers.IO) { Thread.sleep(intervalMs) }
     }
+    throw AssertionError("eventually(timeoutMs=$timeoutMs) timed out waiting for: $description")
 }

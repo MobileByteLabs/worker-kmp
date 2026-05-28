@@ -150,7 +150,7 @@ private fun CachedArticleSection(articleId: String, response: StoreReadResponse<
                     )
                 }
                 is StoreReadResponse.Error -> Text(
-                    text = "Store error: ${response.errorMessageOrNull() ?: response::class.simpleName}",
+                    text = "Store error: ${response.resolveErrorMessage() ?: response::class.simpleName}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )
@@ -173,7 +173,8 @@ private fun CachedArticleSection(articleId: String, response: StoreReadResponse<
     }
 }
 
-private fun StoreReadResponse.Error.errorMessageOrNull(): String? = when (this) {
+// Renamed from `errorMessageOrNull` to avoid shadowing Store5's same-named member.
+private fun StoreReadResponse.Error.resolveErrorMessage(): String? = when (this) {
     is StoreReadResponse.Error.Exception -> error.message
     is StoreReadResponse.Error.Message -> message
     else -> null
