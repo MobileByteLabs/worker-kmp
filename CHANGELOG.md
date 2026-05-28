@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `cmp-worker-compose-all` all-in-one bundle module
+
+New Maven artifact `io.github.mobilebytelabs:worker-compose-all` that re-exports
+core + Compose UI + Koin + Store5 + all 4 platform modules + launcher APIs via
+`api(project(...))`. CMP consumer apps drop from 5+ separate `worker-*` deps to
+**one**:
+
+```kotlin
+implementation("io.github.mobilebytelabs:worker-compose-all:$workerVersion")
+implementation("io.insert-koin:koin-compose:$koinVersion")
+```
+
+Non-breaking: the 4 individual platform modules (`worker-android`, `worker-desktop`,
+`worker-ios`, `worker-web`) + `worker-compose` (UI only) + `worker-kmp` (core) +
+`worker-koin` + `worker-store5` all continue to publish independently. Consumers
+who want granular deps (e.g. pure-Android no-Compose) keep their fine-grained
+options.
+
+`samples/cmp-worker-sample-compose-store` migrated to use the bundle as its
+single worker-kmp dep — proves the bundle works end-to-end on all 5 targets.
+
+See `cmp-worker-compose-all/README.md` for the "use this for CMP apps" pattern.
+
 ### Added — Compose Multiplatform launcher helpers (worker-kmp-cmp-launchers epic)
 
 End-to-end Compose Multiplatform support for consumer sample apps. The library now ships

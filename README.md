@@ -22,11 +22,24 @@ No per-platform consumer init code. Same `WorkManager` API everywhere.
 
 ### 1. Add the dependency (commonMain)
 
+**Building a Compose Multiplatform app (Android + Desktop + iOS + Web)?** Use the all-in-one bundle — **one dep** brings in core + UI + Koin + Store5 + all 4 platform factories + launchers:
+
 ```kotlin
 // gradle/libs.versions.toml
 worker-kmp = "3.0.0"
 
 // commonMain build.gradle.kts
+dependencies {
+    implementation("io.github.mobilebytelabs:worker-compose-all:$workerVersion")
+    implementation(libs.koin.compose)                  // Koin's Compose helpers
+}
+```
+
+See [`cmp-worker-compose-all/README.md`](cmp-worker-compose-all/README.md) for the full per-platform launcher pattern (3-5 lines each).
+
+**Only need a subset** (e.g. pure-Android no-Compose)? The individual `worker-*` artifacts remain available:
+
+```kotlin
 dependencies {
     api(libs.worker.kmp)
     api(libs.worker.koin)
