@@ -62,7 +62,11 @@ targets:
         CFBundleVersion: "1"
         CFBundleShortVersionString: "1.0"
     dependencies:
-      - framework: ComposeApp.framework
+      # Explicit relative path to the Kotlin/Native iOS Simulator framework
+      # produced by `./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosSimulatorArm64`.
+      # Without `path:`, xcodegen looks in the project dir for a literal
+      # ComposeApp.framework file which doesn't exist there.
+      - framework: ../build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
         embed: true
     settings:
       base:
