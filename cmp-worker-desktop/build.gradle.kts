@@ -3,6 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
 }
@@ -28,12 +30,17 @@ kotlin {
                 api(project(":cmp-worker-kmp"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
+                // worker-kmp-cmp-launchers-02: launcher API surface
+                implementation(compose.desktop.currentOs)
+                implementation(compose.runtime)
+                implementation(libs.koin.core)
             }
         }
         jvmTest {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.koin.test)
             }
         }
     }

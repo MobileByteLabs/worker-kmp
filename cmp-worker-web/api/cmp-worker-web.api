@@ -2,12 +2,8 @@ public final class io/github/mobilebytelabs/worker/web/BackgroundSyncScriptKt {
 	public static final fun backgroundSyncServiceWorkerScript ()Ljava/lang/String;
 }
 
-public final class io/github/mobilebytelabs/worker/web/BroadcastChannelBridgeKt {
+public final class io/github/mobilebytelabs/worker/web/BroadcastChannelBridge_jvmKt {
 	public static final fun openWorkerKmpBroadcastChannel (Lkotlin/jvm/functions/Function2;)Lio/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription;
-}
-
-public abstract interface class io/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription {
-	public abstract fun close ()V
 }
 
 public final class io/github/mobilebytelabs/worker/web/NotificationPermission : java/lang/Enum {
@@ -26,6 +22,7 @@ public final class io/github/mobilebytelabs/worker/web/WebNotificationsKt {
 }
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/github/mobilebytelabs/worker/WorkManager {
+	public static final field $stable I
 	public fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;)V
 	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -38,6 +35,7 @@ public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/githu
 }
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig {
+	public static final field $stable I
 	public static final field Companion Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Companion;
 	public fun <init> ()V
 	public fun <init> (JZLjava/lang/String;ZLjava/lang/String;Z)V
@@ -67,5 +65,9 @@ public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Comp
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManagerSupportKt {
 	public static final fun isWebWorkManagerSupported ()Z
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription {
+	public abstract fun close ()V
 }
 

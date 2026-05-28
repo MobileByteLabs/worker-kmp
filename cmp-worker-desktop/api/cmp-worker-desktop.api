@@ -1,4 +1,5 @@
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManager : io/github/mobilebytelabs/worker/WorkManager {
+	public static final field $stable I
 	public fun <init> (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;)V
 	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -11,6 +12,7 @@ public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManager : 
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig {
+	public static final field $stable I
 	public static final field Companion Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig$Companion;
 	public fun <init> ()V
 	public fun <init> (IZLjava/io/File;J)V
@@ -41,5 +43,10 @@ public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerIni
 
 public abstract interface class io/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory {
 	public abstract fun create (Ljava/lang/String;Lio/github/mobilebytelabs/worker/WorkerContext;)Lio/github/mobilebytelabs/worker/CoroutineWorker;
+}
+
+public final class io/github/mobilebytelabs/worker/desktop/LaunchDesktopWorkerAppKt {
+	public static final fun launchDesktopWorkerApp (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
+	public static final fun startWorkerKoinIfAbsent (Lkotlin/jvm/functions/Function0;)V
 }
 

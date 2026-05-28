@@ -12,13 +12,30 @@ version = providers.gradleProperty("worker.version").get()
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
+    // ── JVM Desktop ────────────────────────────────────────────────────────────
     jvm {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
+        compilerOptions { jvmTarget.set(JvmTarget.JVM_11) }
         mainRun {
             mainClass.set("io.github.mobilebytelabs.worker.sample.composestore.MainKt")
         }
+    }
+
+    // ── iOS — Compose Multiplatform framework consumed by iosApp/ Xcode project
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
+    // ── Web (wasmJs) ───────────────────────────────────────────────────────────
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        outputModuleName.set("cmp-worker-sample-compose-store")
+        browser {
+            commonWebpackConfig { outputFileName = "cmp-worker-sample-compose-store.js" }
+        }
+        binaries.executable()
     }
 
     compilerOptions {
@@ -38,6 +55,7 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.foundation)
                 implementation(compose.ui)
+                implementation(libs.koin.compose)
             }
         }
         jvmMain {
@@ -45,6 +63,16 @@ kotlin {
                 implementation(project(":cmp-worker-desktop"))
                 implementation(compose.desktop.currentOs)
                 implementation(compose.preview)
+            }
+        }
+        iosMain {
+            dependencies {
+                implementation(project(":cmp-worker-ios"))
+            }
+        }
+        val wasmJsMain by getting {
+            dependencies {
+                implementation(project(":cmp-worker-web"))
             }
         }
     }

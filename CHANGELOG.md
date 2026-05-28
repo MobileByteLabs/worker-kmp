@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — Compose Multiplatform launcher helpers (worker-kmp-cmp-launchers epic)
+
+End-to-end Compose Multiplatform support for consumer sample apps. The library now ships
+platform-specific launcher helpers so consumer per-platform launcher files reduce to
+≤10 source lines each, with UI living entirely in `commonMain`.
+
+- **`cmp-worker-compose`** — added `iosArm64()` + `iosSimulatorArm64()` publication
+  targets. `WorkManagerProvider`, `BackgroundCapabilitiesBanner`, `WorkMonitorScreen`,
+  `LocalWorkManager` and the rest of the Compose helpers now compile + ship for iOS.
+  Root `apiValidation { klib { enabled = true } }` produces a merged BCV klib snapshot
+  at `cmp-worker-compose/api/cmp-worker-compose.klib.api` covering iOS + JS + wasmJs.
+- **`cmp-worker-android`** — added open base classes:
+  - `WorkerKmpComposeActivity(content: @Composable () -> Unit)` — `ComponentActivity`
+    subclass that wires `setContent { content() }` for you.
+  - `WorkerKmpStarterApplication` — `Application` subclass with abstract
+    `modules(): List<Module>`; runs `startKoin { androidContext(this); modules(modules()) }`
+    idempotently on `onCreate`.
+- **`cmp-worker-desktop`** — added top-level `launchDesktopWorkerApp(title, koinModules, content)`
+  wrapping `application { Window(...) { content() } }` after an idempotent Koin start.
+- **`cmp-worker-ios`** — added `workerKmpMainViewController(koinModules, content): UIViewController`
+  returning a `ComposeUIViewController { content() }` after an idempotent Koin start.
+  Now ships a static `WorkerKmpIos.framework` for Swift / SwiftUI consumption.
+- **`cmp-worker-web`** — added `launchWebWorkerApp(canvasElementId, koinModules, content)` for
+  both wasmJs and js(IR) targets, wrapping `CanvasBasedWindow(canvasElementId) { content() }`.
+- **`gradle/libs.versions.toml`** — added `koin-compose` alias (`io.insert-koin:koin-compose`).
+
+All new public APIs include Dokka KDoc with runnable code examples. Idempotent Koin
+helpers (`startWorkerKoinIfAbsent`) are exposed for test fixtures.
+
+### Changed — `cmp-worker-sample-compose-store` is now fully Compose Multiplatform
+
+The sample previously ran on JVM Desktop only with a hand-rolled 52-line `Main.kt`.
+It now targets **all 5 KMP platforms** with per-platform launcher files reduced to
+≤10 source lines each, courtesy of the launcher APIs above:
+
+- UI moved to `commonMain/.../ui/SampleApp.kt` (no parameters — pulls `WorkManager` +
+  Store via `koinInject`); `commonMain/.../ui/App.kt` deleted.
+- Shared Koin module factory at `commonMain/.../di/SampleKoinSetup.kt` so each per-platform
+  launcher differs only in which `WorkManagerFactory` it plugs in.
+- Android: `SampleApplication` (3 lines) + `MainActivity` (1 line) + `AndroidManifest.xml`.
+- Desktop: `jvmMain/Main.kt` (4 lines, down from 52).
+- iOS: `iosMain/MainViewController.kt` (3 lines) + `iosApp/` Xcode wrapper using
+  xcodegen for merge-friendly project generation.
+- Web (wasmJs): `wasmJsMain/Main.kt` (4 lines) + `wasmJsMain/resources/index.html` shell
+  with `<canvas id="composeCanvas">`.
+
+### Internal
+
+- `.github/workflows/pr-check.yml` gains 3 new jobs: `ios-bcv-check` (runs
+  `scripts/check-ios-artifact.sh`), `sample-wasmjs` (`wasmJsBrowserDistribution`),
+  `sample-ios` (Kotlin/Native framework link + xcodegen + `xcodebuild` against iOS sim).
+- `scripts/check-ios-artifact.sh` — guard script asserting `cmp-worker-compose`'s
+  klib BCV snapshot covers `iosArm64` + `iosSimulatorArm64`.
+
 ### Samples
 
 - **`samples/cmp-worker-sample-compose-store/`** — new end-to-end Compose Multiplatform

@@ -35,6 +35,18 @@ dependencyResolutionManagement {
             metadataSources { artifact() }
             content { includeModule("com.yarnpkg", "yarn") }
         }
+        // worker-kmp-cmp-launchers-03: wasmJs sample's executable() distribution
+        // needs binaryen for the wasm-opt pass. Standard Compose Multiplatform
+        // wasmJs setup — pulls binaryen from GitHub releases.
+        ivy {
+            name = "Binaryen"
+            setUrl("https://github.com/WebAssembly/binaryen/releases/download")
+            patternLayout {
+                artifact("version_[revision]/[artifact]-version_[revision]-[classifier].[ext]")
+            }
+            metadataSources { artifact() }
+            content { includeModule("com.github.webassembly", "binaryen") }
+        }
     }
 }
 
