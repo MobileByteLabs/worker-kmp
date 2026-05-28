@@ -20,8 +20,13 @@
 name: iosApp
 options:
   bundleIdPrefix: io.github.mobilebytelabs.worker.sample.composestore
+  # Compose Multiplatform 1.11.0's iOS framework auto-links `UIUtilities` (a
+  # private framework available on iOS 17+) and is built against the iOS 18.x
+  # simulator SDK on modern CI runners. Bumped from 15.0 → 17.0 to match the
+  # floor the auto-linked frameworks expect; otherwise xcodebuild fails with
+  # "Could not find or use auto-linked framework 'UIUtilities'".
   deploymentTarget:
-    iOS: "15.0"
+    iOS: "17.0"
   createIntermediateGroups: true
 
 settings:
