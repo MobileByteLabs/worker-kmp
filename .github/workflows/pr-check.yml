@@ -54,11 +54,20 @@ jobs:
   # worker-kmp-cmp-launchers-03: build the iOS framework + xcodebuild the
   # iosApp wrapper. The .xcodeproj is generated from iosApp/project.yml via
   # xcodegen (see iosApp/README.md for the rationale).
+  #
+  # macos-15-arm64 runner is required because Compose Multiplatform 1.11.0's
+  # iOS framework auto-links iOS-18-only private frameworks (UIUtilities,
+  # SwiftUICore). macos-latest currently ships Xcode 16.4 (iOS SDK 17.x)
+  # which lacks these symbols at link time. macos-15-arm64 has Xcode 26.x
+  # available — selected explicitly below.
   sample-ios:
     name: cmp-worker-sample-compose-store — iOS sim build
-    runs-on: macos-latest
+    runs-on: macos-15-arm64
     steps:
       - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.3'
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
