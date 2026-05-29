@@ -1,0 +1,9 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-koin>
+final fun io.github.mobilebytelabs.worker.koin/workKoinModule(io.github.mobilebytelabs.worker.config/WorkerConfig = ..., io.github.mobilebytelabs.worker.registry/WorkerRegistry = ..., io.github.mobilebytelabs.worker/WorkManagerFactory): org.koin.core.module/Module // io.github.mobilebytelabs.worker.koin/workKoinModule|workKoinModule(io.github.mobilebytelabs.worker.config.WorkerConfig;io.github.mobilebytelabs.worker.registry.WorkerRegistry;io.github.mobilebytelabs.worker.WorkManagerFactory){}[0]

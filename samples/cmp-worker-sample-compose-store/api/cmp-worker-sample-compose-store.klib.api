@@ -1,0 +1,52 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, wasmJs]
+// Alias: ios => [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-sample-compose-store>
+final class io.github.mobilebytelabs.worker.sample.composestore.domain/Article { // io.github.mobilebytelabs.worker.sample.composestore.domain/Article|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/Long) // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.Long){}[0]
+
+    final val body // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.body|{}body[0]
+        final fun <get-body>(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.body.<get-body>|<get-body>(){}[0]
+    final val fetchedAtEpochMs // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.fetchedAtEpochMs|{}fetchedAtEpochMs[0]
+        final fun <get-fetchedAtEpochMs>(): kotlin/Long // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.fetchedAtEpochMs.<get-fetchedAtEpochMs>|<get-fetchedAtEpochMs>(){}[0]
+    final val id // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.id|{}id[0]
+        final fun <get-id>(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.id.<get-id>|<get-id>(){}[0]
+    final val title // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.title|{}title[0]
+        final fun <get-title>(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.component2|component2(){}[0]
+    final fun component3(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.component3|component3(){}[0]
+    final fun component4(): kotlin/Long // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/Long = ...): io.github.mobilebytelabs.worker.sample.composestore.domain/Article // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.sample.composestore.domain/Article.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.sample.composestore.workers/ArticleSyncWorker : io.github.mobilebytelabs.worker.store5/StoreBackedWorker<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article> { // io.github.mobilebytelabs.worker.sample.composestore.workers/ArticleSyncWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext, org.mobilenativefoundation.store.store5/Store<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article>, kotlin/String) // io.github.mobilebytelabs.worker.sample.composestore.workers/ArticleSyncWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext;org.mobilenativefoundation.store.store5.Store<kotlin.String,io.github.mobilebytelabs.worker.sample.composestore.domain.Article>;kotlin.String){}[0]
+}
+
+final val io.github.mobilebytelabs.worker.sample.composestore.domain/io_github_mobilebytelabs_worker_sample_composestore_domain_Article$stableprop // io.github.mobilebytelabs.worker.sample.composestore.domain/io_github_mobilebytelabs_worker_sample_composestore_domain_Article$stableprop|#static{}io_github_mobilebytelabs_worker_sample_composestore_domain_Article$stableprop[0]
+final val io.github.mobilebytelabs.worker.sample.composestore.workers/io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop // io.github.mobilebytelabs.worker.sample.composestore.workers/io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop|#static{}io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop[0]
+
+final fun io.github.mobilebytelabs.worker.sample.composestore.di/appModule(org.mobilenativefoundation.store.store5/Store<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article>): org.koin.core.module/Module // io.github.mobilebytelabs.worker.sample.composestore.di/appModule|appModule(org.mobilenativefoundation.store.store5.Store<kotlin.String,io.github.mobilebytelabs.worker.sample.composestore.domain.Article>){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.di/articleWorkerKoinModule(org.mobilenativefoundation.store.store5/Store<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article>, io.github.mobilebytelabs.worker/WorkManagerFactory): org.koin.core.module/Module // io.github.mobilebytelabs.worker.sample.composestore.di/articleWorkerKoinModule|articleWorkerKoinModule(org.mobilenativefoundation.store.store5.Store<kotlin.String,io.github.mobilebytelabs.worker.sample.composestore.domain.Article>;io.github.mobilebytelabs.worker.WorkManagerFactory){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.di/sampleKoinModules(io.github.mobilebytelabs.worker/WorkManagerFactory): kotlin.collections/List<org.koin.core.module/Module> // io.github.mobilebytelabs.worker.sample.composestore.di/sampleKoinModules|sampleKoinModules(io.github.mobilebytelabs.worker.WorkManagerFactory){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.domain/io_github_mobilebytelabs_worker_sample_composestore_domain_Article$stableprop_getter(): kotlin/Int // io.github.mobilebytelabs.worker.sample.composestore.domain/io_github_mobilebytelabs_worker_sample_composestore_domain_Article$stableprop_getter|io_github_mobilebytelabs_worker_sample_composestore_domain_Article$stableprop_getter(){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.store/buildArticlesStore(): org.mobilenativefoundation.store.store5/Store<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article> // io.github.mobilebytelabs.worker.sample.composestore.store/buildArticlesStore|buildArticlesStore(){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.ui/ArticlesScreen(org.mobilenativefoundation.store.store5/Store<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.mobilebytelabs.worker.sample.composestore.ui/ArticlesScreen|ArticlesScreen(org.mobilenativefoundation.store.store5.Store<kotlin.String,io.github.mobilebytelabs.worker.sample.composestore.domain.Article>;androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.ui/SampleApp(androidx.compose.runtime/Composer?, kotlin/Int) // io.github.mobilebytelabs.worker.sample.composestore.ui/SampleApp|SampleApp(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
+final fun io.github.mobilebytelabs.worker.sample.composestore.workers/io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop_getter(): kotlin/Int // io.github.mobilebytelabs.worker.sample.composestore.workers/io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop_getter|io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop_getter(){}[0]
+
+// Targets: [ios]
+final fun io.github.mobilebytelabs.worker.sample.composestore/MainViewController(): platform.UIKit/UIViewController // io.github.mobilebytelabs.worker.sample.composestore/MainViewController|MainViewController(){}[0]
+
+// Targets: [wasmJs]
+final fun io.github.mobilebytelabs.worker.sample.composestore/main() // io.github.mobilebytelabs.worker.sample.composestore/main|main(){}[0]

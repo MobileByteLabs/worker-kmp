@@ -1,0 +1,76 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-web-push>
+abstract interface io.github.mobilebytelabs.worker.webpush/WebPushSubscriber { // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber|null[0]
+    abstract val pushSupported // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.pushSupported|{}pushSupported[0]
+        abstract fun <get-pushSupported>(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.pushSupported.<get-pushSupported>|<get-pushSupported>(){}[0]
+    abstract val requiresPwaInstall // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.requiresPwaInstall|{}requiresPwaInstall[0]
+        abstract fun <get-requiresPwaInstall>(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.requiresPwaInstall.<get-requiresPwaInstall>|<get-requiresPwaInstall>(){}[0]
+
+    abstract suspend fun currentSubscription(): io.github.mobilebytelabs.worker.webpush/WebPushSubscription? // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.currentSubscription|currentSubscription(){}[0]
+    abstract suspend fun ensureSubscribed(io.github.mobilebytelabs.worker.webpush/WebPushConfig): io.github.mobilebytelabs.worker.webpush/WebPushSubscription? // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.ensureSubscribed|ensureSubscribed(io.github.mobilebytelabs.worker.webpush.WebPushConfig){}[0]
+    abstract suspend fun unsubscribe(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushSubscriber.unsubscribe|unsubscribe(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.webpush/WebPushConfig { // io.github.mobilebytelabs.worker.webpush/WebPushConfig|null[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/String = ..., kotlin/String = ..., kotlin.coroutines/SuspendFunction0<kotlin/String>? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String = ..., kotlin/Int = ...) // io.github.mobilebytelabs.worker.webpush/WebPushConfig.<init>|<init>(kotlin.Boolean;kotlin.String;kotlin.String;kotlin.coroutines.SuspendFunction0<kotlin.String>?;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.Int){}[0]
+
+    final val enabled // io.github.mobilebytelabs.worker.webpush/WebPushConfig.enabled|{}enabled[0]
+        final fun <get-enabled>(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.enabled.<get-enabled>|<get-enabled>(){}[0]
+    final val foregroundFallback // io.github.mobilebytelabs.worker.webpush/WebPushConfig.foregroundFallback|{}foregroundFallback[0]
+        final fun <get-foregroundFallback>(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.foregroundFallback.<get-foregroundFallback>|<get-foregroundFallback>(){}[0]
+    final val notificationPermissionAutoRequest // io.github.mobilebytelabs.worker.webpush/WebPushConfig.notificationPermissionAutoRequest|{}notificationPermissionAutoRequest[0]
+        final fun <get-notificationPermissionAutoRequest>(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.notificationPermissionAutoRequest.<get-notificationPermissionAutoRequest>|<get-notificationPermissionAutoRequest>(){}[0]
+    final val serverEndpoint // io.github.mobilebytelabs.worker.webpush/WebPushConfig.serverEndpoint|{}serverEndpoint[0]
+        final fun <get-serverEndpoint>(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.serverEndpoint.<get-serverEndpoint>|<get-serverEndpoint>(){}[0]
+    final val serverEndpointAuthHeader // io.github.mobilebytelabs.worker.webpush/WebPushConfig.serverEndpointAuthHeader|{}serverEndpointAuthHeader[0]
+        final fun <get-serverEndpointAuthHeader>(): kotlin.coroutines/SuspendFunction0<kotlin/String>? // io.github.mobilebytelabs.worker.webpush/WebPushConfig.serverEndpointAuthHeader.<get-serverEndpointAuthHeader>|<get-serverEndpointAuthHeader>(){}[0]
+    final val serviceWorkerScript // io.github.mobilebytelabs.worker.webpush/WebPushConfig.serviceWorkerScript|{}serviceWorkerScript[0]
+        final fun <get-serviceWorkerScript>(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.serviceWorkerScript.<get-serviceWorkerScript>|<get-serviceWorkerScript>(){}[0]
+    final val subscriptionExpiryDays // io.github.mobilebytelabs.worker.webpush/WebPushConfig.subscriptionExpiryDays|{}subscriptionExpiryDays[0]
+        final fun <get-subscriptionExpiryDays>(): kotlin/Int // io.github.mobilebytelabs.worker.webpush/WebPushConfig.subscriptionExpiryDays.<get-subscriptionExpiryDays>|<get-subscriptionExpiryDays>(){}[0]
+    final val vapidPublicKey // io.github.mobilebytelabs.worker.webpush/WebPushConfig.vapidPublicKey|{}vapidPublicKey[0]
+        final fun <get-vapidPublicKey>(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.vapidPublicKey.<get-vapidPublicKey>|<get-vapidPublicKey>(){}[0]
+
+    final fun component1(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component3|component3(){}[0]
+    final fun component4(): kotlin.coroutines/SuspendFunction0<kotlin/String>? // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component6|component6(){}[0]
+    final fun component7(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component7|component7(){}[0]
+    final fun component8(): kotlin/Int // io.github.mobilebytelabs.worker.webpush/WebPushConfig.component8|component8(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/String = ..., kotlin/String = ..., kotlin.coroutines/SuspendFunction0<kotlin/String>? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/String = ..., kotlin/Int = ...): io.github.mobilebytelabs.worker.webpush/WebPushConfig // io.github.mobilebytelabs.worker.webpush/WebPushConfig.copy|copy(kotlin.Boolean;kotlin.String;kotlin.String;kotlin.coroutines.SuspendFunction0<kotlin.String>?;kotlin.Boolean;kotlin.Boolean;kotlin.String;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.webpush/WebPushConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.webpush/WebPushSubscription { // io.github.mobilebytelabs.worker.webpush/WebPushSubscription|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String) // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
+
+    final val auth // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.auth|{}auth[0]
+        final fun <get-auth>(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.auth.<get-auth>|<get-auth>(){}[0]
+    final val endpoint // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.endpoint|{}endpoint[0]
+        final fun <get-endpoint>(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.endpoint.<get-endpoint>|<get-endpoint>(){}[0]
+    final val p256dh // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.p256dh|{}p256dh[0]
+        final fun <get-p256dh>(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.p256dh.<get-p256dh>|<get-p256dh>(){}[0]
+
+    final fun component1(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.component2|component2(){}[0]
+    final fun component3(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ...): io.github.mobilebytelabs.worker.webpush/WebPushSubscription // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.copy|copy(kotlin.String;kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.webpush/WebPushSubscription.toString|toString(){}[0]
+}
+
+final val io.github.mobilebytelabs.worker.webpush.koin/workWebPushKoinModule // io.github.mobilebytelabs.worker.webpush.koin/workWebPushKoinModule|{}workWebPushKoinModule[0]
+    final fun <get-workWebPushKoinModule>(): org.koin.core.module/Module // io.github.mobilebytelabs.worker.webpush.koin/workWebPushKoinModule.<get-workWebPushKoinModule>|<get-workWebPushKoinModule>(){}[0]
+
+final fun io.github.mobilebytelabs.worker.webpush/createWebPushSubscriber(): io.github.mobilebytelabs.worker.webpush/WebPushSubscriber // io.github.mobilebytelabs.worker.webpush/createWebPushSubscriber|createWebPushSubscriber(){}[0]

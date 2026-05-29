@@ -3,6 +3,7 @@
 **Getting Started**
 - [Installation](getting-started/installation)
 - [Quick Start](getting-started/quick-start)
+- [Convention Plugin (build-logic)](getting-started/convention-plugin)
 - [Migrating from v2](getting-started/migrating-from-v2)
 
 **Platform Support**

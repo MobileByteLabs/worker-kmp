@@ -1,0 +1,33 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-test>
+final class io.github.mobilebytelabs.worker.test/TestWorkManager : io.github.mobilebytelabs.worker/WorkManager { // io.github.mobilebytelabs.worker.test/TestWorkManager|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker.test/TestWorkManager.<init>|<init>(){}[0]
+
+    final val enqueuedRequests // io.github.mobilebytelabs.worker.test/TestWorkManager.enqueuedRequests|{}enqueuedRequests[0]
+        final fun <get-enqueuedRequests>(): kotlin.collections/List<io.github.mobilebytelabs.worker/WorkRequest> // io.github.mobilebytelabs.worker.test/TestWorkManager.enqueuedRequests.<get-enqueuedRequests>|<get-enqueuedRequests>(){}[0]
+    final val lastEnqueuedRequest // io.github.mobilebytelabs.worker.test/TestWorkManager.lastEnqueuedRequest|{}lastEnqueuedRequest[0]
+        final fun <get-lastEnqueuedRequest>(): io.github.mobilebytelabs.worker/WorkRequest? // io.github.mobilebytelabs.worker.test/TestWorkManager.lastEnqueuedRequest.<get-lastEnqueuedRequest>|<get-lastEnqueuedRequest>(){}[0]
+    final val uniqueWorkNames // io.github.mobilebytelabs.worker.test/TestWorkManager.uniqueWorkNames|{}uniqueWorkNames[0]
+        final fun <get-uniqueWorkNames>(): kotlin.collections/List<kotlin/String> // io.github.mobilebytelabs.worker.test/TestWorkManager.uniqueWorkNames.<get-uniqueWorkNames>|<get-uniqueWorkNames>(){}[0]
+
+    final fun getWorkInfosByTag(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.test/TestWorkManager.getWorkInfosByTag|getWorkInfosByTag(kotlin.String){}[0]
+    final fun hasWorkWithTag(kotlin/String): kotlin/Boolean // io.github.mobilebytelabs.worker.test/TestWorkManager.hasWorkWithTag|hasWorkWithTag(kotlin.String){}[0]
+    final fun reset() // io.github.mobilebytelabs.worker.test/TestWorkManager.reset|reset(){}[0]
+    final fun simulateWorkFailure(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.test/TestWorkManager.simulateWorkFailure|simulateWorkFailure(kotlin.uuid.Uuid){}[0]
+    final fun simulateWorkProgress(kotlin.uuid/Uuid, io.github.mobilebytelabs.worker/WorkProgress) // io.github.mobilebytelabs.worker.test/TestWorkManager.simulateWorkProgress|simulateWorkProgress(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkProgress){}[0]
+    final fun simulateWorkRetry(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.test/TestWorkManager.simulateWorkRetry|simulateWorkRetry(kotlin.uuid.Uuid){}[0]
+    final fun simulateWorkRunning(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.test/TestWorkManager.simulateWorkRunning|simulateWorkRunning(kotlin.uuid.Uuid){}[0]
+    final fun simulateWorkSuccess(kotlin.uuid/Uuid, io.github.mobilebytelabs.worker/WorkData = ...) // io.github.mobilebytelabs.worker.test/TestWorkManager.simulateWorkSuccess|simulateWorkSuccess(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkData){}[0]
+    final fun workCountWithTag(kotlin/String): kotlin/Int // io.github.mobilebytelabs.worker.test/TestWorkManager.workCountWithTag|workCountWithTag(kotlin.String){}[0]
+    final suspend fun cancelAllWorkByTag(kotlin/String) // io.github.mobilebytelabs.worker.test/TestWorkManager.cancelAllWorkByTag|cancelAllWorkByTag(kotlin.String){}[0]
+    final suspend fun cancelWorkById(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.test/TestWorkManager.cancelWorkById|cancelWorkById(kotlin.uuid.Uuid){}[0]
+    final suspend fun enqueue(io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.test/TestWorkManager.enqueue|enqueue(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
+    final suspend fun enqueueUniquePeriodicWork(kotlin/String, io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy, io.github.mobilebytelabs.worker/PeriodicWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.test/TestWorkManager.enqueueUniquePeriodicWork|enqueueUniquePeriodicWork(kotlin.String;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy;io.github.mobilebytelabs.worker.PeriodicWorkRequest){}[0]
+    final suspend fun getWorkInfoById(kotlin.uuid/Uuid): io.github.mobilebytelabs.worker/WorkInfo? // io.github.mobilebytelabs.worker.test/TestWorkManager.getWorkInfoById|getWorkInfoById(kotlin.uuid.Uuid){}[0]
+}

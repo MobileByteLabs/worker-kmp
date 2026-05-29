@@ -1,0 +1,25 @@
+public abstract class io/github/mobilebytelabs/worker/app/gradle/WorkerKmpAppExtension {
+	public fun <init> ()V
+	public abstract fun getAndroidExtraManifestEntries ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getAndroidGenerator ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDesktopGenerator ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIosGenerator ()Lorg/gradle/api/provider/Property;
+	public abstract fun getWasmJsBundleName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getWebGenerator ()Lorg/gradle/api/provider/Property;
+	public abstract fun getXcodegenPath ()Lorg/gradle/api/provider/Property;
+}
+
+public final class io/github/mobilebytelabs/worker/app/gradle/WorkerKmpAppPlugin : org/gradle/api/Plugin {
+	public static final field EXT_NAME Ljava/lang/String;
+	public static final field TASK_ALL Ljava/lang/String;
+	public static final field TASK_ANDROID Ljava/lang/String;
+	public static final field TASK_DESKTOP Ljava/lang/String;
+	public static final field TASK_GROUP Ljava/lang/String;
+	public static final field TASK_IOS Ljava/lang/String;
+	public static final field TASK_WEB Ljava/lang/String;
+	public static final field TASK_XCODEGEN Ljava/lang/String;
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+

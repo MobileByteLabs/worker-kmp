@@ -37,6 +37,29 @@ dependencies {
 
 See [`cmp-worker-compose-all/README.md`](cmp-worker-compose-all/README.md) for the full per-platform launcher pattern (3-5 lines each).
 
+**Want zero per-platform Kotlin files?** Use the [`worker-kmp-app` Gradle plugin](cmp-worker-app-plugin/README.md):
+
+```kotlin
+plugins {
+    id("io.github.mobilebytelabs.worker-app") version "$workerVersion"
+}
+```
+
+Then annotate two commonMain functions:
+
+```kotlin
+@WorkerKmpApp(title = "My App", iosBundleId = "com.example.myapp")
+fun appKoinModules(factory: WorkManagerFactory) = ...
+
+@WorkerKmpAppContent
+@Composable fun AppContent() = ...
+```
+
+Plugin codegens every per-platform launcher (Android Application/Activity/manifest,
+JVM `fun main()`, iOS `MainViewController` + xcodegen project, wasmJs
+`fun main()` + `index.html`) at build time. Consumer source tree: zero per-platform
+Kotlin files.
+
 **Only need a subset** (e.g. pure-Android no-Compose)? The individual `worker-*` artifacts remain available:
 
 ```kotlin
@@ -124,7 +147,7 @@ All published under `io.github.mobilebytelabs` on Maven Central.
 
 Full docs live in [`docs/`](docs/Home.md) and mirror the [GitHub Wiki](https://github.com/MobileByteLabs/worker-kmp/wiki):
 
-- 📚 [Installation](docs/getting-started/installation.md) · [Quick Start](docs/getting-started/quick-start.md) · [Migrating from v2](docs/getting-started/migrating-from-v2.md)
+- 📚 [Installation](docs/getting-started/installation.md) · [Quick Start](docs/getting-started/quick-start.md) · [Convention Plugin (build-logic)](docs/getting-started/convention-plugin.md) · [Migrating from v2](docs/getting-started/migrating-from-v2.md)
 - 📱 Platform setup: [Android](docs/platform-support/android.md) · [iOS](docs/platform-support/ios.md) · [Desktop](docs/platform-support/desktop.md) · [Web](docs/platform-support/web.md)
 - 🛠️ Features: [Foreground Tasks](docs/features/foreground-tasks.md) · [Observers / Telemetry](docs/features/observers.md) · [Web Push Server](docs/features/web-push-server.md)
 - 🔒 Operations: [Security](docs/operations/security.md) · [Performance](docs/operations/performance.md)

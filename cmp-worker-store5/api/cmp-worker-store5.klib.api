@@ -1,0 +1,56 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-store5>
+abstract class <#A: kotlin/Any, #B: kotlin/Any> io.github.mobilebytelabs.worker.store5/MutableStoreSyncWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.store5/MutableStoreSyncWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext, org.mobilenativefoundation.store.store5/MutableStore<#A, #B>, #A, #B) // io.github.mobilebytelabs.worker.store5/MutableStoreSyncWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext;org.mobilenativefoundation.store.store5.MutableStore<1:0,1:1>;1:0;1:1){}[0]
+
+    open fun (kotlin/Throwable).isRetryable(): kotlin/Boolean // io.github.mobilebytelabs.worker.store5/MutableStoreSyncWorker.isRetryable|isRetryable@kotlin.Throwable(){}[0]
+    open fun mapWriteResponseToWorkData(org.mobilenativefoundation.store.store5/StoreWriteResponse.Success): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker.store5/MutableStoreSyncWorker.mapWriteResponseToWorkData|mapWriteResponseToWorkData(org.mobilenativefoundation.store.store5.StoreWriteResponse.Success){}[0]
+    open suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.store5/MutableStoreSyncWorker.doWork|doWork(){}[0]
+}
+
+abstract class <#A: kotlin/Any, #B: kotlin/Any> io.github.mobilebytelabs.worker.store5/StoreBackedWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.store5/StoreBackedWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext, org.mobilenativefoundation.store.store5/Store<#A, #B>, #A) // io.github.mobilebytelabs.worker.store5/StoreBackedWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext;org.mobilenativefoundation.store.store5.Store<1:0,1:1>;1:0){}[0]
+
+    open fun (kotlin/Throwable).isRetryable(): kotlin/Boolean // io.github.mobilebytelabs.worker.store5/StoreBackedWorker.isRetryable|isRetryable@kotlin.Throwable(){}[0]
+    open fun mapOutputToWorkData(#B): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker.store5/StoreBackedWorker.mapOutputToWorkData|mapOutputToWorkData(1:1){}[0]
+    open suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.store5/StoreBackedWorker.doWork|doWork(){}[0]
+}
+
+abstract class <#A: kotlin/Any, #B: kotlin/Any> io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext, org.mobilenativefoundation.store.store5/Store<#A, #B>, #A, org.mobilenativefoundation.store.store5/Validator<#B>) // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext;org.mobilenativefoundation.store.store5.Store<1:0,1:1>;1:0;org.mobilenativefoundation.store.store5.Validator<1:1>){}[0]
+
+    open fun (kotlin/Throwable).isRetryable(): kotlin/Boolean // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.isRetryable|isRetryable@kotlin.Throwable(){}[0]
+    open suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.doWork|doWork(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.Companion|null[0]
+        final const val KEY_SKIPPED // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.Companion.KEY_SKIPPED|{}KEY_SKIPPED[0]
+            final fun <get-KEY_SKIPPED>(): kotlin/String // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.Companion.KEY_SKIPPED.<get-KEY_SKIPPED>|<get-KEY_SKIPPED>(){}[0]
+        final const val VALUE_FRESH // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.Companion.VALUE_FRESH|{}VALUE_FRESH[0]
+            final fun <get-VALUE_FRESH>(): kotlin/String // io.github.mobilebytelabs.worker.store5/StoreFreshnessWorker.Companion.VALUE_FRESH.<get-VALUE_FRESH>|<get-VALUE_FRESH>(){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler { // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkManager) // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.<init>|<init>(io.github.mobilebytelabs.worker.WorkManager){}[0]
+
+    final fun observeRefreshes(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.observeRefreshes|observeRefreshes(kotlin.String){}[0]
+    final suspend fun cancelRefresh(kotlin/String) // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.cancelRefresh|cancelRefresh(kotlin.String){}[0]
+    final suspend fun enqueueUnique(kotlin/String, io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy, io.github.mobilebytelabs.worker/PeriodicWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.enqueueUnique|enqueueUnique(kotlin.String;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy;io.github.mobilebytelabs.worker.PeriodicWorkRequest){}[0]
+    final suspend inline fun <#A1: reified io.github.mobilebytelabs.worker/CoroutineWorker> schedulePeriodicRefresh(kotlin.time/Duration, kotlin/String, io.github.mobilebytelabs.worker/Constraints = ..., io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy = ...): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.schedulePeriodicRefresh|schedulePeriodicRefresh(kotlin.time.Duration;kotlin.String;io.github.mobilebytelabs.worker.Constraints;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy){0§<io.github.mobilebytelabs.worker.CoroutineWorker>}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.Companion|null[0]
+        final const val TAG_PREFIX // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.Companion.TAG_PREFIX|{}TAG_PREFIX[0]
+            final fun <get-TAG_PREFIX>(): kotlin/String // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.Companion.TAG_PREFIX.<get-TAG_PREFIX>|<get-TAG_PREFIX>(){}[0]
+
+        final fun refreshTag(kotlin/String): kotlin/String // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.Companion.refreshTag|refreshTag(kotlin.String){}[0]
+    }
+}
+
+final val io.github.mobilebytelabs.worker.store5.koin/workStore5KoinModule // io.github.mobilebytelabs.worker.store5.koin/workStore5KoinModule|{}workStore5KoinModule[0]
+    final fun <get-workStore5KoinModule>(): org.koin.core.module/Module // io.github.mobilebytelabs.worker.store5.koin/workStore5KoinModule.<get-workStore5KoinModule>|<get-workStore5KoinModule>(){}[0]

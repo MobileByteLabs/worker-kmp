@@ -1,19 +1,24 @@
 package io.github.mobilebytelabs.worker.sample.composestore.di
 
 import io.github.mobilebytelabs.worker.WorkManagerFactory
+import io.github.mobilebytelabs.worker.app.WorkerKmpApp
 import io.github.mobilebytelabs.worker.sample.composestore.store.buildArticlesStore
 import org.koin.core.module.Module
 
 /**
- * Returns the two Koin modules every platform launcher needs.
+ * Single declaration the worker-kmp-app Gradle plugin uses to codegen every
+ * per-platform launcher — Android Application + Activity + manifest, JVM
+ * `fun main()`, iOS `MainViewController`, wasmJs `fun main()` + `index.html`,
+ * iOS Xcode project (via xcodegen). Consumer per-platform Kotlin files: ZERO.
  *
- * Constructs the shared Store5 store inline so per-platform code never builds it
- * — keeps the launcher files at ≤10 source lines each. The only difference per
- * platform is the [WorkManagerFactory] (android / desktop / ios / web).
- *
- * Spec: `plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-cmp-launchers/GOAL.md`
- * §File Structure (Sample — `SampleKoinSetup.kt`).
+ * Spec: `plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-app-plugin/`
  */
+@WorkerKmpApp(
+    title = "worker-kmp Store Demo",
+    iosBundleId = "io.github.mobilebytelabs.worker.sample.composestore",
+    webCanvasId = "composeCanvas",
+    androidPermissions = ["android.permission.POST_NOTIFICATIONS"],
+)
 fun sampleKoinModules(factory: WorkManagerFactory): List<Module> {
     val store = buildArticlesStore()
     return listOf(

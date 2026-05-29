@@ -1,0 +1,26 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-app-annotations>
+open annotation class io.github.mobilebytelabs.worker.app/WorkerKmpApp : kotlin/Annotation { // io.github.mobilebytelabs.worker.app/WorkerKmpApp|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String = ..., kotlin/String = ..., kotlin/Array<kotlin/String> = ...) // io.github.mobilebytelabs.worker.app/WorkerKmpApp.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.Array<kotlin.String>){}[0]
+
+    final val androidApplicationId // io.github.mobilebytelabs.worker.app/WorkerKmpApp.androidApplicationId|{}androidApplicationId[0]
+        final fun <get-androidApplicationId>(): kotlin/String // io.github.mobilebytelabs.worker.app/WorkerKmpApp.androidApplicationId.<get-androidApplicationId>|<get-androidApplicationId>(){}[0]
+    final val androidPermissions // io.github.mobilebytelabs.worker.app/WorkerKmpApp.androidPermissions|{}androidPermissions[0]
+        final fun <get-androidPermissions>(): kotlin/Array<kotlin/String> // io.github.mobilebytelabs.worker.app/WorkerKmpApp.androidPermissions.<get-androidPermissions>|<get-androidPermissions>(){}[0]
+    final val iosBundleId // io.github.mobilebytelabs.worker.app/WorkerKmpApp.iosBundleId|{}iosBundleId[0]
+        final fun <get-iosBundleId>(): kotlin/String // io.github.mobilebytelabs.worker.app/WorkerKmpApp.iosBundleId.<get-iosBundleId>|<get-iosBundleId>(){}[0]
+    final val title // io.github.mobilebytelabs.worker.app/WorkerKmpApp.title|{}title[0]
+        final fun <get-title>(): kotlin/String // io.github.mobilebytelabs.worker.app/WorkerKmpApp.title.<get-title>|<get-title>(){}[0]
+    final val webCanvasId // io.github.mobilebytelabs.worker.app/WorkerKmpApp.webCanvasId|{}webCanvasId[0]
+        final fun <get-webCanvasId>(): kotlin/String // io.github.mobilebytelabs.worker.app/WorkerKmpApp.webCanvasId.<get-webCanvasId>|<get-webCanvasId>(){}[0]
+}
+
+open annotation class io.github.mobilebytelabs.worker.app/WorkerKmpAppContent : kotlin/Annotation { // io.github.mobilebytelabs.worker.app/WorkerKmpAppContent|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker.app/WorkerKmpAppContent.<init>|<init>(){}[0]
+}
