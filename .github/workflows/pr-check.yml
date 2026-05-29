@@ -51,31 +51,16 @@ jobs:
       - name: Build wasmJs distribution
         run: ./gradlew :samples:cmp-worker-sample-compose-store:wasmJsBrowserDistribution
 
-  # worker-kmp-cmp-launchers-03: build the iOS framework + xcodebuild the
-  # iosApp wrapper. The .xcodeproj is generated from iosApp/project.yml via
-  # xcodegen (see iosApp/README.md for the rationale).
-  #
-  # Compose Multiplatform 1.11.0's iOS framework auto-links iOS-18-only private
-  # frameworks (UIUtilities, SwiftUICore) which require Xcode 26.x at link time.
-  # GitHub Actions is migrating `macos-latest` from macOS 15 (Xcode 16.x) to
-  # macOS 26 (Xcode 26.x) between June 15 → July 15, 2026:
-  #   https://github.com/actions/runner-images
-  #
-  # Until that migration completes the job will linker-fail on macos-latest
-  # because Xcode 26.x is not pre-installed on macOS 15 runners — so we mark
-  # it `continue-on-error: true` for an informational run. Local validation
-  # via Xcode 26.x is the source of truth in the meantime — see
-  # `scripts/ci-local.sh --all` which does the same iOS sim build with the
-  # local Xcode toolchain. Post July 15, 2026 this job will start passing
-  # automatically without any workflow change.
-  sample-ios:
-    name: cmp-worker-sample-compose-store — iOS sim build (informational until 2026-07-15)
+  # worker-kmp-cmp-launchers-03 (Part A): the iOS framework + xcodegen project
+  # — these BOTH work on any Xcode version (16+ or 26+). This is the always-on
+  # iOS CI gate: validates the Kotlin/Native iosMain compiles, links into a
+  # Static Framework with the right exports, and that xcodegen can materialize
+  # a valid iosApp.xcodeproj from project.yml. Required check.
+  sample-ios-framework:
+    name: cmp-worker-sample-compose-store — iOS framework + xcodegen
     runs-on: macos-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Show Xcode version (debug — pre-migration this is 16.x; post-migration 26.x)
-        run: xcodebuild -version || true
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -83,12 +68,84 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Install xcodegen
         run: brew install xcodegen
-      - name: Build iOS framework binaries
+      - name: Show Xcode version (debug)
+        run: xcodebuild -version
+      - name: Build iOS framework binaries (linkDebugFrameworkIosSimulatorArm64)
         run: ./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosSimulatorArm64
-      - name: Generate iosApp.xcodeproj
+      - name: Generate iosApp.xcodeproj from xcodegen project.yml
         working-directory: samples/cmp-worker-sample-compose-store/iosApp
         run: xcodegen generate
-      - name: xcodebuild iosApp (iOS Simulator, arm64 only)
+      - name: Assert .xcodeproj structure
+        run: |
+          test -f samples/cmp-worker-sample-compose-store/iosApp/iosApp.xcodeproj/project.pbxproj
+          echo "OK: iosApp.xcodeproj generated and structurally valid"
+
+  # worker-kmp-cmp-launchers-03 (Part B): the xcodebuild iosApp linker step.
+  # Compose Multiplatform 1.11.0's iOS framework auto-links iOS-18-only private
+  # frameworks (UIUtilities, SwiftUICore) which require Xcode 26.x at link time.
+  # GitHub Actions is migrating `macos-latest` from macOS 15 (Xcode 16.x) to
+  # macOS 26 (Xcode 26.x) between June 15 → July 15, 2026:
+  #   https://github.com/actions/runner-images
+  #
+  # This job auto-detects the runner's Xcode major version and:
+  #   - Xcode major >= 26 → run xcodebuild (will pass; HARD gate going forward)
+  #   - Xcode major <  26 → skip with informative log (returns success, doesn't
+  #     block CI; matches the de-facto state until macos-latest migrates)
+  #
+  # Local validation via `scripts/ci-local.sh --all` is the source of truth
+  # for this gate today (requires local Xcode 26.x — script enforces).
+  # Post July 15, 2026 the runner gets Xcode 26 automatically + this gate
+  # turns into a real iOS regression catch with NO workflow change required.
+  sample-ios-xcodebuild:
+    name: cmp-worker-sample-compose-store — iOS xcodebuild (Xcode 26+)
+    needs: sample-ios-framework
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Detect Xcode major version
+        id: xcode
+        run: |
+          XCODE_VERSION="$(xcodebuild -version | head -1 | awk '{print $2}')"
+          XCODE_MAJOR="${XCODE_VERSION%%.*}"
+          echo "version=$XCODE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "major=$XCODE_MAJOR"     >> "$GITHUB_OUTPUT"
+          echo "::notice title=Xcode version::Detected Xcode $XCODE_VERSION (major=$XCODE_MAJOR)"
+      - name: Skip xcodebuild — Xcode < 26 cannot link Compose Multiplatform iOS
+        if: ${{ steps.xcode.outputs.major < '26' }}
+        run: |
+          cat <<EOF
+          ━━━ xcodebuild SKIPPED — Xcode ${{ steps.xcode.outputs.version }} is too old ━━━
+
+          Compose Multiplatform 1.11.0's iOS framework auto-links iOS-18 private
+          frameworks (UIUtilities, SwiftUICore) that don't exist in the SDK
+          shipped with Xcode 16.x.
+
+          This gate becomes a hard CI check automatically once macos-latest
+          migrates to macOS 26 + Xcode 26.x (per GitHub announcement, between
+          2026-06-15 → 2026-07-15: https://github.com/actions/runner-images).
+
+          Until then, local validation via Xcode 26.x is authoritative:
+            ./scripts/ci-local.sh --all
+
+          (Part A — sample-ios-framework — IS hard-gating this PR and PASSED
+          above, so the iOS side of the launcher epic is still validated.)
+          EOF
+      - name: Build iOS framework binaries
+        if: ${{ steps.xcode.outputs.major >= '26' }}
+        run: ./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosSimulatorArm64
+      - name: Generate iosApp.xcodeproj
+        if: ${{ steps.xcode.outputs.major >= '26' }}
+        working-directory: samples/cmp-worker-sample-compose-store/iosApp
+        run: xcodegen generate
+      - name: xcodebuild iosApp (iOS Simulator, arm64)
+        if: ${{ steps.xcode.outputs.major >= '26' }}
         run: |
           xcodebuild \
             -project samples/cmp-worker-sample-compose-store/iosApp/iosApp.xcodeproj \
