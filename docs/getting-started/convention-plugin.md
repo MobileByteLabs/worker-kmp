@@ -31,7 +31,7 @@ It does **not** decide your KMP target matrix, your Compose Multiplatform versio
 
 ```toml
 [versions]
-worker-version = "2.1.2"
+worker-version = "3.0.0"
 
 [libraries]
 worker-compose-all = { module = "io.github.mobilebytelabs:worker-compose-all", version.ref = "worker-version" }
@@ -71,7 +71,7 @@ gradlePlugin {
 
 ```properties
 # build-logic/gradle.properties  (included builds don't inherit parent gradle.properties)
-worker.version=2.1.2
+worker.version=3.0.0
 ```
 
 ### 3. The convention plugin

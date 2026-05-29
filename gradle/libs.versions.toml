@@ -32,7 +32,7 @@ kct-ksp = "0.5.0"
 # libs.findLibrary("worker-compose-all").get(). In-monorepo, root settings.gradle.kts
 # has a dependencySubstitution rule redirecting `io.github.mobilebytelabs:worker-compose-all`
 # → `:cmp-worker-compose-all` (published artifactId vs in-monorepo project name).
-worker-version = "2.1.2"
+worker-version = "3.0.0"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }

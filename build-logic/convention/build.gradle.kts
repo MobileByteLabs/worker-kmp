@@ -32,7 +32,11 @@ dependencies {
     // Substituted from the cmp-worker-app-plugin includedBuild (build-logic's
     // settings.gradle.kts). External adopters depend on the published artifact
     // from Maven Central — same convention plugin code.
-    implementation("io.github.mobilebytelabs:worker-app-plugin:${providers.gradleProperty("worker.version").get()}")
+    // Version literal is COSMETIC — the dep gets substituted to project(":") via
+    // build-logic/settings.gradle.kts's includeBuild rule. ANY non-empty version
+    // works in-monorepo. External adopters depend on the published artifact via
+    // a real Maven Central version in their own build-logic.
+    implementation("io.github.mobilebytelabs:worker-app-plugin:0.0.0-monorepo-internal")
 }
 
 tasks {

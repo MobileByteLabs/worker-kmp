@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-05-29
+
+### ⚠ Breaking Changes
+
+- **kotlinx-datetime 0.6.2 → 0.8.0** (transitive bump via `cmp-worker-kmp`'s `api(libs.kotlinx.datetime)`). kotlinx-datetime 0.7.0 renamed `dayOfMonth → day`, `monthNumber → month`, and changed `TimeZone.UTC` identifier from `"Z"` to `"UTC"`. `Instant` + `Clock` remain available as type aliases pointing at `kotlin.time.Instant` / `kotlin.time.Clock` (0.7.1 migration aid), so existing imports continue to compile. Consumers using the renamed properties must update call sites.
+
 ### Added — `worker-kmp-app-plugin` epic: 3 new modules eliminate per-platform launcher Kotlin
 
 Ships a Gradle plugin + KSP processor that codegens per-platform Compose Multiplatform

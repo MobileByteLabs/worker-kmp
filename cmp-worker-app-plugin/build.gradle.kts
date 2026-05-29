@@ -16,6 +16,8 @@
  *       06-ios-codegen.md              (MainViewController + xcodegen project.yml + Swift)
  */
 
+import java.util.Properties
+
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.kotlinx.serialization)
@@ -24,7 +26,18 @@ plugins {
 }
 
 group = "io.github.mobilebytelabs"
-version = providers.gradleProperty("worker.version").get()
+// Read worker.version from the PARENT build's gradle.properties (single source of
+// truth). Gradle's `providers.gradleProperty` doesn't cross the includedBuild
+// boundary, and a mirror gradle.properties here would defeat the "one source of
+// truth" promise. This plugin DOES publish to Maven Central so the real version
+// matters at publish time (vanniktech reads project.version).
+version = Properties()
+    .apply {
+        rootDir.parentFile
+            .resolve("gradle.properties")
+            .reader()
+            .use(::load)
+    }.getProperty("worker.version") ?: error("worker.version not found in ${rootDir.parentFile}/gradle.properties")
 
 kotlin {
     jvmToolchain(17)
