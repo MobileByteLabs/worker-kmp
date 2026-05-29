@@ -46,10 +46,11 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation(project(":cmp-worker-kmp"))
-                implementation(project(":cmp-worker-koin"))
-                implementation(project(":cmp-worker-store5"))
-                implementation(project(":cmp-worker-compose"))
+                // Single all-in-one bundle replaces the 4 individual worker-kmp deps
+                // (worker-kmp + worker-compose + worker-koin + worker-store5) AND the
+                // 4 per-platform factories (worker-android/-desktop/-ios/-web) — all
+                // re-exported via api(project(...)) in cmp-worker-compose-all.
+                implementation(project(":cmp-worker-compose-all"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(compose.runtime)
                 implementation(compose.material3)
@@ -60,20 +61,14 @@ kotlin {
         }
         jvmMain {
             dependencies {
-                implementation(project(":cmp-worker-desktop"))
+                // cmp-worker-desktop already transitively provided by the bundle's
+                // desktopMain api re-export — only adding Compose Desktop-specific
+                // deps (Window, preview) the bundle doesn't need to ship.
                 implementation(compose.desktop.currentOs)
                 implementation(compose.preview)
             }
         }
-        iosMain {
-            dependencies {
-                implementation(project(":cmp-worker-ios"))
-            }
-        }
-        val wasmJsMain by getting {
-            dependencies {
-                implementation(project(":cmp-worker-web"))
-            }
-        }
+        // androidMain / iosMain / wasmJsMain deps no longer needed — all 4 platform
+        // factories + launchers come in transitively via cmp-worker-compose-all.
     }
 }
