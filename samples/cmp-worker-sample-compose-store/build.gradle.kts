@@ -51,6 +51,11 @@ kotlin {
                 // 4 per-platform factories (worker-android/-desktop/-ios/-web) — all
                 // re-exported via api(project(...)) in cmp-worker-compose-all.
                 implementation(project(":cmp-worker-compose-all"))
+                // Annotations are SOURCE-retention markers; the sample exercises them
+                // as a documentation/discoverability vehicle. Full plugin codegen lives
+                // in cmp-worker-app-plugin and requires consumer-side `apply` wiring
+                // (a follow-up to this epic — see PLAN-worker-kmp-app-plugin §7).
+                implementation(project(":cmp-worker-app-annotations"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(compose.runtime)
                 implementation(compose.material3)

@@ -1,0 +1,70 @@
+public final class io/github/mobilebytelabs/worker/sample/composestore/ComposableSingletons$MainKt {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/sample/composestore/ComposableSingletons$MainKt;
+	public fun <init> ()V
+	public final fun getLambda$-601626485$cmp_worker_sample_compose_store ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/MainKt {
+	public static final fun main ()V
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/di/AppModuleKt {
+	public static final fun appModule (Lorg/mobilenativefoundation/store/store5/Store;)Lorg/koin/core/module/Module;
+	public static final fun articleWorkerKoinModule (Lorg/mobilenativefoundation/store/store5/Store;Lio/github/mobilebytelabs/worker/WorkManagerFactory;)Lorg/koin/core/module/Module;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/di/SampleKoinSetupKt {
+	public static final fun sampleKoinModules (Lio/github/mobilebytelabs/worker/WorkManagerFactory;)Ljava/util/List;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/domain/Article {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Lio/github/mobilebytelabs/worker/sample/composestore/domain/Article;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/sample/composestore/domain/Article;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Lio/github/mobilebytelabs/worker/sample/composestore/domain/Article;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getFetchedAtEpochMs ()J
+	public final fun getId ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/store/ArticlesStoreKt {
+	public static final fun buildArticlesStore ()Lorg/mobilenativefoundation/store/store5/Store;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/ui/ArticlesScreenKt {
+	public static final fun ArticlesScreen (Lorg/mobilenativefoundation/store/store5/Store;Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/ui/ComposableSingletons$ArticlesScreenKt {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/sample/composestore/ui/ComposableSingletons$ArticlesScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$-1743686593$cmp_worker_sample_compose_store ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$300306537$cmp_worker_sample_compose_store ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/ui/ComposableSingletons$SampleAppKt {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/sample/composestore/ui/ComposableSingletons$SampleAppKt;
+	public fun <init> ()V
+	public final fun getLambda$-2132894639$cmp_worker_sample_compose_store ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-989649643$cmp_worker_sample_compose_store ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/ui/SampleAppKt {
+	public static final fun SampleApp (Landroidx/compose/runtime/Composer;I)V
+}
+
+public final class io/github/mobilebytelabs/worker/sample/composestore/workers/ArticleSyncWorker : io/github/mobilebytelabs/worker/store5/StoreBackedWorker {
+	public static final field $stable I
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/Store;Ljava/lang/String;)V
+	public synthetic fun mapOutputToWorkData (Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/WorkData;
+}
+

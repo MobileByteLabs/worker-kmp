@@ -7,8 +7,10 @@ import io.github.mobilebytelabs.worker.sample.composestore.ui.SampleApp
 import platform.UIKit.UIViewController
 
 /**
- * iOS entry point — exposed to Swift as `MainViewControllerKt.MainViewController()`
- * and consumed via SwiftUI's [UIViewControllerRepresentable] in `iosApp/`.
+ * iOS entry point — exposed to Swift as `MainViewControllerKt.MainViewController()`.
+ *
+ * See [Main] for the same rationale: hand-authored mirror of what
+ * `worker-kmp-app-plugin`'s `ios-mainviewcontroller.kt.template` would generate.
  */
 @Suppress("FunctionName")
 fun MainViewController(): UIViewController = workerKmpMainViewController(

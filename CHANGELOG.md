@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added — `worker-kmp-app-plugin` epic: 3 new modules eliminate per-platform launcher Kotlin
+
+Ships a Gradle plugin + KSP processor that codegens per-platform Compose Multiplatform
+launcher files from a single `@WorkerKmpApp` annotation in commonMain. After plugin
+adoption a consumer's source tree contains ZERO per-platform Kotlin files —
+the plugin generates Android Application/Activity/manifest, JVM `fun main()`,
+iOS `MainViewController`+ xcodegen `project.yml`+ Swift wrappers, and wasmJs
+`fun main()` + `index.html` into the consumer's `build/generated/worker-kmp-app/`
+directory at build time.
+
+Three new Maven artifacts:
+
+| Module | Coords | Purpose |
+|---|---|---|
+| `cmp-worker-app-annotations` | `io.github.mobilebytelabs:worker-app-annotations` | KMP module with `@WorkerKmpApp` + `@WorkerKmpAppContent` annotations |
+| `cmp-worker-app-ksp` | `io.github.mobilebytelabs:worker-app-ksp` | JVM-only KSP `SymbolProcessor` emitting `CodegenModel` JSON |
+| `cmp-worker-app-plugin` | `io.github.mobilebytelabs:worker-app-plugin` (Maven) + `io.github.mobilebytelabs.worker-app` (Gradle Plugin Portal) | Gradle plugin reading CodegenModel + running per-platform codegens |
+
+Consumer usage:
+
+```kotlin
+plugins {
+    kotlin("multiplatform")
+    id("io.github.mobilebytelabs.worker-app") version "$workerVersion"
+}
+```
+
+```kotlin
+// commonMain
+@WorkerKmpApp(title = "My App", iosBundleId = "com.example.myapp")
+fun appKoinModules(factory: WorkManagerFactory): List<Module> = ...
+
+@WorkerKmpAppContent
+@Composable fun AppContent() = MyRootScreen()
+```
+
+Build → plugin generates `Generated_App.kt`, `Generated_MainActivity.kt`,
+`Generated_Main.kt` (desktop + wasmJs), `Generated_MainViewController.kt`,
+`AndroidManifest.xml`, `index.html`, `iosApp/project.yml`, Swift wrappers —
+all into `build/generated/worker-kmp-app/...`. Consumer never edits them.
+
+Per-platform opt-out: set `workerKmpApp { androidGenerator = false }` etc.
+Plugin also auto-detects pre-existing `Application.kt` / `MainActivity.kt` /
+`Main.kt` / `MainViewController.kt` files and skips that source set's codegen
+with a warning — zero-config escape hatch.
+
+The canonical sample `cmp-worker-sample-compose-store` retains its hand-authored
+launchers in this PR — sample migration to the plugin is a follow-up (requires
+`includeBuild` / build-logic plumbing for the same-monorepo apply path). The
+plugin module's hand-authored launcher files in the sample remain a 1:1 mirror
+of what the plugin's templates would generate, so the migration is mechanical.
+
+KSP processor + Gradle plugin behaviour will be covered by TestKit fixtures
+in a follow-up (kotlin-compile-testing's kctfork 0.5.0 ships
+`kotlin-compiler-embeddable 2.0.0` which can't read `symbol-processing-api 2.3.x`
+metadata; the processor is exercised end-to-end via plugin integration).
+
+Spec: `plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-app-plugin/`
+(epic master + 7 sub-plans, 23 ACs).
+
 ### Added — `cmp-worker-compose-all` all-in-one bundle module
 
 New Maven artifact `io.github.mobilebytelabs:worker-compose-all` that re-exports

@@ -1,0 +1,841 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-kmp>
+open annotation class io.github.mobilebytelabs.worker/ExperimentalForegroundApi : kotlin/Annotation { // io.github.mobilebytelabs.worker/ExperimentalForegroundApi|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker/ExperimentalForegroundApi.<init>|<init>(){}[0]
+}
+
+open annotation class io.github.mobilebytelabs.worker/ExperimentalWorkerApi : kotlin/Annotation { // io.github.mobilebytelabs.worker/ExperimentalWorkerApi|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker/ExperimentalWorkerApi.<init>|<init>(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker.config/LogLevel : kotlin/Enum<io.github.mobilebytelabs.worker.config/LogLevel> { // io.github.mobilebytelabs.worker.config/LogLevel|null[0]
+    enum entry DEBUG // io.github.mobilebytelabs.worker.config/LogLevel.DEBUG|null[0]
+    enum entry ERROR // io.github.mobilebytelabs.worker.config/LogLevel.ERROR|null[0]
+    enum entry INFO // io.github.mobilebytelabs.worker.config/LogLevel.INFO|null[0]
+    enum entry SILENT // io.github.mobilebytelabs.worker.config/LogLevel.SILENT|null[0]
+    enum entry VERBOSE // io.github.mobilebytelabs.worker.config/LogLevel.VERBOSE|null[0]
+    enum entry WARN // io.github.mobilebytelabs.worker.config/LogLevel.WARN|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker.config/LogLevel.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker.config/LogLevel> // io.github.mobilebytelabs.worker.config/LogLevel.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker.config/LogLevel // io.github.mobilebytelabs.worker.config/LogLevel.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker.config/LogLevel> // io.github.mobilebytelabs.worker.config/LogLevel.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker/BackoffPolicy : kotlin/Enum<io.github.mobilebytelabs.worker/BackoffPolicy> { // io.github.mobilebytelabs.worker/BackoffPolicy|null[0]
+    enum entry EXPONENTIAL // io.github.mobilebytelabs.worker/BackoffPolicy.EXPONENTIAL|null[0]
+    enum entry LINEAR // io.github.mobilebytelabs.worker/BackoffPolicy.LINEAR|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker/BackoffPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker/BackoffPolicy> // io.github.mobilebytelabs.worker/BackoffPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker/BackoffPolicy // io.github.mobilebytelabs.worker/BackoffPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker/BackoffPolicy> // io.github.mobilebytelabs.worker/BackoffPolicy.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy : kotlin/Enum<io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy> { // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy|null[0]
+    enum entry KEEP // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.KEEP|null[0]
+    enum entry REPLACE // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.REPLACE|null[0]
+    enum entry UPDATE // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.UPDATE|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy> // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy> // io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker/ForegroundServiceType : kotlin/Enum<io.github.mobilebytelabs.worker/ForegroundServiceType> { // io.github.mobilebytelabs.worker/ForegroundServiceType|null[0]
+    enum entry CAMERA // io.github.mobilebytelabs.worker/ForegroundServiceType.CAMERA|null[0]
+    enum entry CONNECTED_DEVICE // io.github.mobilebytelabs.worker/ForegroundServiceType.CONNECTED_DEVICE|null[0]
+    enum entry DATA_SYNC // io.github.mobilebytelabs.worker/ForegroundServiceType.DATA_SYNC|null[0]
+    enum entry HEALTH // io.github.mobilebytelabs.worker/ForegroundServiceType.HEALTH|null[0]
+    enum entry LOCATION // io.github.mobilebytelabs.worker/ForegroundServiceType.LOCATION|null[0]
+    enum entry MEDIA_PLAYBACK // io.github.mobilebytelabs.worker/ForegroundServiceType.MEDIA_PLAYBACK|null[0]
+    enum entry MEDIA_PROJECTION // io.github.mobilebytelabs.worker/ForegroundServiceType.MEDIA_PROJECTION|null[0]
+    enum entry MICROPHONE // io.github.mobilebytelabs.worker/ForegroundServiceType.MICROPHONE|null[0]
+    enum entry PHONE_CALL // io.github.mobilebytelabs.worker/ForegroundServiceType.PHONE_CALL|null[0]
+    enum entry REMOTE_MESSAGING // io.github.mobilebytelabs.worker/ForegroundServiceType.REMOTE_MESSAGING|null[0]
+    enum entry SHORT_SERVICE // io.github.mobilebytelabs.worker/ForegroundServiceType.SHORT_SERVICE|null[0]
+    enum entry SPECIAL_USE // io.github.mobilebytelabs.worker/ForegroundServiceType.SPECIAL_USE|null[0]
+    enum entry SYSTEM_EXEMPTED // io.github.mobilebytelabs.worker/ForegroundServiceType.SYSTEM_EXEMPTED|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker/ForegroundServiceType.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker/ForegroundServiceType> // io.github.mobilebytelabs.worker/ForegroundServiceType.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker/ForegroundServiceType // io.github.mobilebytelabs.worker/ForegroundServiceType.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker/ForegroundServiceType> // io.github.mobilebytelabs.worker/ForegroundServiceType.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker/NetworkType : kotlin/Enum<io.github.mobilebytelabs.worker/NetworkType> { // io.github.mobilebytelabs.worker/NetworkType|null[0]
+    enum entry CONNECTED // io.github.mobilebytelabs.worker/NetworkType.CONNECTED|null[0]
+    enum entry METERED // io.github.mobilebytelabs.worker/NetworkType.METERED|null[0]
+    enum entry NOT_REQUIRED // io.github.mobilebytelabs.worker/NetworkType.NOT_REQUIRED|null[0]
+    enum entry NOT_ROAMING // io.github.mobilebytelabs.worker/NetworkType.NOT_ROAMING|null[0]
+    enum entry UNMETERED // io.github.mobilebytelabs.worker/NetworkType.UNMETERED|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker/NetworkType.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker/NetworkType> // io.github.mobilebytelabs.worker/NetworkType.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker/NetworkType // io.github.mobilebytelabs.worker/NetworkType.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker/NetworkType> // io.github.mobilebytelabs.worker/NetworkType.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker/OutOfQuotaPolicy : kotlin/Enum<io.github.mobilebytelabs.worker/OutOfQuotaPolicy> { // io.github.mobilebytelabs.worker/OutOfQuotaPolicy|null[0]
+    enum entry DROP_WORK_REQUEST // io.github.mobilebytelabs.worker/OutOfQuotaPolicy.DROP_WORK_REQUEST|null[0]
+    enum entry RUN_AS_NON_EXPEDITED_WORK_REQUEST // io.github.mobilebytelabs.worker/OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker/OutOfQuotaPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker/OutOfQuotaPolicy> // io.github.mobilebytelabs.worker/OutOfQuotaPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker/OutOfQuotaPolicy // io.github.mobilebytelabs.worker/OutOfQuotaPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker/OutOfQuotaPolicy> // io.github.mobilebytelabs.worker/OutOfQuotaPolicy.values|values#static(){}[0]
+}
+
+abstract fun interface io.github.mobilebytelabs.worker/WorkManagerFactory { // io.github.mobilebytelabs.worker/WorkManagerFactory|null[0]
+    abstract fun create(io.github.mobilebytelabs.worker.config/WorkerConfig, io.github.mobilebytelabs.worker.registry/WorkerRegistry): io.github.mobilebytelabs.worker/WorkManager // io.github.mobilebytelabs.worker/WorkManagerFactory.create|create(io.github.mobilebytelabs.worker.config.WorkerConfig;io.github.mobilebytelabs.worker.registry.WorkerRegistry){}[0]
+}
+
+abstract fun interface io.github.mobilebytelabs.worker/WorkObserver { // io.github.mobilebytelabs.worker/WorkObserver|null[0]
+    abstract suspend fun onEvent(io.github.mobilebytelabs.worker/WorkEvent) // io.github.mobilebytelabs.worker/WorkObserver.onEvent|onEvent(io.github.mobilebytelabs.worker.WorkEvent){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker/WorkContinuation { // io.github.mobilebytelabs.worker/WorkContinuation|null[0]
+    abstract fun then(io.github.mobilebytelabs.worker/OneTimeWorkRequest): io.github.mobilebytelabs.worker/WorkContinuation // io.github.mobilebytelabs.worker/WorkContinuation.then|then(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
+    abstract fun then(kotlin.collections/List<io.github.mobilebytelabs.worker/OneTimeWorkRequest>): io.github.mobilebytelabs.worker/WorkContinuation // io.github.mobilebytelabs.worker/WorkContinuation.then|then(kotlin.collections.List<io.github.mobilebytelabs.worker.OneTimeWorkRequest>){}[0]
+    abstract suspend fun enqueue(): kotlin.collections/List<kotlin.uuid/Uuid> // io.github.mobilebytelabs.worker/WorkContinuation.enqueue|enqueue(){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker/WorkManager { // io.github.mobilebytelabs.worker/WorkManager|null[0]
+    abstract fun getWorkInfosByTag(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker/WorkManager.getWorkInfosByTag|getWorkInfosByTag(kotlin.String){}[0]
+    abstract suspend fun cancelAllWorkByTag(kotlin/String) // io.github.mobilebytelabs.worker/WorkManager.cancelAllWorkByTag|cancelAllWorkByTag(kotlin.String){}[0]
+    abstract suspend fun cancelWorkById(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker/WorkManager.cancelWorkById|cancelWorkById(kotlin.uuid.Uuid){}[0]
+    abstract suspend fun enqueue(io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkManager.enqueue|enqueue(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
+    abstract suspend fun enqueueUniquePeriodicWork(kotlin/String, io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy, io.github.mobilebytelabs.worker/PeriodicWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkManager.enqueueUniquePeriodicWork|enqueueUniquePeriodicWork(kotlin.String;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy;io.github.mobilebytelabs.worker.PeriodicWorkRequest){}[0]
+    abstract suspend fun getWorkInfoById(kotlin.uuid/Uuid): io.github.mobilebytelabs.worker/WorkInfo? // io.github.mobilebytelabs.worker/WorkManager.getWorkInfoById|getWorkInfoById(kotlin.uuid.Uuid){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker/WorkerContext { // io.github.mobilebytelabs.worker/WorkerContext|null[0]
+    abstract val id // io.github.mobilebytelabs.worker/WorkerContext.id|{}id[0]
+        abstract fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkerContext.id.<get-id>|<get-id>(){}[0]
+    abstract val inputData // io.github.mobilebytelabs.worker/WorkerContext.inputData|{}inputData[0]
+        abstract fun <get-inputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkerContext.inputData.<get-inputData>|<get-inputData>(){}[0]
+    abstract val tags // io.github.mobilebytelabs.worker/WorkerContext.tags|{}tags[0]
+        abstract fun <get-tags>(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/WorkerContext.tags.<get-tags>|<get-tags>(){}[0]
+
+    abstract suspend fun setProgress(io.github.mobilebytelabs.worker/WorkProgress) // io.github.mobilebytelabs.worker/WorkerContext.setProgress|setProgress(io.github.mobilebytelabs.worker.WorkProgress){}[0]
+}
+
+abstract class io.github.mobilebytelabs.worker/ConditionalWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker/ConditionalWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker/ConditionalWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    abstract suspend fun condition(): kotlin/Boolean // io.github.mobilebytelabs.worker/ConditionalWorker.condition|condition(){}[0]
+    abstract suspend fun doConditionalWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/ConditionalWorker.doConditionalWork|doConditionalWork(){}[0]
+    final suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/ConditionalWorker.doWork|doWork(){}[0]
+}
+
+abstract class io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker/CoroutineWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker/CoroutineWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    final val context // io.github.mobilebytelabs.worker/CoroutineWorker.context|{}context[0]
+        final fun <get-context>(): io.github.mobilebytelabs.worker/WorkerContext // io.github.mobilebytelabs.worker/CoroutineWorker.context.<get-context>|<get-context>(){}[0]
+    final val id // io.github.mobilebytelabs.worker/CoroutineWorker.id|{}id[0]
+        final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/CoroutineWorker.id.<get-id>|<get-id>(){}[0]
+    final val inputData // io.github.mobilebytelabs.worker/CoroutineWorker.inputData|{}inputData[0]
+        final fun <get-inputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/CoroutineWorker.inputData.<get-inputData>|<get-inputData>(){}[0]
+    final val tags // io.github.mobilebytelabs.worker/CoroutineWorker.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/CoroutineWorker.tags.<get-tags>|<get-tags>(){}[0]
+
+    abstract suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/CoroutineWorker.doWork|doWork(){}[0]
+    final suspend fun setProgress(io.github.mobilebytelabs.worker/WorkProgress) // io.github.mobilebytelabs.worker/CoroutineWorker.setProgress|setProgress(io.github.mobilebytelabs.worker.WorkProgress){}[0]
+}
+
+abstract class io.github.mobilebytelabs.worker/ForegroundWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker/ForegroundWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker/ForegroundWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    final suspend fun setForeground(io.github.mobilebytelabs.worker/ForegroundInfo) // io.github.mobilebytelabs.worker/ForegroundWorker.setForeground|setForeground(io.github.mobilebytelabs.worker.ForegroundInfo){}[0]
+}
+
+final class <#A: io.github.mobilebytelabs.worker/CoroutineWorker> io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder { // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder|null[0]
+    constructor <init>(kotlin/String) // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.<init>|<init>(kotlin.String){}[0]
+
+    final fun addTag(kotlin/String): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.addTag|addTag(kotlin.String){}[0]
+    final fun build(): io.github.mobilebytelabs.worker/OneTimeWorkRequest // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.build|build(){}[0]
+    final fun setBackoffCriteria(io.github.mobilebytelabs.worker/BackoffPolicy, io.github.mobilebytelabs.worker/RetryConfig): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.setBackoffCriteria|setBackoffCriteria(io.github.mobilebytelabs.worker.BackoffPolicy;io.github.mobilebytelabs.worker.RetryConfig){}[0]
+    final fun setConstraints(io.github.mobilebytelabs.worker/Constraints): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.setConstraints|setConstraints(io.github.mobilebytelabs.worker.Constraints){}[0]
+    final fun setExpedited(io.github.mobilebytelabs.worker/OutOfQuotaPolicy): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.setExpedited|setExpedited(io.github.mobilebytelabs.worker.OutOfQuotaPolicy){}[0]
+    final fun setId(kotlin.uuid/Uuid): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.setId|setId(kotlin.uuid.Uuid){}[0]
+    final fun setInitialDelay(kotlin.time/Duration): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.setInitialDelay|setInitialDelay(kotlin.time.Duration){}[0]
+    final fun setInputData(io.github.mobilebytelabs.worker/WorkData): io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder.setInputData|setInputData(io.github.mobilebytelabs.worker.WorkData){}[0]
+}
+
+final class <#A: io.github.mobilebytelabs.worker/CoroutineWorker> io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder { // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder|null[0]
+    constructor <init>(kotlin/String, kotlin.time/Duration, kotlin.time/Duration = ...) // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.<init>|<init>(kotlin.String;kotlin.time.Duration;kotlin.time.Duration){}[0]
+
+    final fun addTag(kotlin/String): io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.addTag|addTag(kotlin.String){}[0]
+    final fun build(): io.github.mobilebytelabs.worker/PeriodicWorkRequest // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.build|build(){}[0]
+    final fun setConstraints(io.github.mobilebytelabs.worker/Constraints): io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.setConstraints|setConstraints(io.github.mobilebytelabs.worker.Constraints){}[0]
+    final fun setInitialDelay(kotlin.time/Duration): io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.setInitialDelay|setInitialDelay(kotlin.time.Duration){}[0]
+    final fun setInputData(io.github.mobilebytelabs.worker/WorkData): io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.setInputData|setInputData(io.github.mobilebytelabs.worker.WorkData){}[0]
+    final fun setQuickRefresh(kotlin/Boolean): io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A> // io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder.setQuickRefresh|setQuickRefresh(kotlin.Boolean){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.config/AndroidWorkerConfig { // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ...) // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.Boolean){}[0]
+
+    final val notificationChannelId // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.notificationChannelId|{}notificationChannelId[0]
+        final fun <get-notificationChannelId>(): kotlin/String? // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.notificationChannelId.<get-notificationChannelId>|<get-notificationChannelId>(){}[0]
+    final val notificationChannelName // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.notificationChannelName|{}notificationChannelName[0]
+        final fun <get-notificationChannelName>(): kotlin/String? // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.notificationChannelName.<get-notificationChannelName>|<get-notificationChannelName>(){}[0]
+    final val useReflectionFactory // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.useReflectionFactory|{}useReflectionFactory[0]
+        final fun <get-useReflectionFactory>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.useReflectionFactory.<get-useReflectionFactory>|<get-useReflectionFactory>(){}[0]
+
+    final fun component1(): kotlin/String? // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.component3|component3(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ...): io.github.mobilebytelabs.worker.config/AndroidWorkerConfig // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.copy|copy(kotlin.String?;kotlin.String?;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.config/AndroidWorkerConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig { // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?;kotlin.String?;kotlin.Int;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val appId // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.appId|{}appId[0]
+        final fun <get-appId>(): kotlin/String // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.appId.<get-appId>|<get-appId>(){}[0]
+    final val daemonJarPath // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.daemonJarPath|{}daemonJarPath[0]
+        final fun <get-daemonJarPath>(): kotlin/String // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.daemonJarPath.<get-daemonJarPath>|<get-daemonJarPath>(){}[0]
+    final val installOnFirstRun // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.installOnFirstRun|{}installOnFirstRun[0]
+        final fun <get-installOnFirstRun>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.installOnFirstRun.<get-installOnFirstRun>|<get-installOnFirstRun>(){}[0]
+    final val persistenceDir // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.persistenceDir|{}persistenceDir[0]
+        final fun <get-persistenceDir>(): kotlin/String? // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.persistenceDir.<get-persistenceDir>|<get-persistenceDir>(){}[0]
+    final val pollIntervalMin // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.pollIntervalMin|{}pollIntervalMin[0]
+        final fun <get-pollIntervalMin>(): kotlin/Int // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.pollIntervalMin.<get-pollIntervalMin>|<get-pollIntervalMin>(){}[0]
+    final val runOnlyIfLoggedOn // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.runOnlyIfLoggedOn|{}runOnlyIfLoggedOn[0]
+        final fun <get-runOnlyIfLoggedOn>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.runOnlyIfLoggedOn.<get-runOnlyIfLoggedOn>|<get-runOnlyIfLoggedOn>(){}[0]
+    final val runtimeJavaHome // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.runtimeJavaHome|{}runtimeJavaHome[0]
+        final fun <get-runtimeJavaHome>(): kotlin/String? // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.runtimeJavaHome.<get-runtimeJavaHome>|<get-runtimeJavaHome>(){}[0]
+    final val uninstallOnAppUninstall // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.uninstallOnAppUninstall|{}uninstallOnAppUninstall[0]
+        final fun <get-uninstallOnAppUninstall>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.uninstallOnAppUninstall.<get-uninstallOnAppUninstall>|<get-uninstallOnAppUninstall>(){}[0]
+
+    final fun component1(): kotlin/String // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component6|component6(){}[0]
+    final fun component7(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component7|component7(){}[0]
+    final fun component8(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.component8|component8(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.copy|copy(kotlin.String;kotlin.String;kotlin.String?;kotlin.String?;kotlin.Int;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.config/DesktopWorkerConfig { // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin/Boolean = ..., kotlin/String? = ..., kotlin/Long = ..., io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig? = ...) // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.<init>|<init>(kotlin.Int;kotlin.Boolean;kotlin.String?;kotlin.Long;io.github.mobilebytelabs.worker.config.DesktopBackgroundConfig?){}[0]
+
+    final val background // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.background|{}background[0]
+        final fun <get-background>(): io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig? // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.background.<get-background>|<get-background>(){}[0]
+    final val constraintCheckIntervalMs // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.constraintCheckIntervalMs|{}constraintCheckIntervalMs[0]
+        final fun <get-constraintCheckIntervalMs>(): kotlin/Long // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.constraintCheckIntervalMs.<get-constraintCheckIntervalMs>|<get-constraintCheckIntervalMs>(){}[0]
+    final val maxConcurrentWorkers // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.maxConcurrentWorkers|{}maxConcurrentWorkers[0]
+        final fun <get-maxConcurrentWorkers>(): kotlin/Int // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.maxConcurrentWorkers.<get-maxConcurrentWorkers>|<get-maxConcurrentWorkers>(){}[0]
+    final val persistenceEnabled // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.persistenceEnabled|{}persistenceEnabled[0]
+        final fun <get-persistenceEnabled>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.persistenceEnabled.<get-persistenceEnabled>|<get-persistenceEnabled>(){}[0]
+    final val persistencePath // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.persistencePath|{}persistencePath[0]
+        final fun <get-persistencePath>(): kotlin/String? // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.persistencePath.<get-persistencePath>|<get-persistencePath>(){}[0]
+
+    final fun component1(): kotlin/Int // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.component3|component3(){}[0]
+    final fun component4(): kotlin/Long // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.component4|component4(){}[0]
+    final fun component5(): io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig? // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.component5|component5(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Boolean = ..., kotlin/String? = ..., kotlin/Long = ..., io.github.mobilebytelabs.worker.config/DesktopBackgroundConfig? = ...): io.github.mobilebytelabs.worker.config/DesktopWorkerConfig // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.copy|copy(kotlin.Int;kotlin.Boolean;kotlin.String?;kotlin.Long;io.github.mobilebytelabs.worker.config.DesktopBackgroundConfig?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.config/DesktopWorkerConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.config/IosWorkerConfig { // io.github.mobilebytelabs.worker.config/IosWorkerConfig|null[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ..., kotlin/String = ...) // io.github.mobilebytelabs.worker.config/IosWorkerConfig.<init>|<init>(kotlin.Boolean;kotlin.String;kotlin.Boolean;kotlin.String;kotlin.String){}[0]
+
+    final val appRefreshTaskIdentifier // io.github.mobilebytelabs.worker.config/IosWorkerConfig.appRefreshTaskIdentifier|{}appRefreshTaskIdentifier[0]
+        final fun <get-appRefreshTaskIdentifier>(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.appRefreshTaskIdentifier.<get-appRefreshTaskIdentifier>|<get-appRefreshTaskIdentifier>(){}[0]
+    final val bgProcessingTaskIdentifier // io.github.mobilebytelabs.worker.config/IosWorkerConfig.bgProcessingTaskIdentifier|{}bgProcessingTaskIdentifier[0]
+        final fun <get-bgProcessingTaskIdentifier>(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.bgProcessingTaskIdentifier.<get-bgProcessingTaskIdentifier>|<get-bgProcessingTaskIdentifier>(){}[0]
+    final val enableBackgroundTasks // io.github.mobilebytelabs.worker.config/IosWorkerConfig.enableBackgroundTasks|{}enableBackgroundTasks[0]
+        final fun <get-enableBackgroundTasks>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/IosWorkerConfig.enableBackgroundTasks.<get-enableBackgroundTasks>|<get-enableBackgroundTasks>(){}[0]
+    final val enablePersistence // io.github.mobilebytelabs.worker.config/IosWorkerConfig.enablePersistence|{}enablePersistence[0]
+        final fun <get-enablePersistence>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/IosWorkerConfig.enablePersistence.<get-enablePersistence>|<get-enablePersistence>(){}[0]
+    final val persistenceKey // io.github.mobilebytelabs.worker.config/IosWorkerConfig.persistenceKey|{}persistenceKey[0]
+        final fun <get-persistenceKey>(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.persistenceKey.<get-persistenceKey>|<get-persistenceKey>(){}[0]
+
+    final fun component1(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/IosWorkerConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/IosWorkerConfig.component3|component3(){}[0]
+    final fun component4(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.component5|component5(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/String = ..., kotlin/Boolean = ..., kotlin/String = ..., kotlin/String = ...): io.github.mobilebytelabs.worker.config/IosWorkerConfig // io.github.mobilebytelabs.worker.config/IosWorkerConfig.copy|copy(kotlin.Boolean;kotlin.String;kotlin.Boolean;kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.config/IosWorkerConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.config/IosWorkerConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.config/IosWorkerConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.config/WebWorkerConfig { // io.github.mobilebytelabs.worker.config/WebWorkerConfig|null[0]
+    constructor <init>(kotlin/Boolean = ..., kotlin/String = ..., kotlin/Long = ..., kotlin/Boolean = ..., kotlin/String = ..., kotlin/Boolean = ...) // io.github.mobilebytelabs.worker.config/WebWorkerConfig.<init>|<init>(kotlin.Boolean;kotlin.String;kotlin.Long;kotlin.Boolean;kotlin.String;kotlin.Boolean){}[0]
+
+    final val constraintCheckIntervalMs // io.github.mobilebytelabs.worker.config/WebWorkerConfig.constraintCheckIntervalMs|{}constraintCheckIntervalMs[0]
+        final fun <get-constraintCheckIntervalMs>(): kotlin/Long // io.github.mobilebytelabs.worker.config/WebWorkerConfig.constraintCheckIntervalMs.<get-constraintCheckIntervalMs>|<get-constraintCheckIntervalMs>(){}[0]
+    final val enableBackgroundSync // io.github.mobilebytelabs.worker.config/WebWorkerConfig.enableBackgroundSync|{}enableBackgroundSync[0]
+        final fun <get-enableBackgroundSync>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.enableBackgroundSync.<get-enableBackgroundSync>|<get-enableBackgroundSync>(){}[0]
+    final val enablePeriodicBackgroundSync // io.github.mobilebytelabs.worker.config/WebWorkerConfig.enablePeriodicBackgroundSync|{}enablePeriodicBackgroundSync[0]
+        final fun <get-enablePeriodicBackgroundSync>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.enablePeriodicBackgroundSync.<get-enablePeriodicBackgroundSync>|<get-enablePeriodicBackgroundSync>(){}[0]
+    final val enablePersistence // io.github.mobilebytelabs.worker.config/WebWorkerConfig.enablePersistence|{}enablePersistence[0]
+        final fun <get-enablePersistence>(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.enablePersistence.<get-enablePersistence>|<get-enablePersistence>(){}[0]
+    final val persistenceDbName // io.github.mobilebytelabs.worker.config/WebWorkerConfig.persistenceDbName|{}persistenceDbName[0]
+        final fun <get-persistenceDbName>(): kotlin/String // io.github.mobilebytelabs.worker.config/WebWorkerConfig.persistenceDbName.<get-persistenceDbName>|<get-persistenceDbName>(){}[0]
+    final val serviceWorkerScript // io.github.mobilebytelabs.worker.config/WebWorkerConfig.serviceWorkerScript|{}serviceWorkerScript[0]
+        final fun <get-serviceWorkerScript>(): kotlin/String // io.github.mobilebytelabs.worker.config/WebWorkerConfig.serviceWorkerScript.<get-serviceWorkerScript>|<get-serviceWorkerScript>(){}[0]
+
+    final fun component1(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.config/WebWorkerConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/Long // io.github.mobilebytelabs.worker.config/WebWorkerConfig.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/String // io.github.mobilebytelabs.worker.config/WebWorkerConfig.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.component6|component6(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/String = ..., kotlin/Long = ..., kotlin/Boolean = ..., kotlin/String = ..., kotlin/Boolean = ...): io.github.mobilebytelabs.worker.config/WebWorkerConfig // io.github.mobilebytelabs.worker.config/WebWorkerConfig.copy|copy(kotlin.Boolean;kotlin.String;kotlin.Long;kotlin.Boolean;kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WebWorkerConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.config/WebWorkerConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.config/WebWorkerConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.config/WorkerConfig { // io.github.mobilebytelabs.worker.config/WorkerConfig|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker.config/LogLevel = ..., io.github.mobilebytelabs.worker/RetryConfig = ..., kotlin.collections/List<io.github.mobilebytelabs.worker/WorkObserver> = ..., io.github.mobilebytelabs.worker.config/AndroidWorkerConfig = ..., io.github.mobilebytelabs.worker.config/IosWorkerConfig = ..., io.github.mobilebytelabs.worker.config/DesktopWorkerConfig = ..., io.github.mobilebytelabs.worker.config/WebWorkerConfig = ...) // io.github.mobilebytelabs.worker.config/WorkerConfig.<init>|<init>(io.github.mobilebytelabs.worker.config.LogLevel;io.github.mobilebytelabs.worker.RetryConfig;kotlin.collections.List<io.github.mobilebytelabs.worker.WorkObserver>;io.github.mobilebytelabs.worker.config.AndroidWorkerConfig;io.github.mobilebytelabs.worker.config.IosWorkerConfig;io.github.mobilebytelabs.worker.config.DesktopWorkerConfig;io.github.mobilebytelabs.worker.config.WebWorkerConfig){}[0]
+
+    final val androidConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.androidConfig|{}androidConfig[0]
+        final fun <get-androidConfig>(): io.github.mobilebytelabs.worker.config/AndroidWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.androidConfig.<get-androidConfig>|<get-androidConfig>(){}[0]
+    final val defaultRetryConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.defaultRetryConfig|{}defaultRetryConfig[0]
+        final fun <get-defaultRetryConfig>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.defaultRetryConfig.<get-defaultRetryConfig>|<get-defaultRetryConfig>(){}[0]
+    final val desktopConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.desktopConfig|{}desktopConfig[0]
+        final fun <get-desktopConfig>(): io.github.mobilebytelabs.worker.config/DesktopWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.desktopConfig.<get-desktopConfig>|<get-desktopConfig>(){}[0]
+    final val iosConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.iosConfig|{}iosConfig[0]
+        final fun <get-iosConfig>(): io.github.mobilebytelabs.worker.config/IosWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.iosConfig.<get-iosConfig>|<get-iosConfig>(){}[0]
+    final val logLevel // io.github.mobilebytelabs.worker.config/WorkerConfig.logLevel|{}logLevel[0]
+        final fun <get-logLevel>(): io.github.mobilebytelabs.worker.config/LogLevel // io.github.mobilebytelabs.worker.config/WorkerConfig.logLevel.<get-logLevel>|<get-logLevel>(){}[0]
+    final val observers // io.github.mobilebytelabs.worker.config/WorkerConfig.observers|{}observers[0]
+        final fun <get-observers>(): kotlin.collections/List<io.github.mobilebytelabs.worker/WorkObserver> // io.github.mobilebytelabs.worker.config/WorkerConfig.observers.<get-observers>|<get-observers>(){}[0]
+    final val webConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.webConfig|{}webConfig[0]
+        final fun <get-webConfig>(): io.github.mobilebytelabs.worker.config/WebWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.webConfig.<get-webConfig>|<get-webConfig>(){}[0]
+
+    final fun component1(): io.github.mobilebytelabs.worker.config/LogLevel // io.github.mobilebytelabs.worker.config/WorkerConfig.component1|component1(){}[0]
+    final fun component2(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/List<io.github.mobilebytelabs.worker/WorkObserver> // io.github.mobilebytelabs.worker.config/WorkerConfig.component3|component3(){}[0]
+    final fun component4(): io.github.mobilebytelabs.worker.config/AndroidWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.component4|component4(){}[0]
+    final fun component5(): io.github.mobilebytelabs.worker.config/IosWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.component5|component5(){}[0]
+    final fun component6(): io.github.mobilebytelabs.worker.config/DesktopWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.component6|component6(){}[0]
+    final fun component7(): io.github.mobilebytelabs.worker.config/WebWorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.component7|component7(){}[0]
+    final fun copy(io.github.mobilebytelabs.worker.config/LogLevel = ..., io.github.mobilebytelabs.worker/RetryConfig = ..., kotlin.collections/List<io.github.mobilebytelabs.worker/WorkObserver> = ..., io.github.mobilebytelabs.worker.config/AndroidWorkerConfig = ..., io.github.mobilebytelabs.worker.config/IosWorkerConfig = ..., io.github.mobilebytelabs.worker.config/DesktopWorkerConfig = ..., io.github.mobilebytelabs.worker.config/WebWorkerConfig = ...): io.github.mobilebytelabs.worker.config/WorkerConfig // io.github.mobilebytelabs.worker.config/WorkerConfig.copy|copy(io.github.mobilebytelabs.worker.config.LogLevel;io.github.mobilebytelabs.worker.RetryConfig;kotlin.collections.List<io.github.mobilebytelabs.worker.WorkObserver>;io.github.mobilebytelabs.worker.config.AndroidWorkerConfig;io.github.mobilebytelabs.worker.config.IosWorkerConfig;io.github.mobilebytelabs.worker.config.DesktopWorkerConfig;io.github.mobilebytelabs.worker.config.WebWorkerConfig){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.config/WorkerConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.config/WorkerConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.config/WorkerConfig.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.observer/LoggingWorkObserver : io.github.mobilebytelabs.worker/WorkObserver { // io.github.mobilebytelabs.worker.observer/LoggingWorkObserver|null[0]
+    constructor <init>(kotlin/String = ...) // io.github.mobilebytelabs.worker.observer/LoggingWorkObserver.<init>|<init>(kotlin.String){}[0]
+
+    final suspend fun onEvent(io.github.mobilebytelabs.worker/WorkEvent) // io.github.mobilebytelabs.worker.observer/LoggingWorkObserver.onEvent|onEvent(io.github.mobilebytelabs.worker.WorkEvent){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.registry/WorkerRegistry { // io.github.mobilebytelabs.worker.registry/WorkerRegistry|null[0]
+    final fun create(kotlin/String, io.github.mobilebytelabs.worker/WorkerContext): io.github.mobilebytelabs.worker/CoroutineWorker? // io.github.mobilebytelabs.worker.registry/WorkerRegistry.create|create(kotlin.String;io.github.mobilebytelabs.worker.WorkerContext){}[0]
+    final fun lock() // io.github.mobilebytelabs.worker.registry/WorkerRegistry.lock|lock(){}[0]
+    final fun register(kotlin/String, kotlin/Function1<io.github.mobilebytelabs.worker/WorkerContext, io.github.mobilebytelabs.worker/CoroutineWorker>) // io.github.mobilebytelabs.worker.registry/WorkerRegistry.register|register(kotlin.String;kotlin.Function1<io.github.mobilebytelabs.worker.WorkerContext,io.github.mobilebytelabs.worker.CoroutineWorker>){}[0]
+    final fun registeredClassNames(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker.registry/WorkerRegistry.registeredClassNames|registeredClassNames(){}[0]
+    final inline fun <#A1: reified io.github.mobilebytelabs.worker/CoroutineWorker> register(noinline kotlin/Function1<io.github.mobilebytelabs.worker/WorkerContext, #A1>) // io.github.mobilebytelabs.worker.registry/WorkerRegistry.register|register(kotlin.Function1<io.github.mobilebytelabs.worker.WorkerContext,0:0>){0§<io.github.mobilebytelabs.worker.CoroutineWorker>}[0]
+}
+
+final class io.github.mobilebytelabs.worker.registry/WorkerRegistryAlreadyLoadedException : kotlin/IllegalStateException { // io.github.mobilebytelabs.worker.registry/WorkerRegistryAlreadyLoadedException|null[0]
+    constructor <init>(kotlin/String) // io.github.mobilebytelabs.worker.registry/WorkerRegistryAlreadyLoadedException.<init>|<init>(kotlin.String){}[0]
+
+    final val attemptedRegistration // io.github.mobilebytelabs.worker.registry/WorkerRegistryAlreadyLoadedException.attemptedRegistration|{}attemptedRegistration[0]
+        final fun <get-attemptedRegistration>(): kotlin/String // io.github.mobilebytelabs.worker.registry/WorkerRegistryAlreadyLoadedException.attemptedRegistration.<get-attemptedRegistration>|<get-attemptedRegistration>(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/BackgroundCapabilities { // io.github.mobilebytelabs.worker/BackgroundCapabilities|null[0]
+    constructor <init>(kotlin/Boolean, kotlin/Boolean) // io.github.mobilebytelabs.worker/BackgroundCapabilities.<init>|<init>(kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val supportsOsScheduling // io.github.mobilebytelabs.worker/BackgroundCapabilities.supportsOsScheduling|{}supportsOsScheduling[0]
+        final fun <get-supportsOsScheduling>(): kotlin/Boolean // io.github.mobilebytelabs.worker/BackgroundCapabilities.supportsOsScheduling.<get-supportsOsScheduling>|<get-supportsOsScheduling>(){}[0]
+    final val supportsPersistence // io.github.mobilebytelabs.worker/BackgroundCapabilities.supportsPersistence|{}supportsPersistence[0]
+        final fun <get-supportsPersistence>(): kotlin/Boolean // io.github.mobilebytelabs.worker/BackgroundCapabilities.supportsPersistence.<get-supportsPersistence>|<get-supportsPersistence>(){}[0]
+
+    final fun component1(): kotlin/Boolean // io.github.mobilebytelabs.worker/BackgroundCapabilities.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // io.github.mobilebytelabs.worker/BackgroundCapabilities.component2|component2(){}[0]
+    final fun copy(kotlin/Boolean = ..., kotlin/Boolean = ...): io.github.mobilebytelabs.worker/BackgroundCapabilities // io.github.mobilebytelabs.worker/BackgroundCapabilities.copy|copy(kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/BackgroundCapabilities.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/BackgroundCapabilities.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/BackgroundCapabilities.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/Constraints { // io.github.mobilebytelabs.worker/Constraints|null[0]
+    final val contentUriTriggers // io.github.mobilebytelabs.worker/Constraints.contentUriTriggers|{}contentUriTriggers[0]
+        final fun <get-contentUriTriggers>(): kotlin.collections/List<io.github.mobilebytelabs.worker/ContentUriTrigger> // io.github.mobilebytelabs.worker/Constraints.contentUriTriggers.<get-contentUriTriggers>|<get-contentUriTriggers>(){}[0]
+    final val requiredNetworkType // io.github.mobilebytelabs.worker/Constraints.requiredNetworkType|{}requiredNetworkType[0]
+        final fun <get-requiredNetworkType>(): io.github.mobilebytelabs.worker/NetworkType // io.github.mobilebytelabs.worker/Constraints.requiredNetworkType.<get-requiredNetworkType>|<get-requiredNetworkType>(){}[0]
+    final val requiresBatteryNotLow // io.github.mobilebytelabs.worker/Constraints.requiresBatteryNotLow|{}requiresBatteryNotLow[0]
+        final fun <get-requiresBatteryNotLow>(): kotlin/Boolean // io.github.mobilebytelabs.worker/Constraints.requiresBatteryNotLow.<get-requiresBatteryNotLow>|<get-requiresBatteryNotLow>(){}[0]
+    final val requiresCharging // io.github.mobilebytelabs.worker/Constraints.requiresCharging|{}requiresCharging[0]
+        final fun <get-requiresCharging>(): kotlin/Boolean // io.github.mobilebytelabs.worker/Constraints.requiresCharging.<get-requiresCharging>|<get-requiresCharging>(){}[0]
+    final val requiresDeviceIdle // io.github.mobilebytelabs.worker/Constraints.requiresDeviceIdle|{}requiresDeviceIdle[0]
+        final fun <get-requiresDeviceIdle>(): kotlin/Boolean // io.github.mobilebytelabs.worker/Constraints.requiresDeviceIdle.<get-requiresDeviceIdle>|<get-requiresDeviceIdle>(){}[0]
+    final val requiresStorageNotLow // io.github.mobilebytelabs.worker/Constraints.requiresStorageNotLow|{}requiresStorageNotLow[0]
+        final fun <get-requiresStorageNotLow>(): kotlin/Boolean // io.github.mobilebytelabs.worker/Constraints.requiresStorageNotLow.<get-requiresStorageNotLow>|<get-requiresStorageNotLow>(){}[0]
+
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/Constraints.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/Constraints.hashCode|hashCode(){}[0]
+
+    final class Builder { // io.github.mobilebytelabs.worker/Constraints.Builder|null[0]
+        constructor <init>() // io.github.mobilebytelabs.worker/Constraints.Builder.<init>|<init>(){}[0]
+
+        final fun addContentUriTrigger(kotlin/String, kotlin/Boolean): io.github.mobilebytelabs.worker/Constraints.Builder // io.github.mobilebytelabs.worker/Constraints.Builder.addContentUriTrigger|addContentUriTrigger(kotlin.String;kotlin.Boolean){}[0]
+        final fun build(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/Constraints.Builder.build|build(){}[0]
+        final fun setRequiredNetworkType(io.github.mobilebytelabs.worker/NetworkType): io.github.mobilebytelabs.worker/Constraints.Builder // io.github.mobilebytelabs.worker/Constraints.Builder.setRequiredNetworkType|setRequiredNetworkType(io.github.mobilebytelabs.worker.NetworkType){}[0]
+        final fun setRequiresBatteryNotLow(kotlin/Boolean): io.github.mobilebytelabs.worker/Constraints.Builder // io.github.mobilebytelabs.worker/Constraints.Builder.setRequiresBatteryNotLow|setRequiresBatteryNotLow(kotlin.Boolean){}[0]
+        final fun setRequiresCharging(kotlin/Boolean): io.github.mobilebytelabs.worker/Constraints.Builder // io.github.mobilebytelabs.worker/Constraints.Builder.setRequiresCharging|setRequiresCharging(kotlin.Boolean){}[0]
+        final fun setRequiresDeviceIdle(kotlin/Boolean): io.github.mobilebytelabs.worker/Constraints.Builder // io.github.mobilebytelabs.worker/Constraints.Builder.setRequiresDeviceIdle|setRequiresDeviceIdle(kotlin.Boolean){}[0]
+        final fun setRequiresStorageNotLow(kotlin/Boolean): io.github.mobilebytelabs.worker/Constraints.Builder // io.github.mobilebytelabs.worker/Constraints.Builder.setRequiresStorageNotLow|setRequiresStorageNotLow(kotlin.Boolean){}[0]
+    }
+
+    final object Companion { // io.github.mobilebytelabs.worker/Constraints.Companion|null[0]
+        final val NONE // io.github.mobilebytelabs.worker/Constraints.Companion.NONE|{}NONE[0]
+            final fun <get-NONE>(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/Constraints.Companion.NONE.<get-NONE>|<get-NONE>(){}[0]
+
+        final fun invoke(kotlin/Function1<io.github.mobilebytelabs.worker/Constraints.Builder, kotlin/Unit>): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/Constraints.Companion.invoke|invoke(kotlin.Function1<io.github.mobilebytelabs.worker.Constraints.Builder,kotlin.Unit>){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker/ContentUriTrigger { // io.github.mobilebytelabs.worker/ContentUriTrigger|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean) // io.github.mobilebytelabs.worker/ContentUriTrigger.<init>|<init>(kotlin.String;kotlin.Boolean){}[0]
+
+    final val triggerForDescendants // io.github.mobilebytelabs.worker/ContentUriTrigger.triggerForDescendants|{}triggerForDescendants[0]
+        final fun <get-triggerForDescendants>(): kotlin/Boolean // io.github.mobilebytelabs.worker/ContentUriTrigger.triggerForDescendants.<get-triggerForDescendants>|<get-triggerForDescendants>(){}[0]
+    final val uriString // io.github.mobilebytelabs.worker/ContentUriTrigger.uriString|{}uriString[0]
+        final fun <get-uriString>(): kotlin/String // io.github.mobilebytelabs.worker/ContentUriTrigger.uriString.<get-uriString>|<get-uriString>(){}[0]
+
+    final fun component1(): kotlin/String // io.github.mobilebytelabs.worker/ContentUriTrigger.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // io.github.mobilebytelabs.worker/ContentUriTrigger.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ...): io.github.mobilebytelabs.worker/ContentUriTrigger // io.github.mobilebytelabs.worker/ContentUriTrigger.copy|copy(kotlin.String;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/ContentUriTrigger.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/ContentUriTrigger.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/ContentUriTrigger.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/ForegroundInfo { // io.github.mobilebytelabs.worker/ForegroundInfo|null[0]
+    constructor <init>(kotlin/Int, kotlin/String, kotlin/String, io.github.mobilebytelabs.worker/WorkProgress = ..., io.github.mobilebytelabs.worker/ForegroundServiceType? = ..., kotlin.coroutines/SuspendFunction0<kotlin/Unit>? = ...) // io.github.mobilebytelabs.worker/ForegroundInfo.<init>|<init>(kotlin.Int;kotlin.String;kotlin.String;io.github.mobilebytelabs.worker.WorkProgress;io.github.mobilebytelabs.worker.ForegroundServiceType?;kotlin.coroutines.SuspendFunction0<kotlin.Unit>?){}[0]
+
+    final val cancelAction // io.github.mobilebytelabs.worker/ForegroundInfo.cancelAction|{}cancelAction[0]
+        final fun <get-cancelAction>(): kotlin.coroutines/SuspendFunction0<kotlin/Unit>? // io.github.mobilebytelabs.worker/ForegroundInfo.cancelAction.<get-cancelAction>|<get-cancelAction>(){}[0]
+    final val message // io.github.mobilebytelabs.worker/ForegroundInfo.message|{}message[0]
+        final fun <get-message>(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundInfo.message.<get-message>|<get-message>(){}[0]
+    final val notificationId // io.github.mobilebytelabs.worker/ForegroundInfo.notificationId|{}notificationId[0]
+        final fun <get-notificationId>(): kotlin/Int // io.github.mobilebytelabs.worker/ForegroundInfo.notificationId.<get-notificationId>|<get-notificationId>(){}[0]
+    final val progress // io.github.mobilebytelabs.worker/ForegroundInfo.progress|{}progress[0]
+        final fun <get-progress>(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/ForegroundInfo.progress.<get-progress>|<get-progress>(){}[0]
+    final val serviceType // io.github.mobilebytelabs.worker/ForegroundInfo.serviceType|{}serviceType[0]
+        final fun <get-serviceType>(): io.github.mobilebytelabs.worker/ForegroundServiceType? // io.github.mobilebytelabs.worker/ForegroundInfo.serviceType.<get-serviceType>|<get-serviceType>(){}[0]
+    final val title // io.github.mobilebytelabs.worker/ForegroundInfo.title|{}title[0]
+        final fun <get-title>(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundInfo.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/Int // io.github.mobilebytelabs.worker/ForegroundInfo.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundInfo.component2|component2(){}[0]
+    final fun component3(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundInfo.component3|component3(){}[0]
+    final fun component4(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/ForegroundInfo.component4|component4(){}[0]
+    final fun component5(): io.github.mobilebytelabs.worker/ForegroundServiceType? // io.github.mobilebytelabs.worker/ForegroundInfo.component5|component5(){}[0]
+    final fun component6(): kotlin.coroutines/SuspendFunction0<kotlin/Unit>? // io.github.mobilebytelabs.worker/ForegroundInfo.component6|component6(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/String = ..., kotlin/String = ..., io.github.mobilebytelabs.worker/WorkProgress = ..., io.github.mobilebytelabs.worker/ForegroundServiceType? = ..., kotlin.coroutines/SuspendFunction0<kotlin/Unit>? = ...): io.github.mobilebytelabs.worker/ForegroundInfo // io.github.mobilebytelabs.worker/ForegroundInfo.copy|copy(kotlin.Int;kotlin.String;kotlin.String;io.github.mobilebytelabs.worker.WorkProgress;io.github.mobilebytelabs.worker.ForegroundServiceType?;kotlin.coroutines.SuspendFunction0<kotlin.Unit>?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/ForegroundInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/ForegroundInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundInfo.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/ForegroundNotSupportedException : kotlin/RuntimeException { // io.github.mobilebytelabs.worker/ForegroundNotSupportedException|null[0]
+    constructor <init>(kotlin/String, kotlin/String) // io.github.mobilebytelabs.worker/ForegroundNotSupportedException.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+    final val platform // io.github.mobilebytelabs.worker/ForegroundNotSupportedException.platform|{}platform[0]
+        final fun <get-platform>(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundNotSupportedException.platform.<get-platform>|<get-platform>(){}[0]
+    final val reason // io.github.mobilebytelabs.worker/ForegroundNotSupportedException.reason|{}reason[0]
+        final fun <get-reason>(): kotlin/String // io.github.mobilebytelabs.worker/ForegroundNotSupportedException.reason.<get-reason>|<get-reason>(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/OneTimeWorkRequest : io.github.mobilebytelabs.worker/WorkRequest { // io.github.mobilebytelabs.worker/OneTimeWorkRequest|null[0]
+    final val constraints // io.github.mobilebytelabs.worker/OneTimeWorkRequest.constraints|{}constraints[0]
+        final fun <get-constraints>(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/OneTimeWorkRequest.constraints.<get-constraints>|<get-constraints>(){}[0]
+    final val expeditedPolicy // io.github.mobilebytelabs.worker/OneTimeWorkRequest.expeditedPolicy|{}expeditedPolicy[0]
+        final fun <get-expeditedPolicy>(): io.github.mobilebytelabs.worker/OutOfQuotaPolicy? // io.github.mobilebytelabs.worker/OneTimeWorkRequest.expeditedPolicy.<get-expeditedPolicy>|<get-expeditedPolicy>(){}[0]
+    final val id // io.github.mobilebytelabs.worker/OneTimeWorkRequest.id|{}id[0]
+        final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/OneTimeWorkRequest.id.<get-id>|<get-id>(){}[0]
+    final val initialDelay // io.github.mobilebytelabs.worker/OneTimeWorkRequest.initialDelay|{}initialDelay[0]
+        final fun <get-initialDelay>(): kotlin.time/Duration // io.github.mobilebytelabs.worker/OneTimeWorkRequest.initialDelay.<get-initialDelay>|<get-initialDelay>(){}[0]
+    final val inputData // io.github.mobilebytelabs.worker/OneTimeWorkRequest.inputData|{}inputData[0]
+        final fun <get-inputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/OneTimeWorkRequest.inputData.<get-inputData>|<get-inputData>(){}[0]
+    final val retryConfig // io.github.mobilebytelabs.worker/OneTimeWorkRequest.retryConfig|{}retryConfig[0]
+        final fun <get-retryConfig>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/OneTimeWorkRequest.retryConfig.<get-retryConfig>|<get-retryConfig>(){}[0]
+    final val tags // io.github.mobilebytelabs.worker/OneTimeWorkRequest.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/OneTimeWorkRequest.tags.<get-tags>|<get-tags>(){}[0]
+    final val workerClass // io.github.mobilebytelabs.worker/OneTimeWorkRequest.workerClass|{}workerClass[0]
+        final fun <get-workerClass>(): kotlin/String // io.github.mobilebytelabs.worker/OneTimeWorkRequest.workerClass.<get-workerClass>|<get-workerClass>(){}[0]
+
+    final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component2|component2(){}[0]
+    final fun component3(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component3|component3(){}[0]
+    final fun component4(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component4|component4(){}[0]
+    final fun component5(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component6|component6(){}[0]
+    final fun component7(): kotlin.time/Duration // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component7|component7(){}[0]
+    final fun component8(): io.github.mobilebytelabs.worker/OutOfQuotaPolicy? // io.github.mobilebytelabs.worker/OneTimeWorkRequest.component8|component8(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/OneTimeWorkRequest.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/OneTimeWorkRequest.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/OneTimeWorkRequest.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/PeriodicWorkRequest : io.github.mobilebytelabs.worker/WorkRequest { // io.github.mobilebytelabs.worker/PeriodicWorkRequest|null[0]
+    final val constraints // io.github.mobilebytelabs.worker/PeriodicWorkRequest.constraints|{}constraints[0]
+        final fun <get-constraints>(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/PeriodicWorkRequest.constraints.<get-constraints>|<get-constraints>(){}[0]
+    final val flexTimeInterval // io.github.mobilebytelabs.worker/PeriodicWorkRequest.flexTimeInterval|{}flexTimeInterval[0]
+        final fun <get-flexTimeInterval>(): kotlin.time/Duration // io.github.mobilebytelabs.worker/PeriodicWorkRequest.flexTimeInterval.<get-flexTimeInterval>|<get-flexTimeInterval>(){}[0]
+    final val id // io.github.mobilebytelabs.worker/PeriodicWorkRequest.id|{}id[0]
+        final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/PeriodicWorkRequest.id.<get-id>|<get-id>(){}[0]
+    final val initialDelay // io.github.mobilebytelabs.worker/PeriodicWorkRequest.initialDelay|{}initialDelay[0]
+        final fun <get-initialDelay>(): kotlin.time/Duration // io.github.mobilebytelabs.worker/PeriodicWorkRequest.initialDelay.<get-initialDelay>|<get-initialDelay>(){}[0]
+    final val inputData // io.github.mobilebytelabs.worker/PeriodicWorkRequest.inputData|{}inputData[0]
+        final fun <get-inputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/PeriodicWorkRequest.inputData.<get-inputData>|<get-inputData>(){}[0]
+    final val quickRefresh // io.github.mobilebytelabs.worker/PeriodicWorkRequest.quickRefresh|{}quickRefresh[0]
+        final fun <get-quickRefresh>(): kotlin/Boolean // io.github.mobilebytelabs.worker/PeriodicWorkRequest.quickRefresh.<get-quickRefresh>|<get-quickRefresh>(){}[0]
+    final val repeatInterval // io.github.mobilebytelabs.worker/PeriodicWorkRequest.repeatInterval|{}repeatInterval[0]
+        final fun <get-repeatInterval>(): kotlin.time/Duration // io.github.mobilebytelabs.worker/PeriodicWorkRequest.repeatInterval.<get-repeatInterval>|<get-repeatInterval>(){}[0]
+    final val retryConfig // io.github.mobilebytelabs.worker/PeriodicWorkRequest.retryConfig|{}retryConfig[0]
+        final fun <get-retryConfig>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/PeriodicWorkRequest.retryConfig.<get-retryConfig>|<get-retryConfig>(){}[0]
+    final val tags // io.github.mobilebytelabs.worker/PeriodicWorkRequest.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/PeriodicWorkRequest.tags.<get-tags>|<get-tags>(){}[0]
+    final val workerClass // io.github.mobilebytelabs.worker/PeriodicWorkRequest.workerClass|{}workerClass[0]
+        final fun <get-workerClass>(): kotlin/String // io.github.mobilebytelabs.worker/PeriodicWorkRequest.workerClass.<get-workerClass>|<get-workerClass>(){}[0]
+
+    final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component1|component1(){}[0]
+    final fun component10(): kotlin/Boolean // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component10|component10(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component2|component2(){}[0]
+    final fun component3(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component3|component3(){}[0]
+    final fun component4(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component4|component4(){}[0]
+    final fun component5(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component6|component6(){}[0]
+    final fun component7(): kotlin.time/Duration // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component7|component7(){}[0]
+    final fun component8(): kotlin.time/Duration // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component8|component8(){}[0]
+    final fun component9(): kotlin.time/Duration // io.github.mobilebytelabs.worker/PeriodicWorkRequest.component9|component9(){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/PeriodicWorkRequest.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/PeriodicWorkRequest.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/PeriodicWorkRequest.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/PlatformContext { // io.github.mobilebytelabs.worker/PlatformContext|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker/PlatformContext.<init>|<init>(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/RetryConfig { // io.github.mobilebytelabs.worker/RetryConfig|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin.time/Duration = ..., kotlin.time/Duration = ..., io.github.mobilebytelabs.worker/BackoffPolicy = ..., kotlin/Double = ...) // io.github.mobilebytelabs.worker/RetryConfig.<init>|<init>(kotlin.Int;kotlin.time.Duration;kotlin.time.Duration;io.github.mobilebytelabs.worker.BackoffPolicy;kotlin.Double){}[0]
+
+    final val backoffPolicy // io.github.mobilebytelabs.worker/RetryConfig.backoffPolicy|{}backoffPolicy[0]
+        final fun <get-backoffPolicy>(): io.github.mobilebytelabs.worker/BackoffPolicy // io.github.mobilebytelabs.worker/RetryConfig.backoffPolicy.<get-backoffPolicy>|<get-backoffPolicy>(){}[0]
+    final val initialDelay // io.github.mobilebytelabs.worker/RetryConfig.initialDelay|{}initialDelay[0]
+        final fun <get-initialDelay>(): kotlin.time/Duration // io.github.mobilebytelabs.worker/RetryConfig.initialDelay.<get-initialDelay>|<get-initialDelay>(){}[0]
+    final val maxAttempts // io.github.mobilebytelabs.worker/RetryConfig.maxAttempts|{}maxAttempts[0]
+        final fun <get-maxAttempts>(): kotlin/Int // io.github.mobilebytelabs.worker/RetryConfig.maxAttempts.<get-maxAttempts>|<get-maxAttempts>(){}[0]
+    final val maxDelay // io.github.mobilebytelabs.worker/RetryConfig.maxDelay|{}maxDelay[0]
+        final fun <get-maxDelay>(): kotlin.time/Duration // io.github.mobilebytelabs.worker/RetryConfig.maxDelay.<get-maxDelay>|<get-maxDelay>(){}[0]
+    final val multiplier // io.github.mobilebytelabs.worker/RetryConfig.multiplier|{}multiplier[0]
+        final fun <get-multiplier>(): kotlin/Double // io.github.mobilebytelabs.worker/RetryConfig.multiplier.<get-multiplier>|<get-multiplier>(){}[0]
+
+    final fun component1(): kotlin/Int // io.github.mobilebytelabs.worker/RetryConfig.component1|component1(){}[0]
+    final fun component2(): kotlin.time/Duration // io.github.mobilebytelabs.worker/RetryConfig.component2|component2(){}[0]
+    final fun component3(): kotlin.time/Duration // io.github.mobilebytelabs.worker/RetryConfig.component3|component3(){}[0]
+    final fun component4(): io.github.mobilebytelabs.worker/BackoffPolicy // io.github.mobilebytelabs.worker/RetryConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/Double // io.github.mobilebytelabs.worker/RetryConfig.component5|component5(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin.time/Duration = ..., kotlin.time/Duration = ..., io.github.mobilebytelabs.worker/BackoffPolicy = ..., kotlin/Double = ...): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/RetryConfig.copy|copy(kotlin.Int;kotlin.time.Duration;kotlin.time.Duration;io.github.mobilebytelabs.worker.BackoffPolicy;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/RetryConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/RetryConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/RetryConfig.toString|toString(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker/RetryConfig.Companion|null[0]
+        final val AGGRESSIVE // io.github.mobilebytelabs.worker/RetryConfig.Companion.AGGRESSIVE|{}AGGRESSIVE[0]
+            final fun <get-AGGRESSIVE>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/RetryConfig.Companion.AGGRESSIVE.<get-AGGRESSIVE>|<get-AGGRESSIVE>(){}[0]
+        final val CONSERVATIVE // io.github.mobilebytelabs.worker/RetryConfig.Companion.CONSERVATIVE|{}CONSERVATIVE[0]
+            final fun <get-CONSERVATIVE>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/RetryConfig.Companion.CONSERVATIVE.<get-CONSERVATIVE>|<get-CONSERVATIVE>(){}[0]
+        final val DEFAULT // io.github.mobilebytelabs.worker/RetryConfig.Companion.DEFAULT|{}DEFAULT[0]
+            final fun <get-DEFAULT>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/RetryConfig.Companion.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker/WorkData { // io.github.mobilebytelabs.worker/WorkData|null[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkData.equals|equals(kotlin.Any?){}[0]
+    final fun getBoolean(kotlin/String, kotlin/Boolean = ...): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkData.getBoolean|getBoolean(kotlin.String;kotlin.Boolean){}[0]
+    final fun getFloat(kotlin/String, kotlin/Float = ...): kotlin/Float // io.github.mobilebytelabs.worker/WorkData.getFloat|getFloat(kotlin.String;kotlin.Float){}[0]
+    final fun getInt(kotlin/String, kotlin/Int = ...): kotlin/Int // io.github.mobilebytelabs.worker/WorkData.getInt|getInt(kotlin.String;kotlin.Int){}[0]
+    final fun getLong(kotlin/String, kotlin/Long = ...): kotlin/Long // io.github.mobilebytelabs.worker/WorkData.getLong|getLong(kotlin.String;kotlin.Long){}[0]
+    final fun getString(kotlin/String, kotlin/String? = ...): kotlin/String? // io.github.mobilebytelabs.worker/WorkData.getString|getString(kotlin.String;kotlin.String?){}[0]
+    final fun getStringArray(kotlin/String): kotlin/Array<kotlin/String>? // io.github.mobilebytelabs.worker/WorkData.getStringArray|getStringArray(kotlin.String){}[0]
+    final fun hasKey(kotlin/String): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkData.hasKey|hasKey(kotlin.String){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkData.hashCode|hashCode(){}[0]
+    final fun keyValueMap(): kotlin.collections/Map<kotlin/String, kotlin/Any?> // io.github.mobilebytelabs.worker/WorkData.keyValueMap|keyValueMap(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkData.toString|toString(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker/WorkData.Companion|null[0]
+        final val EMPTY // io.github.mobilebytelabs.worker/WorkData.Companion.EMPTY|{}EMPTY[0]
+            final fun <get-EMPTY>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkData.Companion.EMPTY.<get-EMPTY>|<get-EMPTY>(){}[0]
+
+        final fun invoke(kotlin/Array<out kotlin/Pair<kotlin/String, kotlin/Any?>>...): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkData.Companion.invoke|invoke(kotlin.Array<out|kotlin.Pair<kotlin.String,kotlin.Any?>>...){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker/WorkDataSerializationException : kotlin/Exception { // io.github.mobilebytelabs.worker/WorkDataSerializationException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // io.github.mobilebytelabs.worker/WorkDataSerializationException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/WorkEnqueueException : kotlin/Exception { // io.github.mobilebytelabs.worker/WorkEnqueueException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // io.github.mobilebytelabs.worker/WorkEnqueueException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
+}
+
+final class io.github.mobilebytelabs.worker/WorkInfo { // io.github.mobilebytelabs.worker/WorkInfo|null[0]
+    constructor <init>(kotlin.uuid/Uuid, io.github.mobilebytelabs.worker/WorkInfo.State, io.github.mobilebytelabs.worker/WorkProgress = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin.collections/Set<kotlin/String> = ..., kotlin/Int = ...) // io.github.mobilebytelabs.worker/WorkInfo.<init>|<init>(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkInfo.State;io.github.mobilebytelabs.worker.WorkProgress;io.github.mobilebytelabs.worker.WorkData;kotlin.collections.Set<kotlin.String>;kotlin.Int){}[0]
+
+    final val id // io.github.mobilebytelabs.worker/WorkInfo.id|{}id[0]
+        final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkInfo.id.<get-id>|<get-id>(){}[0]
+    final val isFinished // io.github.mobilebytelabs.worker/WorkInfo.isFinished|{}isFinished[0]
+        final fun <get-isFinished>(): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkInfo.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+    final val outputData // io.github.mobilebytelabs.worker/WorkInfo.outputData|{}outputData[0]
+        final fun <get-outputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkInfo.outputData.<get-outputData>|<get-outputData>(){}[0]
+    final val progress // io.github.mobilebytelabs.worker/WorkInfo.progress|{}progress[0]
+        final fun <get-progress>(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkInfo.progress.<get-progress>|<get-progress>(){}[0]
+    final val runAttemptCount // io.github.mobilebytelabs.worker/WorkInfo.runAttemptCount|{}runAttemptCount[0]
+        final fun <get-runAttemptCount>(): kotlin/Int // io.github.mobilebytelabs.worker/WorkInfo.runAttemptCount.<get-runAttemptCount>|<get-runAttemptCount>(){}[0]
+    final val state // io.github.mobilebytelabs.worker/WorkInfo.state|{}state[0]
+        final fun <get-state>(): io.github.mobilebytelabs.worker/WorkInfo.State // io.github.mobilebytelabs.worker/WorkInfo.state.<get-state>|<get-state>(){}[0]
+    final val tags // io.github.mobilebytelabs.worker/WorkInfo.tags|{}tags[0]
+        final fun <get-tags>(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/WorkInfo.tags.<get-tags>|<get-tags>(){}[0]
+
+    final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkInfo.component1|component1(){}[0]
+    final fun component2(): io.github.mobilebytelabs.worker/WorkInfo.State // io.github.mobilebytelabs.worker/WorkInfo.component2|component2(){}[0]
+    final fun component3(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkInfo.component3|component3(){}[0]
+    final fun component4(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkInfo.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/WorkInfo.component5|component5(){}[0]
+    final fun component6(): kotlin/Int // io.github.mobilebytelabs.worker/WorkInfo.component6|component6(){}[0]
+    final fun copy(kotlin.uuid/Uuid = ..., io.github.mobilebytelabs.worker/WorkInfo.State = ..., io.github.mobilebytelabs.worker/WorkProgress = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin.collections/Set<kotlin/String> = ..., kotlin/Int = ...): io.github.mobilebytelabs.worker/WorkInfo // io.github.mobilebytelabs.worker/WorkInfo.copy|copy(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkInfo.State;io.github.mobilebytelabs.worker.WorkProgress;io.github.mobilebytelabs.worker.WorkData;kotlin.collections.Set<kotlin.String>;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkInfo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkInfo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkInfo.toString|toString(){}[0]
+
+    final enum class State : kotlin/Enum<io.github.mobilebytelabs.worker/WorkInfo.State> { // io.github.mobilebytelabs.worker/WorkInfo.State|null[0]
+        enum entry BLOCKED // io.github.mobilebytelabs.worker/WorkInfo.State.BLOCKED|null[0]
+        enum entry CANCELLED // io.github.mobilebytelabs.worker/WorkInfo.State.CANCELLED|null[0]
+        enum entry ENQUEUED // io.github.mobilebytelabs.worker/WorkInfo.State.ENQUEUED|null[0]
+        enum entry FAILED // io.github.mobilebytelabs.worker/WorkInfo.State.FAILED|null[0]
+        enum entry RUNNING // io.github.mobilebytelabs.worker/WorkInfo.State.RUNNING|null[0]
+        enum entry SUCCEEDED // io.github.mobilebytelabs.worker/WorkInfo.State.SUCCEEDED|null[0]
+
+        final val entries // io.github.mobilebytelabs.worker/WorkInfo.State.entries|#static{}entries[0]
+            final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker/WorkInfo.State> // io.github.mobilebytelabs.worker/WorkInfo.State.entries.<get-entries>|<get-entries>#static(){}[0]
+        final val isFinished // io.github.mobilebytelabs.worker/WorkInfo.State.isFinished|{}isFinished[0]
+            final fun <get-isFinished>(): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkInfo.State.isFinished.<get-isFinished>|<get-isFinished>(){}[0]
+
+        final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker/WorkInfo.State // io.github.mobilebytelabs.worker/WorkInfo.State.valueOf|valueOf#static(kotlin.String){}[0]
+        final fun values(): kotlin/Array<io.github.mobilebytelabs.worker/WorkInfo.State> // io.github.mobilebytelabs.worker/WorkInfo.State.values|values#static(){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker/WorkProgress { // io.github.mobilebytelabs.worker/WorkProgress|null[0]
+    constructor <init>(kotlin/Int, io.github.mobilebytelabs.worker/WorkData = ...) // io.github.mobilebytelabs.worker/WorkProgress.<init>|<init>(kotlin.Int;io.github.mobilebytelabs.worker.WorkData){}[0]
+
+    final val data // io.github.mobilebytelabs.worker/WorkProgress.data|{}data[0]
+        final fun <get-data>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkProgress.data.<get-data>|<get-data>(){}[0]
+    final val isComplete // io.github.mobilebytelabs.worker/WorkProgress.isComplete|{}isComplete[0]
+        final fun <get-isComplete>(): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkProgress.isComplete.<get-isComplete>|<get-isComplete>(){}[0]
+    final val isIndeterminate // io.github.mobilebytelabs.worker/WorkProgress.isIndeterminate|{}isIndeterminate[0]
+        final fun <get-isIndeterminate>(): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkProgress.isIndeterminate.<get-isIndeterminate>|<get-isIndeterminate>(){}[0]
+    final val progress // io.github.mobilebytelabs.worker/WorkProgress.progress|{}progress[0]
+        final fun <get-progress>(): kotlin/Int // io.github.mobilebytelabs.worker/WorkProgress.progress.<get-progress>|<get-progress>(){}[0]
+
+    final fun component1(): kotlin/Int // io.github.mobilebytelabs.worker/WorkProgress.component1|component1(){}[0]
+    final fun component2(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkProgress.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkProgress.copy|copy(kotlin.Int;io.github.mobilebytelabs.worker.WorkData){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkProgress.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkProgress.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkProgress.toString|toString(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker/WorkProgress.Companion|null[0]
+        final val COMPLETE // io.github.mobilebytelabs.worker/WorkProgress.Companion.COMPLETE|{}COMPLETE[0]
+            final fun <get-COMPLETE>(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkProgress.Companion.COMPLETE.<get-COMPLETE>|<get-COMPLETE>(){}[0]
+        final val NONE // io.github.mobilebytelabs.worker/WorkProgress.Companion.NONE|{}NONE[0]
+            final fun <get-NONE>(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkProgress.Companion.NONE.<get-NONE>|<get-NONE>(){}[0]
+
+        final fun of(kotlin/Int, io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkProgress.Companion.of|of(kotlin.Int;io.github.mobilebytelabs.worker.WorkData){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker/WorkerInstantiationException : kotlin/Exception { // io.github.mobilebytelabs.worker/WorkerInstantiationException|null[0]
+    constructor <init>(kotlin/String, kotlin/Throwable? = ...) // io.github.mobilebytelabs.worker/WorkerInstantiationException.<init>|<init>(kotlin.String;kotlin.Throwable?){}[0]
+}
+
+sealed class io.github.mobilebytelabs.worker/WorkEvent { // io.github.mobilebytelabs.worker/WorkEvent|null[0]
+    abstract val id // io.github.mobilebytelabs.worker/WorkEvent.id|{}id[0]
+        abstract fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.id.<get-id>|<get-id>(){}[0]
+
+    final class Enqueued : io.github.mobilebytelabs.worker/WorkEvent { // io.github.mobilebytelabs.worker/WorkEvent.Enqueued|null[0]
+        constructor <init>(kotlin.uuid/Uuid, kotlin/String?, io.github.mobilebytelabs.worker/WorkData) // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.<init>|<init>(kotlin.uuid.Uuid;kotlin.String?;io.github.mobilebytelabs.worker.WorkData){}[0]
+
+        final val id // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.id|{}id[0]
+            final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.id.<get-id>|<get-id>(){}[0]
+        final val inputData // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.inputData|{}inputData[0]
+            final fun <get-inputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.inputData.<get-inputData>|<get-inputData>(){}[0]
+        final val tag // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.tag|{}tag[0]
+            final fun <get-tag>(): kotlin/String? // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.tag.<get-tag>|<get-tag>(){}[0]
+
+        final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.component1|component1(){}[0]
+        final fun component2(): kotlin/String? // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.component2|component2(){}[0]
+        final fun component3(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.component3|component3(){}[0]
+        final fun copy(kotlin.uuid/Uuid = ..., kotlin/String? = ..., io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker/WorkEvent.Enqueued // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.copy|copy(kotlin.uuid.Uuid;kotlin.String?;io.github.mobilebytelabs.worker.WorkData){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkEvent.Enqueued.toString|toString(){}[0]
+    }
+
+    final class Progress : io.github.mobilebytelabs.worker/WorkEvent { // io.github.mobilebytelabs.worker/WorkEvent.Progress|null[0]
+        constructor <init>(kotlin.uuid/Uuid, io.github.mobilebytelabs.worker/WorkProgress) // io.github.mobilebytelabs.worker/WorkEvent.Progress.<init>|<init>(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkProgress){}[0]
+
+        final val id // io.github.mobilebytelabs.worker/WorkEvent.Progress.id|{}id[0]
+            final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Progress.id.<get-id>|<get-id>(){}[0]
+        final val progress // io.github.mobilebytelabs.worker/WorkEvent.Progress.progress|{}progress[0]
+            final fun <get-progress>(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkEvent.Progress.progress.<get-progress>|<get-progress>(){}[0]
+
+        final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Progress.component1|component1(){}[0]
+        final fun component2(): io.github.mobilebytelabs.worker/WorkProgress // io.github.mobilebytelabs.worker/WorkEvent.Progress.component2|component2(){}[0]
+        final fun copy(kotlin.uuid/Uuid = ..., io.github.mobilebytelabs.worker/WorkProgress = ...): io.github.mobilebytelabs.worker/WorkEvent.Progress // io.github.mobilebytelabs.worker/WorkEvent.Progress.copy|copy(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkProgress){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkEvent.Progress.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkEvent.Progress.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkEvent.Progress.toString|toString(){}[0]
+    }
+
+    final class Resulted : io.github.mobilebytelabs.worker/WorkEvent { // io.github.mobilebytelabs.worker/WorkEvent.Resulted|null[0]
+        constructor <init>(kotlin.uuid/Uuid, io.github.mobilebytelabs.worker/WorkResult, kotlin/Long) // io.github.mobilebytelabs.worker/WorkEvent.Resulted.<init>|<init>(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkResult;kotlin.Long){}[0]
+
+        final val durationMs // io.github.mobilebytelabs.worker/WorkEvent.Resulted.durationMs|{}durationMs[0]
+            final fun <get-durationMs>(): kotlin/Long // io.github.mobilebytelabs.worker/WorkEvent.Resulted.durationMs.<get-durationMs>|<get-durationMs>(){}[0]
+        final val id // io.github.mobilebytelabs.worker/WorkEvent.Resulted.id|{}id[0]
+            final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Resulted.id.<get-id>|<get-id>(){}[0]
+        final val result // io.github.mobilebytelabs.worker/WorkEvent.Resulted.result|{}result[0]
+            final fun <get-result>(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/WorkEvent.Resulted.result.<get-result>|<get-result>(){}[0]
+
+        final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Resulted.component1|component1(){}[0]
+        final fun component2(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/WorkEvent.Resulted.component2|component2(){}[0]
+        final fun component3(): kotlin/Long // io.github.mobilebytelabs.worker/WorkEvent.Resulted.component3|component3(){}[0]
+        final fun copy(kotlin.uuid/Uuid = ..., io.github.mobilebytelabs.worker/WorkResult = ..., kotlin/Long = ...): io.github.mobilebytelabs.worker/WorkEvent.Resulted // io.github.mobilebytelabs.worker/WorkEvent.Resulted.copy|copy(kotlin.uuid.Uuid;io.github.mobilebytelabs.worker.WorkResult;kotlin.Long){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkEvent.Resulted.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkEvent.Resulted.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkEvent.Resulted.toString|toString(){}[0]
+    }
+
+    final class Started : io.github.mobilebytelabs.worker/WorkEvent { // io.github.mobilebytelabs.worker/WorkEvent.Started|null[0]
+        constructor <init>(kotlin.uuid/Uuid, kotlin/Int) // io.github.mobilebytelabs.worker/WorkEvent.Started.<init>|<init>(kotlin.uuid.Uuid;kotlin.Int){}[0]
+
+        final val attemptCount // io.github.mobilebytelabs.worker/WorkEvent.Started.attemptCount|{}attemptCount[0]
+            final fun <get-attemptCount>(): kotlin/Int // io.github.mobilebytelabs.worker/WorkEvent.Started.attemptCount.<get-attemptCount>|<get-attemptCount>(){}[0]
+        final val id // io.github.mobilebytelabs.worker/WorkEvent.Started.id|{}id[0]
+            final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Started.id.<get-id>|<get-id>(){}[0]
+
+        final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkEvent.Started.component1|component1(){}[0]
+        final fun component2(): kotlin/Int // io.github.mobilebytelabs.worker/WorkEvent.Started.component2|component2(){}[0]
+        final fun copy(kotlin.uuid/Uuid = ..., kotlin/Int = ...): io.github.mobilebytelabs.worker/WorkEvent.Started // io.github.mobilebytelabs.worker/WorkEvent.Started.copy|copy(kotlin.uuid.Uuid;kotlin.Int){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkEvent.Started.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkEvent.Started.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkEvent.Started.toString|toString(){}[0]
+    }
+}
+
+sealed class io.github.mobilebytelabs.worker/WorkRequest { // io.github.mobilebytelabs.worker/WorkRequest|null[0]
+    abstract val constraints // io.github.mobilebytelabs.worker/WorkRequest.constraints|{}constraints[0]
+        abstract fun <get-constraints>(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker/WorkRequest.constraints.<get-constraints>|<get-constraints>(){}[0]
+    abstract val id // io.github.mobilebytelabs.worker/WorkRequest.id|{}id[0]
+        abstract fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkRequest.id.<get-id>|<get-id>(){}[0]
+    abstract val inputData // io.github.mobilebytelabs.worker/WorkRequest.inputData|{}inputData[0]
+        abstract fun <get-inputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkRequest.inputData.<get-inputData>|<get-inputData>(){}[0]
+    abstract val retryConfig // io.github.mobilebytelabs.worker/WorkRequest.retryConfig|{}retryConfig[0]
+        abstract fun <get-retryConfig>(): io.github.mobilebytelabs.worker/RetryConfig // io.github.mobilebytelabs.worker/WorkRequest.retryConfig.<get-retryConfig>|<get-retryConfig>(){}[0]
+    abstract val tags // io.github.mobilebytelabs.worker/WorkRequest.tags|{}tags[0]
+        abstract fun <get-tags>(): kotlin.collections/Set<kotlin/String> // io.github.mobilebytelabs.worker/WorkRequest.tags.<get-tags>|<get-tags>(){}[0]
+    abstract val workerClass // io.github.mobilebytelabs.worker/WorkRequest.workerClass|{}workerClass[0]
+        abstract fun <get-workerClass>(): kotlin/String // io.github.mobilebytelabs.worker/WorkRequest.workerClass.<get-workerClass>|<get-workerClass>(){}[0]
+}
+
+sealed class io.github.mobilebytelabs.worker/WorkResult { // io.github.mobilebytelabs.worker/WorkResult|null[0]
+    final class Failure : io.github.mobilebytelabs.worker/WorkResult { // io.github.mobilebytelabs.worker/WorkResult.Failure|null[0]
+        constructor <init>(kotlin/String = ..., io.github.mobilebytelabs.worker/WorkData = ...) // io.github.mobilebytelabs.worker/WorkResult.Failure.<init>|<init>(kotlin.String;io.github.mobilebytelabs.worker.WorkData){}[0]
+
+        final val message // io.github.mobilebytelabs.worker/WorkResult.Failure.message|{}message[0]
+            final fun <get-message>(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Failure.message.<get-message>|<get-message>(){}[0]
+        final val outputData // io.github.mobilebytelabs.worker/WorkResult.Failure.outputData|{}outputData[0]
+            final fun <get-outputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkResult.Failure.outputData.<get-outputData>|<get-outputData>(){}[0]
+
+        final fun component1(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Failure.component1|component1(){}[0]
+        final fun component2(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkResult.Failure.component2|component2(){}[0]
+        final fun copy(kotlin/String = ..., io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker/WorkResult.Failure // io.github.mobilebytelabs.worker/WorkResult.Failure.copy|copy(kotlin.String;io.github.mobilebytelabs.worker.WorkData){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkResult.Failure.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkResult.Failure.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Failure.toString|toString(){}[0]
+    }
+
+    final class Retry : io.github.mobilebytelabs.worker/WorkResult { // io.github.mobilebytelabs.worker/WorkResult.Retry|null[0]
+        constructor <init>(kotlin/String = ...) // io.github.mobilebytelabs.worker/WorkResult.Retry.<init>|<init>(kotlin.String){}[0]
+
+        final val reason // io.github.mobilebytelabs.worker/WorkResult.Retry.reason|{}reason[0]
+            final fun <get-reason>(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Retry.reason.<get-reason>|<get-reason>(){}[0]
+
+        final fun component1(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Retry.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): io.github.mobilebytelabs.worker/WorkResult.Retry // io.github.mobilebytelabs.worker/WorkResult.Retry.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkResult.Retry.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkResult.Retry.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Retry.toString|toString(){}[0]
+    }
+
+    final class Success : io.github.mobilebytelabs.worker/WorkResult { // io.github.mobilebytelabs.worker/WorkResult.Success|null[0]
+        constructor <init>(io.github.mobilebytelabs.worker/WorkData = ...) // io.github.mobilebytelabs.worker/WorkResult.Success.<init>|<init>(io.github.mobilebytelabs.worker.WorkData){}[0]
+
+        final val outputData // io.github.mobilebytelabs.worker/WorkResult.Success.outputData|{}outputData[0]
+            final fun <get-outputData>(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkResult.Success.outputData.<get-outputData>|<get-outputData>(){}[0]
+
+        final fun component1(): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/WorkResult.Success.component1|component1(){}[0]
+        final fun copy(io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker/WorkResult.Success // io.github.mobilebytelabs.worker/WorkResult.Success.copy|copy(io.github.mobilebytelabs.worker.WorkData){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker/WorkResult.Success.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker/WorkResult.Success.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // io.github.mobilebytelabs.worker/WorkResult.Success.toString|toString(){}[0]
+    }
+
+    final object Companion { // io.github.mobilebytelabs.worker/WorkResult.Companion|null[0]
+        final fun failure(kotlin/String = ...): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/WorkResult.Companion.failure|failure(kotlin.String){}[0]
+        final fun retry(kotlin/String = ...): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/WorkResult.Companion.retry|retry(kotlin.String){}[0]
+        final fun success(io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker/WorkResult.Companion.success|success(io.github.mobilebytelabs.worker.WorkData){}[0]
+    }
+}
+
+final fun (io.github.mobilebytelabs.worker/WorkManager).io.github.mobilebytelabs.worker/beginWith(io.github.mobilebytelabs.worker/OneTimeWorkRequest): io.github.mobilebytelabs.worker/WorkContinuation // io.github.mobilebytelabs.worker/beginWith|beginWith@io.github.mobilebytelabs.worker.WorkManager(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
+final fun (io.github.mobilebytelabs.worker/WorkManager).io.github.mobilebytelabs.worker/beginWith(kotlin.collections/List<io.github.mobilebytelabs.worker/OneTimeWorkRequest>): io.github.mobilebytelabs.worker/WorkContinuation // io.github.mobilebytelabs.worker/beginWith|beginWith@io.github.mobilebytelabs.worker.WorkManager(kotlin.collections.List<io.github.mobilebytelabs.worker.OneTimeWorkRequest>){}[0]
+final fun io.github.mobilebytelabs.worker.registry/workerRegistry(kotlin/Function1<io.github.mobilebytelabs.worker.registry/WorkerRegistry, kotlin/Unit>): io.github.mobilebytelabs.worker.registry/WorkerRegistry // io.github.mobilebytelabs.worker.registry/workerRegistry|workerRegistry(kotlin.Function1<io.github.mobilebytelabs.worker.registry.WorkerRegistry,kotlin.Unit>){}[0]
+final fun io.github.mobilebytelabs.worker/platformBackgroundCapabilities(): io.github.mobilebytelabs.worker/BackgroundCapabilities // io.github.mobilebytelabs.worker/platformBackgroundCapabilities|platformBackgroundCapabilities(){}[0]
+final fun io.github.mobilebytelabs.worker/workDataOf(kotlin/Array<out kotlin/Pair<kotlin/String, kotlin/Any?>>...): io.github.mobilebytelabs.worker/WorkData // io.github.mobilebytelabs.worker/workDataOf|workDataOf(kotlin.Array<out|kotlin.Pair<kotlin.String,kotlin.Any?>>...){}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker/CoroutineWorker> io.github.mobilebytelabs.worker/oneTimeWorkRequest(kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker/OneTimeWorkRequest // io.github.mobilebytelabs.worker/oneTimeWorkRequest|oneTimeWorkRequest(kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.CoroutineWorker>}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker/CoroutineWorker> io.github.mobilebytelabs.worker/periodicWorkRequest(kotlin.time/Duration, kotlin.time/Duration = ..., kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker/PeriodicWorkRequest // io.github.mobilebytelabs.worker/periodicWorkRequest|periodicWorkRequest(kotlin.time.Duration;kotlin.time.Duration;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.CoroutineWorker>}[0]
+final suspend fun io.github.mobilebytelabs.worker/runAsForeground(io.github.mobilebytelabs.worker/ForegroundWorker, io.github.mobilebytelabs.worker/ForegroundInfo) // io.github.mobilebytelabs.worker/runAsForeground|runAsForeground(io.github.mobilebytelabs.worker.ForegroundWorker;io.github.mobilebytelabs.worker.ForegroundInfo){}[0]

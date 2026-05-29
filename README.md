@@ -37,6 +37,29 @@ dependencies {
 
 See [`cmp-worker-compose-all/README.md`](cmp-worker-compose-all/README.md) for the full per-platform launcher pattern (3-5 lines each).
 
+**Want zero per-platform Kotlin files?** Use the [`worker-kmp-app` Gradle plugin](cmp-worker-app-plugin/README.md):
+
+```kotlin
+plugins {
+    id("io.github.mobilebytelabs.worker-app") version "$workerVersion"
+}
+```
+
+Then annotate two commonMain functions:
+
+```kotlin
+@WorkerKmpApp(title = "My App", iosBundleId = "com.example.myapp")
+fun appKoinModules(factory: WorkManagerFactory) = ...
+
+@WorkerKmpAppContent
+@Composable fun AppContent() = ...
+```
+
+Plugin codegens every per-platform launcher (Android Application/Activity/manifest,
+JVM `fun main()`, iOS `MainViewController` + xcodegen project, wasmJs
+`fun main()` + `index.html`) at build time. Consumer source tree: zero per-platform
+Kotlin files.
+
 **Only need a subset** (e.g. pure-Android no-Compose)? The individual `worker-*` artifacts remain available:
 
 ```kotlin

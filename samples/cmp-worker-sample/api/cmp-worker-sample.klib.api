@@ -1,0 +1,64 @@
+// Klib ABI Dump
+// Targets: [js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-sample>
+// Targets: [js]
+final class io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    final suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker.doWork|doWork(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker.Companion|null[0]
+        final var runCount // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker.Companion.runCount|{}runCount[0]
+            final fun <get-runCount>(): kotlin/Int // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker.Companion.runCount.<get-runCount>|<get-runCount>(){}[0]
+            final fun <set-runCount>(kotlin/Int) // io.github.mobilebytelabs.worker.sample/WebHeartbeatWorker.Companion.runCount.<set-runCount>|<set-runCount>(kotlin.Int){}[0]
+    }
+}
+
+// Targets: [js]
+final class io.github.mobilebytelabs.worker.sample/WebImageResizeWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.sample/WebImageResizeWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker.sample/WebImageResizeWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    final suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.sample/WebImageResizeWorker.doWork|doWork(){}[0]
+}
+
+// Targets: [js]
+final class io.github.mobilebytelabs.worker.sample/WebSyncWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.sample/WebSyncWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker.sample/WebSyncWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    final suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.sample/WebSyncWorker.doWork|doWork(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker.sample/WebSyncWorker.Companion|null[0]
+        final var callCount // io.github.mobilebytelabs.worker.sample/WebSyncWorker.Companion.callCount|{}callCount[0]
+            final fun <get-callCount>(): kotlin/Int // io.github.mobilebytelabs.worker.sample/WebSyncWorker.Companion.callCount.<get-callCount>|<get-callCount>(){}[0]
+            final fun <set-callCount>(kotlin/Int) // io.github.mobilebytelabs.worker.sample/WebSyncWorker.Companion.callCount.<set-callCount>|<set-callCount>(kotlin.Int){}[0]
+    }
+}
+
+// Targets: [js]
+final val io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebHeartbeatWorker$stableprop // io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebHeartbeatWorker$stableprop|#static{}io_github_mobilebytelabs_worker_sample_WebHeartbeatWorker$stableprop[0]
+
+// Targets: [js]
+final val io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebImageResizeWorker$stableprop // io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebImageResizeWorker$stableprop|#static{}io_github_mobilebytelabs_worker_sample_WebImageResizeWorker$stableprop[0]
+
+// Targets: [js]
+final val io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebSyncWorker$stableprop // io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebSyncWorker$stableprop|#static{}io_github_mobilebytelabs_worker_sample_WebSyncWorker$stableprop[0]
+
+// Targets: [js]
+final fun io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebHeartbeatWorker$stableprop_getter(): kotlin/Int // io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebHeartbeatWorker$stableprop_getter|io_github_mobilebytelabs_worker_sample_WebHeartbeatWorker$stableprop_getter(){}[0]
+
+// Targets: [js]
+final fun io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebImageResizeWorker$stableprop_getter(): kotlin/Int // io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebImageResizeWorker$stableprop_getter|io_github_mobilebytelabs_worker_sample_WebImageResizeWorker$stableprop_getter(){}[0]
+
+// Targets: [js]
+final fun io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebSyncWorker$stableprop_getter(): kotlin/Int // io.github.mobilebytelabs.worker.sample/io_github_mobilebytelabs_worker_sample_WebSyncWorker$stableprop_getter|io_github_mobilebytelabs_worker_sample_WebSyncWorker$stableprop_getter(){}[0]
+
+// Targets: [js]
+final fun io.github.mobilebytelabs.worker.sample/main() // io.github.mobilebytelabs.worker.sample/main|main(){}[0]
+
+// Targets: [wasmJs]
+final fun /main() // /main|main(){}[0]

@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.mobilebytelabs.worker.WorkManager
+import io.github.mobilebytelabs.worker.app.WorkerKmpAppContent
 import io.github.mobilebytelabs.worker.compose.BackgroundCapabilitiesBanner
 import io.github.mobilebytelabs.worker.compose.WorkManagerProvider
 import io.github.mobilebytelabs.worker.sample.composestore.domain.Article
@@ -34,6 +35,7 @@ import org.mobilenativefoundation.store.store5.Store
  *
  * Spec: `plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-cmp-launchers/GOAL.md` AC11.
  */
+@WorkerKmpAppContent
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SampleApp() {

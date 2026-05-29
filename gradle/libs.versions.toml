@@ -22,6 +22,11 @@ vanniktech-publish = "0.36.0"
 # 5.0.0 GA lacks wasmJs targets so we track the alpha06 line which matches our
 # full KMP target matrix (jvm + iosArm64 + iosSimulatorArm64 + iosX64 + js + wasmJs).
 store5 = "5.1.0-alpha06"
+# KSP2 — Kotlin Symbol Processing — tracks Kotlin major.minor, decoupled patch
+ksp = "2.3.9"
+gradle-plugin-publish = "1.3.0"
+# kotlin-compile-testing for KSP processor functional tests
+kct-ksp = "0.5.0"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
@@ -48,6 +53,9 @@ detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plug
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 store5 = { module = "org.mobilenativefoundation.store:store5", version.ref = "store5" }
+# worker-kmp-app-plugin
+ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+kct-ksp-tester = { module = "dev.zacsweers.kctfork:ksp", version.ref = "kct-ksp" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.05.01" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -69,6 +77,9 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }
+# worker-kmp-app-plugin
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
 
 [bundles]
 coroutines = ["kotlinx-coroutines-core"]

@@ -8,12 +8,14 @@ import io.github.mobilebytelabs.worker.sample.composestore.ui.SampleApp
 /**
  * JVM (desktop) entry point.
  *
- * Pre-launcher version (commit `8478fea`) was 52 lines (manual Koin start + manual
- * `application { Window { App(workManager, store) } }` + Koin-via-Java helper +
- * factory lookup). Library encapsulation via [launchDesktopWorkerApp] reduces this
- * to a 5-line `fun main`.
+ * NOTE: This file mirrors exactly what `worker-kmp-app-plugin`'s
+ * `desktop-main.kt.template` would generate from the `@WorkerKmpApp` annotation
+ * on `sampleKoinModules` + `@WorkerKmpAppContent` on `SampleApp`. Kept
+ * hand-authored here because applying the plugin from a sibling-module build
+ * requires `includeBuild` infrastructure not yet in place — sample migration
+ * to the plugin tracks as a follow-up to the worker-kmp-app-plugin epic.
  */
 fun main() = launchDesktopWorkerApp(
-    title = "worker-kmp — Store5 + Koin + Compose demo",
+    title = "worker-kmp Store Demo",
     koinModules = { sampleKoinModules(desktopWorkManagerFactory()) },
 ) { SampleApp() }

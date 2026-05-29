@@ -65,3 +65,4 @@ public final class io/github/mobilebytelabs/worker/daemon/OsFamily : java/lang/E
 public final class io/github/mobilebytelabs/worker/daemon/installer/DesktopInstallerFactoryKt {
 	public static final fun createDesktopBackgroundInstaller ()Lio/github/mobilebytelabs/worker/daemon/DesktopBackgroundInstaller;
 }
+

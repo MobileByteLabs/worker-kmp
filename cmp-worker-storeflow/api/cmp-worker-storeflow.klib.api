@@ -1,0 +1,193 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-storeflow>
+final enum class io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy : kotlin/Enum<io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy> { // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy|null[0]
+    enum entry CACHE_ONLY // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.CACHE_ONLY|null[0]
+    enum entry CACHE_THEN_NETWORK // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.CACHE_THEN_NETWORK|null[0]
+    enum entry NETWORK_ONLY // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.NETWORK_ONLY|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy> // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy> // io.github.mobilebytelabs.worker.storeflow.policy/FetchPolicy.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker.storeflow.submit/OutboxState : kotlin/Enum<io.github.mobilebytelabs.worker.storeflow.submit/OutboxState> { // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState|null[0]
+    enum entry FAILED // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.FAILED|null[0]
+    enum entry PENDING // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.PENDING|null[0]
+    enum entry RETRYING // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.RETRYING|null[0]
+    enum entry SUBMITTED // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.SUBMITTED|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker.storeflow.submit/OutboxState> // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker.storeflow.submit/OutboxState // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker.storeflow.submit/OutboxState> // io.github.mobilebytelabs.worker.storeflow.submit/OutboxState.values|values#static(){}[0]
+}
+
+abstract interface <#A: kotlin/Any> io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox { // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox|null[0]
+    abstract suspend fun deleteSubmitted() // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox.deleteSubmitted|deleteSubmitted(){}[0]
+    abstract suspend fun enqueue(#A): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox.enqueue|enqueue(1:0){}[0]
+    abstract suspend fun getAllPending(): kotlin.collections/List<io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry<#A>> // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox.getAllPending|getAllPending(){}[0]
+    abstract suspend fun markFailed(kotlin.uuid/Uuid, kotlin/String?) // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox.markFailed|markFailed(kotlin.uuid.Uuid;kotlin.String?){}[0]
+    abstract suspend fun markRetrying(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox.markRetrying|markRetrying(kotlin.uuid.Uuid){}[0]
+    abstract suspend fun markSubmitted(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox.markSubmitted|markSubmitted(kotlin.uuid.Uuid){}[0]
+}
+
+abstract class io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    abstract suspend fun fetchPage(kotlin/Int) // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.fetchPage|fetchPage(kotlin.Int){}[0]
+    open suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.doWork|doWork(){}[0]
+
+    final object Companion { // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion|null[0]
+        final const val DEFAULT_PAGE_COUNT // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.DEFAULT_PAGE_COUNT|{}DEFAULT_PAGE_COUNT[0]
+            final fun <get-DEFAULT_PAGE_COUNT>(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.DEFAULT_PAGE_COUNT.<get-DEFAULT_PAGE_COUNT>|<get-DEFAULT_PAGE_COUNT>(){}[0]
+        final const val KEY_PAGES_FETCHED // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.KEY_PAGES_FETCHED|{}KEY_PAGES_FETCHED[0]
+            final fun <get-KEY_PAGES_FETCHED>(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.KEY_PAGES_FETCHED.<get-KEY_PAGES_FETCHED>|<get-KEY_PAGES_FETCHED>(){}[0]
+        final const val KEY_PAGE_COUNT // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.KEY_PAGE_COUNT|{}KEY_PAGE_COUNT[0]
+            final fun <get-KEY_PAGE_COUNT>(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.KEY_PAGE_COUNT.<get-KEY_PAGE_COUNT>|<get-KEY_PAGE_COUNT>(){}[0]
+        final const val KEY_START_PAGE // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.KEY_START_PAGE|{}KEY_START_PAGE[0]
+            final fun <get-KEY_START_PAGE>(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.paging/PrefetchPagingWorker.Companion.KEY_START_PAGE.<get-KEY_START_PAGE>|<get-KEY_START_PAGE>(){}[0]
+    }
+}
+
+final class <#A: kotlin/Any, #B: kotlin/Any?> io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox<#A>, kotlin.coroutines/SuspendFunction1<#A, #B>) // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.<init>|<init>(io.github.mobilebytelabs.worker.storeflow.submit.SubmitOutbox<1:0>;kotlin.coroutines.SuspendFunction1<1:0,1:1>){}[0]
+
+    final val state // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.state|{}state[0]
+        final fun <get-state>(): io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<#A> // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.state.<get-state>|<get-state>(){}[0]
+
+    final fun draft(#A) // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.draft|draft(1:0){}[0]
+    final fun reset() // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.reset|reset(){}[0]
+    final suspend fun rehydrateFromOutbox() // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.rehydrateFromOutbox|rehydrateFromOutbox(){}[0]
+    final suspend fun submit(): io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<#A> // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.submit|submit(){}[0]
+
+    sealed class <#A1: out kotlin/Any?> State { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State|null[0]
+        final class <#A2: kotlin/Any?> Drafting : io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<#A2> { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting|null[0]
+            constructor <init>(#A2) // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.<init>|<init>(1:0){}[0]
+
+            final val payload // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.payload|{}payload[0]
+                final fun <get-payload>(): #A2 // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.payload.<get-payload>|<get-payload>(){}[0]
+
+            final fun component1(): #A2 // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.component1|component1(){}[0]
+            final fun copy(#A2 = ...): io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting<#A2> // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.copy|copy(1:0){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Drafting.toString|toString(){}[0]
+        }
+
+        final class <#A2: kotlin/Any?> Failed : io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<#A2> { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed|null[0]
+            constructor <init>(kotlin.uuid/Uuid, kotlin/String?) // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.<init>|<init>(kotlin.uuid.Uuid;kotlin.String?){}[0]
+
+            final val id // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.id|{}id[0]
+                final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.id.<get-id>|<get-id>(){}[0]
+            final val reason // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.reason|{}reason[0]
+                final fun <get-reason>(): kotlin/String? // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.reason.<get-reason>|<get-reason>(){}[0]
+
+            final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.component1|component1(){}[0]
+            final fun component2(): kotlin/String? // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.component2|component2(){}[0]
+            final fun copy(kotlin.uuid/Uuid = ..., kotlin/String? = ...): io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed<#A2> // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.copy|copy(kotlin.uuid.Uuid;kotlin.String?){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Failed.toString|toString(){}[0]
+        }
+
+        final class <#A2: kotlin/Any?> Submitted : io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<#A2> { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted|null[0]
+            constructor <init>(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.<init>|<init>(kotlin.uuid.Uuid){}[0]
+
+            final val id // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.id|{}id[0]
+                final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.id.<get-id>|<get-id>(){}[0]
+
+            final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.component1|component1(){}[0]
+            final fun copy(kotlin.uuid/Uuid = ...): io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted<#A2> // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.copy|copy(kotlin.uuid.Uuid){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitted.toString|toString(){}[0]
+        }
+
+        final class <#A2: kotlin/Any?> Submitting : io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<#A2> { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting|null[0]
+            constructor <init>(kotlin.uuid/Uuid, #A2) // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.<init>|<init>(kotlin.uuid.Uuid;1:0){}[0]
+
+            final val id // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.id|{}id[0]
+                final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.id.<get-id>|<get-id>(){}[0]
+            final val payload // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.payload|{}payload[0]
+                final fun <get-payload>(): #A2 // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.payload.<get-payload>|<get-payload>(){}[0]
+
+            final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.component1|component1(){}[0]
+            final fun component2(): #A2 // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.component2|component2(){}[0]
+            final fun copy(kotlin.uuid/Uuid = ..., #A2 = ...): io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting<#A2> // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.copy|copy(kotlin.uuid.Uuid;1:0){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Submitting.toString|toString(){}[0]
+        }
+
+        final object Idle : io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State<kotlin/Nothing> { // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Idle|null[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Idle.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Idle.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.submit/DraftSubmitHandler.State.Idle.toString|toString(){}[0]
+        }
+    }
+}
+
+final class <#A: kotlin/Any, #B: kotlin/Any?> io.github.mobilebytelabs.worker.storeflow.submit/WorkScheduledOfflineSubmitSyncer { // io.github.mobilebytelabs.worker.storeflow.submit/WorkScheduledOfflineSubmitSyncer|null[0]
+    final fun observeRetries(): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.storeflow.submit/WorkScheduledOfflineSubmitSyncer.observeRetries|observeRetries(){}[0]
+    final suspend fun start(kotlin.time/Duration = ..., kotlin/Boolean = ..., io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy = ...): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/WorkScheduledOfflineSubmitSyncer.start|start(kotlin.time.Duration;kotlin.Boolean;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy){}[0]
+    final suspend fun stop() // io.github.mobilebytelabs.worker.storeflow.submit/WorkScheduledOfflineSubmitSyncer.stop|stop(){}[0]
+}
+
+final class <#A: kotlin/Any> io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox : io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox<#A> { // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.<init>|<init>(){}[0]
+
+    final suspend fun deleteSubmitted() // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.deleteSubmitted|deleteSubmitted(){}[0]
+    final suspend fun enqueue(#A): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.enqueue|enqueue(1:0){}[0]
+    final suspend fun getAllPending(): kotlin.collections/List<io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry<#A>> // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.getAllPending|getAllPending(){}[0]
+    final suspend fun markFailed(kotlin.uuid/Uuid, kotlin/String?) // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.markFailed|markFailed(kotlin.uuid.Uuid;kotlin.String?){}[0]
+    final suspend fun markRetrying(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.markRetrying|markRetrying(kotlin.uuid.Uuid){}[0]
+    final suspend fun markSubmitted(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.storeflow.submit/InMemorySubmitOutbox.markSubmitted|markSubmitted(kotlin.uuid.Uuid){}[0]
+}
+
+final class <#A: kotlin/Any> io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry { // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry|null[0]
+    constructor <init>(kotlin.uuid/Uuid, #A, io.github.mobilebytelabs.worker.storeflow.submit/OutboxState, kotlin/Int, kotlin/String?, kotlin/Long) // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.<init>|<init>(kotlin.uuid.Uuid;1:0;io.github.mobilebytelabs.worker.storeflow.submit.OutboxState;kotlin.Int;kotlin.String?;kotlin.Long){}[0]
+
+    final val enqueuedAtMillis // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.enqueuedAtMillis|{}enqueuedAtMillis[0]
+        final fun <get-enqueuedAtMillis>(): kotlin/Long // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.enqueuedAtMillis.<get-enqueuedAtMillis>|<get-enqueuedAtMillis>(){}[0]
+    final val id // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.id|{}id[0]
+        final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.id.<get-id>|<get-id>(){}[0]
+    final val lastFailureReason // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.lastFailureReason|{}lastFailureReason[0]
+        final fun <get-lastFailureReason>(): kotlin/String? // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.lastFailureReason.<get-lastFailureReason>|<get-lastFailureReason>(){}[0]
+    final val payload // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.payload|{}payload[0]
+        final fun <get-payload>(): #A // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.payload.<get-payload>|<get-payload>(){}[0]
+    final val retryCount // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.retryCount|{}retryCount[0]
+        final fun <get-retryCount>(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.retryCount.<get-retryCount>|<get-retryCount>(){}[0]
+    final val state // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.state|{}state[0]
+        final fun <get-state>(): io.github.mobilebytelabs.worker.storeflow.submit/OutboxState // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.state.<get-state>|<get-state>(){}[0]
+
+    final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.component1|component1(){}[0]
+    final fun component2(): #A // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.component2|component2(){}[0]
+    final fun component3(): io.github.mobilebytelabs.worker.storeflow.submit/OutboxState // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.component3|component3(){}[0]
+    final fun component4(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.component5|component5(){}[0]
+    final fun component6(): kotlin/Long // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.component6|component6(){}[0]
+    final fun copy(kotlin.uuid/Uuid = ..., #A = ..., io.github.mobilebytelabs.worker.storeflow.submit/OutboxState = ..., kotlin/Int = ..., kotlin/String? = ..., kotlin/Long = ...): io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry<#A> // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.copy|copy(kotlin.uuid.Uuid;1:0;io.github.mobilebytelabs.worker.storeflow.submit.OutboxState;kotlin.Int;kotlin.String?;kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.storeflow.submit/OutboxEntry.toString|toString(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.storeflow.submit/SyncerWorker : io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.storeflow.submit/SyncerWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext) // io.github.mobilebytelabs.worker.storeflow.submit/SyncerWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext){}[0]
+
+    final suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.storeflow.submit/SyncerWorker.doWork|doWork(){}[0]
+}
+
+final val io.github.mobilebytelabs.worker.storeflow.koin/workStoreFlowKoinModule // io.github.mobilebytelabs.worker.storeflow.koin/workStoreFlowKoinModule|{}workStoreFlowKoinModule[0]
+    final fun <get-workStoreFlowKoinModule>(): org.koin.core.module/Module // io.github.mobilebytelabs.worker.storeflow.koin/workStoreFlowKoinModule.<get-workStoreFlowKoinModule>|<get-workStoreFlowKoinModule>(){}[0]
+
+final fun <#A: kotlin/Any, #B: kotlin/Any?> io.github.mobilebytelabs.worker.storeflow.submit/workScheduledOfflineSubmitSyncer(io.github.mobilebytelabs.worker/WorkManager, io.github.mobilebytelabs.worker.storeflow.submit/SubmitOutbox<#A>, kotlin.coroutines/SuspendFunction1<#A, #B>, kotlin/String = ...): io.github.mobilebytelabs.worker.storeflow.submit/WorkScheduledOfflineSubmitSyncer<#A, #B> // io.github.mobilebytelabs.worker.storeflow.submit/workScheduledOfflineSubmitSyncer|workScheduledOfflineSubmitSyncer(io.github.mobilebytelabs.worker.WorkManager;io.github.mobilebytelabs.worker.storeflow.submit.SubmitOutbox<0:0>;kotlin.coroutines.SuspendFunction1<0:0,0:1>;kotlin.String){0§<kotlin.Any>;1§<kotlin.Any?>}[0]

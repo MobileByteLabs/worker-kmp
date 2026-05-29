@@ -6,8 +6,10 @@ import io.github.mobilebytelabs.worker.web.launchWebWorkerApp
 import io.github.mobilebytelabs.worker.web.webWorkManagerFactory
 
 /**
- * Web (wasmJs) entry point — pairs with `src/wasmJsMain/resources/index.html`
- * which declares `<canvas id="composeCanvas">`.
+ * Web (wasmJs) entry point.
+ *
+ * Hand-authored mirror of what `worker-kmp-app-plugin`'s `web-main.kt.template`
+ * would generate. See `samples/.../jvmMain/Main.kt` for the rationale.
  */
 fun main() = launchWebWorkerApp(
     canvasElementId = "composeCanvas",

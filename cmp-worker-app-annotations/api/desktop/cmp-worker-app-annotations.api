@@ -1,0 +1,11 @@
+public abstract interface annotation class io/github/mobilebytelabs/worker/app/WorkerKmpApp : java/lang/annotation/Annotation {
+	public abstract fun androidApplicationId ()Ljava/lang/String;
+	public abstract fun androidPermissions ()[Ljava/lang/String;
+	public abstract fun iosBundleId ()Ljava/lang/String;
+	public abstract fun title ()Ljava/lang/String;
+	public abstract fun webCanvasId ()Ljava/lang/String;
+}
+
+public abstract interface annotation class io/github/mobilebytelabs/worker/app/WorkerKmpAppContent : java/lang/annotation/Annotation {
+}
+

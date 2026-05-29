@@ -2,6 +2,20 @@ public final class io/github/mobilebytelabs/worker/storeflow/koin/WorkStoreFlowK
 	public static final fun getWorkStoreFlowKoinModule ()Lorg/koin/core/module/Module;
 }
 
+public abstract class io/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
+	public static final field Companion Lio/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker$Companion;
+	public static final field DEFAULT_PAGE_COUNT I
+	public static final field KEY_PAGES_FETCHED Ljava/lang/String;
+	public static final field KEY_PAGE_COUNT Ljava/lang/String;
+	public static final field KEY_START_PAGE Ljava/lang/String;
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	protected abstract fun fetchPage (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker$Companion {
+}
+
 public final class io/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy : java/lang/Enum {
 	public static final field CACHE_ONLY Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
 	public static final field CACHE_THEN_NETWORK Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
@@ -9,6 +23,73 @@ public final class io/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy 
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
 	public static fun values ()[Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler {
+	public fun <init> (Lio/github/mobilebytelabs/worker/storeflow/submit/SubmitOutbox;Lkotlin/jvm/functions/Function2;)V
+	public final fun draft (Ljava/lang/Object;)V
+	public final fun getState ()Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State;
+	public final fun rehydrateFromOutbox (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun reset ()V
+	public final fun submit (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting : io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPayload ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Failed : io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
+	public fun <init> (Lkotlin/uuid/Uuid;Ljava/lang/String;)V
+	public final fun component1 ()Lkotlin/uuid/Uuid;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lkotlin/uuid/Uuid;Ljava/lang/String;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Failed;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Failed;Lkotlin/uuid/Uuid;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lkotlin/uuid/Uuid;
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Idle : io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Idle;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitted : io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
+	public fun <init> (Lkotlin/uuid/Uuid;)V
+	public final fun component1 ()Lkotlin/uuid/Uuid;
+	public final fun copy (Lkotlin/uuid/Uuid;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitted;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitted;Lkotlin/uuid/Uuid;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitted;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lkotlin/uuid/Uuid;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitting : io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
+	public fun <init> (Lkotlin/uuid/Uuid;Ljava/lang/Object;)V
+	public final fun component1 ()Lkotlin/uuid/Uuid;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Lkotlin/uuid/Uuid;Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitting;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitting;Lkotlin/uuid/Uuid;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Submitting;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lkotlin/uuid/Uuid;
+	public final fun getPayload ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/mobilebytelabs/worker/storeflow/submit/InMemorySubmitOutbox : io/github/mobilebytelabs/worker/storeflow/submit/SubmitOutbox {
