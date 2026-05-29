@@ -36,6 +36,10 @@ kotlin {
 dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:${libs.versions.kotlin.get()}")
+    // KSP plugin marker — placing the marker on this plugin's runtime classpath
+    // lets `plugins.apply("com.google.devtools.ksp")` succeed in any consumer
+    // without requiring the consumer's pluginManagement to know about KSP.
+    implementation("com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:${libs.versions.ksp.get()}")
 
     testImplementation(gradleTestKit())
     testImplementation(libs.kotlin.test.junit)

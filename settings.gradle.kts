@@ -2,6 +2,7 @@ rootProject.name = "worker-kmp"
 
 pluginManagement {
     includeBuild("build-logic")
+    includeBuild("cmp-worker-app-plugin")
     repositories {
         google()
         mavenCentral()
@@ -57,7 +58,6 @@ include(":cmp-worker-compose")
 include(":cmp-worker-compose-all")
 include(":cmp-worker-app-annotations")
 include(":cmp-worker-app-ksp")
-include(":cmp-worker-app-plugin")
 include(":cmp-worker-web")
 include(":cmp-worker-test")
 include(":cmp-worker-ios")

@@ -35,19 +35,23 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         plugins.apply("com.google.devtools.ksp")
 
         // Add transitive deps: annotations into commonMain; processor into kspCommonMainMetadata.
+        // In-monorepo detection — if the worker-kmp project tree includes the annotations
+        // + ksp modules (i.e. the sample inside worker-kmp itself), use project() refs to
+        // avoid the mavenLocal-publish prerequisite. External consumers fall back to
+        // resolving the published Maven coordinates.
         val workerVersion = providers.gradleProperty("worker.version").orNull
             ?: project.version.toString()
-        dependencies.add(
-            "commonMainImplementation",
-            "io.github.mobilebytelabs:worker-app-annotations:$workerVersion",
-        )
+        val annotationsProject = rootProject.findProject(":cmp-worker-app-annotations")
+        val kspProject = rootProject.findProject(":cmp-worker-app-ksp")
+        val annotationsDep: Any = annotationsProject
+            ?: "io.github.mobilebytelabs:worker-app-annotations:$workerVersion"
+        val kspDep: Any = kspProject
+            ?: "io.github.mobilebytelabs:worker-app-ksp:$workerVersion"
+        dependencies.add("commonMainImplementation", annotationsDep)
         // KSP processor — `kspCommonMainMetadata` runs on commonMain so annotations
         // are processed once regardless of consumer's target matrix.
         runCatching {
-            dependencies.add(
-                "kspCommonMainMetadata",
-                "io.github.mobilebytelabs:worker-app-ksp:$workerVersion",
-            )
+            dependencies.add("kspCommonMainMetadata", kspDep)
         }
 
         val ext = extensions.create(EXT_NAME, WorkerKmpAppExtension::class.java).apply {
@@ -71,9 +75,16 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         wireKmpSourceSet("wasmJsMain", generatedRoot.get().dir("wasmJsMain/kotlin").asFile)
 
         // ── Codegen tasks ──────────────────────────────────────────────────────
+        // KSP processor must run before any codegen reads codegen-model.json.
+        // The metadata variant runs on commonMain so annotations are processed once
+        // regardless of the consumer's target matrix. Codegen tasks dependOn this
+        // and each platform's `compile*` task in turn dependsOn the matching codegen.
+        val kspTask = "kspCommonMainKotlinMetadata"
+
         tasks.register(TASK_ANDROID) {
             group = TASK_GROUP
             description = "Codegens Android Application + Activity + AndroidManifest.xml"
+            dependsOn(kspTask)
             doLast {
                 if (!ext.androidGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: androidGenerator disabled — skipping")
@@ -98,6 +109,7 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         tasks.register(TASK_DESKTOP) {
             group = TASK_GROUP
             description = "Codegens jvmMain/desktopMain fun main()"
+            dependsOn(kspTask)
             doLast {
                 if (!ext.desktopGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: desktopGenerator disabled — skipping")
@@ -116,6 +128,7 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         tasks.register(TASK_IOS) {
             group = TASK_GROUP
             description = "Codegens iosMain MainViewController + iosApp xcodegen spec + Swift wrappers"
+            dependsOn(kspTask)
             doLast {
                 if (!ext.iosGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping")
@@ -141,6 +154,7 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         tasks.register(TASK_WEB) {
             group = TASK_GROUP
             description = "Codegens wasmJsMain fun main() + resources/index.html"
+            dependsOn(kspTask)
             doLast {
                 if (!ext.webGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: webGenerator disabled — skipping")
@@ -162,6 +176,20 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             description = "Runs all enabled per-platform codegen tasks"
             dependsOn(TASK_ANDROID, TASK_DESKTOP, TASK_IOS, TASK_WEB)
         }
+        // Auto-wire compile tasks → codegen → KSP so the consumer never needs to
+        // invoke codegen manually. Per-target matchers because the compile-task
+        // name depends on which targets the consumer declared.
+        tasks.matching { it.name.startsWith("compileKotlinJvm") || it.name.startsWith("compileKotlinDesktop") }
+            .configureEach { dependsOn(TASK_DESKTOP) }
+        tasks.matching { it.name.startsWith("compileKotlinIos") }
+            .configureEach { dependsOn(TASK_IOS) }
+        tasks.matching { it.name.startsWith("compileKotlinWasmJs") || it.name.startsWith("compileKotlinJs") }
+            .configureEach { dependsOn(TASK_WEB) }
+        tasks.matching { it.name.startsWith("compileKotlinAndroid") || it.name.matches(Regex("compile[A-Z].*KotlinAndroid")) }
+            .configureEach { dependsOn(TASK_ANDROID) }
+        // AndroidManifest merge wiring is left to consumer-side AGP convention
+        // (point manifest at build/generated/worker-kmp-app/androidMain/AndroidManifest.xml).
+
         // xcodegen materialization — depends on iOS codegen producing project.yml.
         tasks.register(TASK_XCODEGEN) {
             group = TASK_GROUP
