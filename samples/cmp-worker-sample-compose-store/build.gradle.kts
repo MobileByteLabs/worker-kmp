@@ -1,15 +1,14 @@
 /*
  * Compose Multiplatform sample for worker-kmp + Store5.
  *
- * Demonstrates how a real CMP consumer integrates worker-kmp:
- *  - Consumer brings their own KMP target matrix + Compose stack
- *  - Library wiring (worker-app plugin + cmp-worker-compose-all + koin-compose +
- *    worker opt-in) is encapsulated in a build-logic convention plugin
- *    (io.github.mobilebytelabs.worker.compose-sample) so an external project
- *    can lift the convention plugin into their own build-logic verbatim.
+ * Demonstrates a minimal end-to-end CMP consumer of worker-kmp. After applying
+ * the worker-app plugin + annotating commonMain (@WorkerKmpApp + @WorkerKmpAppContent),
+ * the source tree contains ZERO per-platform Kotlin — launchers are codegened
+ * into build/generated/.
  *
- * After this setup the consumer source tree contains ZERO per-platform Kotlin —
- * launchers are codegened by the worker-app plugin into build/generated/.
+ * For projects that use build-logic + convention plugins, see
+ * docs/getting-started/convention-plugin.md for a copy-pasteable Kotlin convention
+ * plugin that wraps the wiring below.
  */
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -19,11 +18,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.compose)
-    // Encapsulates worker-kmp library wiring (worker-app plugin + cmp-worker-compose-all
-    // + koin-compose + ExperimentalWorkerApi opt-in). Source: build-logic/convention/
-    // WorkerComposeConventionPlugin.kt — copy verbatim into any external project's
-    // build-logic to get the same library setup.
-    id("io.github.mobilebytelabs.worker.compose-sample")
+    id("io.github.mobilebytelabs.worker-app")
 }
 
 group = "io.github.mobilebytelabs"
@@ -58,11 +53,15 @@ kotlin {
 
     compilerOptions {
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
+        optIn.add("io.github.mobilebytelabs.worker.ExperimentalWorkerApi")
     }
 
     sourceSets {
         commonMain {
             dependencies {
+                // worker-kmp all-in-one bundle (core + UI + Koin + Store5 + 4 platform actuals).
+                implementation(project(":cmp-worker-compose-all"))
+                implementation(libs.koin.compose)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(compose.runtime)
                 implementation(compose.material3)

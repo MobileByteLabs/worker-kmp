@@ -1,18 +1,3 @@
-// cmp-worker-app-plugin lives in a sibling included build (alongside this one in
-// the root settings.gradle.kts pluginManagement). Including it here too lets the
-// convention plugin take a compile-time dep on the worker-app plugin class +
-// programmatically apply it by ID. External adopters depend on the published
-// `io.github.mobilebytelabs:worker-app-plugin` artifact from Maven Central
-// instead — same convention plugin code, just a different resolution path.
-//
-// Substitution rule needed because the included build's rootProject.name is
-// "cmp-worker-app-plugin" but the published artifact id is "worker-app-plugin".
-includeBuild("../cmp-worker-app-plugin") {
-    dependencySubstitution {
-        substitute(module("io.github.mobilebytelabs:worker-app-plugin")).using(project(":"))
-    }
-}
-
 dependencyResolutionManagement {
     repositories {
         mavenLocal()
@@ -29,4 +14,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "build-logic"
 include(":convention")
+// The worker-app Gradle plugin (the published library artifact). Sub-project of
+// build-logic so the convention plugin can apply it programmatically (sibling
+// classpath) AND the publish workflow can target it via module-path.
+include(":worker-app-plugin")
 

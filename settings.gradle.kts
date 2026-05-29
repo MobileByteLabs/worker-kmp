@@ -2,7 +2,6 @@ rootProject.name = "worker-kmp"
 
 pluginManagement {
     includeBuild("build-logic")
-    includeBuild("cmp-worker-app-plugin")
     repositories {
         google()
         mavenCentral()
@@ -58,6 +57,8 @@ include(":cmp-worker-compose")
 include(":cmp-worker-compose-all")
 include(":cmp-worker-app-annotations")
 include(":cmp-worker-app-ksp")
+// :cmp-worker-app-plugin moved to build-logic/worker-app-plugin/ per kmp-product-flavors
+// pattern. Published via the dedicated module-path publish workflow job.
 include(":cmp-worker-web")
 include(":cmp-worker-test")
 include(":cmp-worker-ios")
@@ -70,17 +71,3 @@ include(":samples:cmp-worker-sample-compose-store")
 include(":cmp-worker-bench")
 include(":cmp-worker-desktop-daemon")
 include(":cmp-worker-web-push")
-
-// Substitute the published-artifact coordinates in libs.versions.toml back to the
-// in-monorepo project at resolution time. Lets build-logic + samples consume the
-// same `libs.findLibrary(...)` entries that external adopters use — single catalog
-// is the source of truth, no in-monorepo conditional needed.
-gradle.allprojects {
-    configurations.all {
-        resolutionStrategy.dependencySubstitution {
-            substitute(module("io.github.mobilebytelabs:worker-compose-all"))
-                .using(project(":cmp-worker-compose-all"))
-                .because("worker-compose-all published artifactId vs in-monorepo project name")
-        }
-    }
-}
