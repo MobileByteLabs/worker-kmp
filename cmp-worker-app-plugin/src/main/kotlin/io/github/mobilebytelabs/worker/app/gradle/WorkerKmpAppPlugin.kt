@@ -185,7 +185,10 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             .configureEach { dependsOn(TASK_IOS) }
         tasks.matching { it.name.startsWith("compileKotlinWasmJs") || it.name.startsWith("compileKotlinJs") }
             .configureEach { dependsOn(TASK_WEB) }
-        tasks.matching { it.name.startsWith("compileKotlinAndroid") || it.name.matches(Regex("compile[A-Z].*KotlinAndroid")) }
+        tasks.matching {
+            it.name.startsWith("compileKotlinAndroid") ||
+                it.name.matches(Regex("compile[A-Z].*KotlinAndroid"))
+        }
             .configureEach { dependsOn(TASK_ANDROID) }
         // AndroidManifest merge wiring is left to consumer-side AGP convention
         // (point manifest at build/generated/worker-kmp-app/androidMain/AndroidManifest.xml).
