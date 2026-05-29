@@ -129,7 +129,7 @@ fun WorkDashboard() {
 
 - 📚 [Installation](getting-started/installation.md) — Gradle + Maven setup with Compose Multiplatform
 - 🚀 [Quick Start](getting-started/quick-start.md) — first worker in 60 seconds
-- 🧩 [Convention Plugin (build-logic)](getting-started/convention-plugin.md) — share the worker-kmp wiring across modules via a single convention plugin (copy-and-adopt; canonical pattern used by the [compose-store sample](https://github.com/MobileByteLabs/worker-kmp/tree/development/samples/cmp-worker-sample-compose-store))
+- 🧩 [Convention Plugin (build-logic)](getting-started/convention-plugin.md) — copy-and-adopt Kotlin source for projects that share worker-kmp wiring across modules via a build-logic convention plugin (worker-kmp does not ship one — see the page for why)
 - 📱 Platform setup: [Android](platform-support/android.md) · [iOS](platform-support/ios.md) · [Desktop](platform-support/desktop.md) · [Web](platform-support/web.md)
 - 🛠️ Features: [Foreground Tasks](features/foreground-tasks.md) · [Telemetry / Observers](features/observers.md) · [Web Push Server](features/web-push-server.md)
 - 🔒 [Security](operations/security.md) · [Performance](operations/performance.md)
