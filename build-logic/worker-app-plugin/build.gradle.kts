@@ -82,6 +82,13 @@ tasks.test {
 }
 
 mavenPublishing {
+    // Explicit Central Portal config — vanniktech's auto-detection skips when
+    // com.gradle.plugin-publish is also applied (it assumes plugin-publish will
+    // handle Maven Central too, but it doesn't). Without this call the
+    // `publishAllPublicationsToMavenCentralRepository` task isn't created and the
+    // publish workflow fails with "task not found". `automaticRelease = true`
+    // mirrors the project-wide SONATYPE_AUTOMATIC_RELEASE setting.
+    publishToMavenCentral(automaticRelease = true)
     signAllPublications()
     coordinates(
         groupId = "io.github.mobilebytelabs",
