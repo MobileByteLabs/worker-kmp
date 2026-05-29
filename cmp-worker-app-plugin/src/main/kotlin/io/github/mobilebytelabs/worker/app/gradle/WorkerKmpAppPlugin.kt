@@ -85,6 +85,13 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             group = TASK_GROUP
             description = "Codegens Android Application + Activity + AndroidManifest.xml"
             dependsOn(kspTask)
+            // Tasks read codegen-model.json + scan source-set dirs at execution time
+            // (data isn't known until KSP runs + user's kotlin{} block resolves).
+            // Both are fundamentally Project-backed lookups → opt out of config cache
+            // for these tasks specifically. Rest of the build still caches.
+            notCompatibleWithConfigurationCache(
+                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
+            )
             doLast {
                 if (!ext.androidGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: androidGenerator disabled — skipping")
@@ -110,6 +117,13 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             group = TASK_GROUP
             description = "Codegens jvmMain/desktopMain fun main()"
             dependsOn(kspTask)
+            // Tasks read codegen-model.json + scan source-set dirs at execution time
+            // (data isn't known until KSP runs + user's kotlin{} block resolves).
+            // Both are fundamentally Project-backed lookups → opt out of config cache
+            // for these tasks specifically. Rest of the build still caches.
+            notCompatibleWithConfigurationCache(
+                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
+            )
             doLast {
                 if (!ext.desktopGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: desktopGenerator disabled — skipping")
@@ -129,6 +143,13 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             group = TASK_GROUP
             description = "Codegens iosMain MainViewController + iosApp xcodegen spec + Swift wrappers"
             dependsOn(kspTask)
+            // Tasks read codegen-model.json + scan source-set dirs at execution time
+            // (data isn't known until KSP runs + user's kotlin{} block resolves).
+            // Both are fundamentally Project-backed lookups → opt out of config cache
+            // for these tasks specifically. Rest of the build still caches.
+            notCompatibleWithConfigurationCache(
+                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
+            )
             doLast {
                 if (!ext.iosGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping")
@@ -155,6 +176,13 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             group = TASK_GROUP
             description = "Codegens wasmJsMain fun main() + resources/index.html"
             dependsOn(kspTask)
+            // Tasks read codegen-model.json + scan source-set dirs at execution time
+            // (data isn't known until KSP runs + user's kotlin{} block resolves).
+            // Both are fundamentally Project-backed lookups → opt out of config cache
+            // for these tasks specifically. Rest of the build still caches.
+            notCompatibleWithConfigurationCache(
+                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
+            )
             doLast {
                 if (!ext.webGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: webGenerator disabled — skipping")
@@ -198,6 +226,9 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             group = TASK_GROUP
             description = "Materializes iosApp.xcodeproj via xcodegen (depends on $TASK_IOS)"
             dependsOn(TASK_IOS)
+            notCompatibleWithConfigurationCache(
+                "xcodegen runner shells out to user PATH at execution time",
+            )
             doLast {
                 if (!ext.iosGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping xcodegen")
