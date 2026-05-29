@@ -33,14 +33,12 @@ class WorkerComposeConventionPlugin : Plugin<Project> {
             pluginManager.apply("io.github.mobilebytelabs.worker-app")
 
             dependencies {
-                // In-monorepo: prefer project ref to skip a publish round-trip.
-                // External adopters: drop the `findProject` check and use
-                //   add("commonMainImplementation", libs.findLibrary("worker-compose-all").get())
-                // after adding `worker-compose-all = { module = "io.github.mobilebytelabs:worker-compose-all", version = ... }`
-                // to their libs.versions.toml.
-                val workerComposeAll: Any = rootProject.findProject(":cmp-worker-compose-all")
-                    ?: libs.findLibrary("worker-compose-all").get()
-                add("commonMainImplementation", workerComposeAll)
+                // Catalog entry `worker-compose-all` resolves to the published Maven
+                // artifact for external adopters, and is dep-substituted to the
+                // in-monorepo `:cmp-worker-compose-all` project at build time (the
+                // project sets base.archivesName = "worker-compose-all" to enable
+                // Gradle's automatic same-build substitution).
+                add("commonMainImplementation", libs.findLibrary("worker-compose-all").get())
                 add("commonMainImplementation", libs.findLibrary("koin-compose").get())
             }
 

@@ -70,3 +70,17 @@ include(":samples:cmp-worker-sample-compose-store")
 include(":cmp-worker-bench")
 include(":cmp-worker-desktop-daemon")
 include(":cmp-worker-web-push")
+
+// Substitute the published-artifact coordinates in libs.versions.toml back to the
+// in-monorepo project at resolution time. Lets build-logic + samples consume the
+// same `libs.findLibrary(...)` entries that external adopters use — single catalog
+// is the source of truth, no in-monorepo conditional needed.
+gradle.allprojects {
+    configurations.all {
+        resolutionStrategy.dependencySubstitution {
+            substitute(module("io.github.mobilebytelabs:worker-compose-all"))
+                .using(project(":cmp-worker-compose-all"))
+                .because("worker-compose-all published artifactId vs in-monorepo project name")
+        }
+    }
+}

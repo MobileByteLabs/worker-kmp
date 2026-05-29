@@ -27,6 +27,12 @@ ksp = "2.3.9"
 gradle-plugin-publish = "1.3.0"
 # kotlin-compile-testing for KSP processor functional tests
 kct-ksp = "0.5.0"
+# worker-kmp itself — kept in sync with gradle.properties worker.version.
+# Lets build-logic / external adopters reference the published bundle via
+# libs.findLibrary("worker-compose-all").get(). In-monorepo, root settings.gradle.kts
+# has a dependencySubstitution rule redirecting `io.github.mobilebytelabs:worker-compose-all`
+# → `:cmp-worker-compose-all` (published artifactId vs in-monorepo project name).
+worker-version = "2.1.2"
 
 [libraries]
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
@@ -54,6 +60,9 @@ dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 store5 = { module = "org.mobilenativefoundation.store:store5", version.ref = "store5" }
+# worker-kmp published Maven artifacts — in-monorepo resolution via the
+# dependencySubstitution rule in root settings.gradle.kts.
+worker-compose-all = { module = "io.github.mobilebytelabs:worker-compose-all", version.ref = "worker-version" }
 # worker-kmp-app-plugin
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 kct-ksp-tester = { module = "dev.zacsweers.kctfork:ksp", version.ref = "kct-ksp" }
