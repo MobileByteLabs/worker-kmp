@@ -1,7 +1,8 @@
 /*
- * cmp-worker-app-plugin — Gradle plugin entry for worker-kmp-app-plugin epic.
+ * worker-app-plugin — Gradle plugin entry for the worker-kmp-app-plugin epic.
  *
- * Applied to consumer projects via:
+ * Lives under build-logic/worker-app-plugin/ (kmp-product-flavors pattern).
+ * Consumed via:
  *   plugins {
  *       id("io.github.mobilebytelabs.worker-app") version "$workerVersion"
  *   }
@@ -26,18 +27,20 @@ plugins {
 }
 
 group = "io.github.mobilebytelabs"
-// Read worker.version from the PARENT build's gradle.properties (single source of
-// truth). Gradle's `providers.gradleProperty` doesn't cross the includedBuild
-// boundary, and a mirror gradle.properties here would defeat the "one source of
-// truth" promise. This plugin DOES publish to Maven Central so the real version
-// matters at publish time (vanniktech reads project.version).
+// Read worker.version from the ROOT build's gradle.properties (single source of
+// truth). build-logic is an included composite; Gradle doesn't propagate
+// properties across the includedBuild boundary, so we read the file directly.
+// rootDir here is the build-logic directory; its parent is the main worker-kmp
+// repo root where gradle.properties lives.
 version = Properties()
     .apply {
         rootDir.parentFile
             .resolve("gradle.properties")
             .reader()
             .use(::load)
-    }.getProperty("worker.version") ?: error("worker.version not found in ${rootDir.parentFile}/gradle.properties")
+    }.getProperty("worker.version") ?: error(
+        "worker.version not found in ${rootDir.parentFile}/gradle.properties",
+    )
 
 kotlin {
     jvmToolchain(17)

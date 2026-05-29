@@ -30,6 +30,7 @@ permissions:
 
 jobs:
   publish:
+    name: Publish cmp-* modules
     uses: MobileByteLabs/mbl-actionhub/.github/workflows/publish-kmp-library.yml@v1.6.1
     with:
       module-pattern: 'cmp-'
@@ -44,4 +45,26 @@ jobs:
       java-distribution: 'zulu'
       sonatype-host: 'CENTRAL_PORTAL'
       create-github-release: true
+    secrets: inherit
+
+  publish-worker-app-plugin:
+    name: Publish worker-app-plugin
+    # cmp-worker-app-plugin moved to build-logic/worker-app-plugin/ (kmp-product-flavors
+    # pattern) so the convention plugin in build-logic can apply it as a sibling. It's
+    # NOT discoverable by the cmp-* pattern job above — needs its own explicit job using
+    # module-path. Reference: kmp-product-flavors uses the same pattern.
+    uses: MobileByteLabs/mbl-actionhub/.github/workflows/publish-kmp-library.yml@v1.6.1
+    with:
+      module-path: 'build-logic/worker-app-plugin'
+      group-id: 'io.github.mobilebytelabs'
+      artifact-id: 'worker-app-plugin'
+      version: ${{ inputs.version || '' }}
+      version-source: 'gradle-properties'
+      gradle-properties-key: 'worker.version'
+      verify-against-maven: false
+      bump-after-release: false   # main job above already bumps once per run
+      java-version: '21'
+      java-distribution: 'zulu'
+      sonatype-host: 'CENTRAL_PORTAL'
+      create-github-release: false  # main job creates the release for the version
     secrets: inherit
