@@ -1,0 +1,48 @@
+# Mirror docs/ → GitHub Wiki on every push to development.
+#
+# Pre-requisite (one-time, must be done in GitHub UI):
+#   1. Settings → Features → Wikis (checkbox enabled)
+#   2. Create the first Wiki page (any content — e.g. "Home" with "TBD"). This
+#      step initializes the underlying `worker-kmp.wiki.git` repo. Without it,
+#      the sync action below fails with `Repository not found`.
+#
+# After that, every push to development that touches docs/** publishes the
+# updated tree to the wiki. The wiki tree mirrors docs/ verbatim:
+#   docs/Home.md                              → Wiki Home page
+#   docs/_Sidebar.md                          → Wiki Sidebar
+#   docs/getting-started/installation.md      → Wiki page at /getting-started/installation
+#   docs/getting-started/convention-plugin.md → Wiki page at /getting-started/convention-plugin
+#   …etc.
+#
+# Manual dispatch is also supported for ad-hoc syncs.
+
+name: Sync docs to Wiki
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - 'docs/**'
+      - '.github/workflows/sync-docs-to-wiki.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Mirror docs/ → wiki
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push docs/ to wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          path: docs
+          # Default branch of the wiki repo is `master`; keep that to avoid
+          # creating a second branch.
+          default-branch: master
+          # Commit message author for the wiki commits.
+          token: ${{ secrets.GITHUB_TOKEN }}
