@@ -5,6 +5,67 @@ All notable changes to worker-kmp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-05-30 (WIP)
+
+### Added — NEW `cmp-worker-scheduler` module
+
+High-level `WorkScheduler` Koin façade extracted from `samples/kmp-project-template/sync/`
+into a dedicated library module. Consumers depending on `cmp-worker-compose-all` get
+scheduling APIs for free with no extra dep.
+
+- **`WorkScheduler` interface** (9 methods): enqueueDataSync, scheduleNotification,
+  scheduleDailyDataSync (daily-at-LocalTime), schedulePeriodicDataSync,
+  scheduleDataSyncAt (one-time at-Instant), scheduleDataSyncAtExact, scheduleNotificationAt,
+  observeWork, cancelWork. Every method accepts `payload: WorkData = workDataOf()`.
+- **`DefaultWorkScheduler`** — cross-platform impl using PeriodicWorkRequest + setInitialDelay +
+  enqueueUniquePeriodicWork(KEEP) for periodic + OneTimeWorkRequest for at-time.
+- **Android exact-tier**: `AlarmManager.setExactAndAllowWhileIdle(RTC_WAKEUP, ...)` actual.
+  Requires host app to declare `SCHEDULE_EXACT_ALARM` permission in AndroidManifest.xml
+  (Android 12+). Runtime check `AlarmManager.canScheduleExactAlarms()`; on denial, falls
+  back to WorkManager flex-window with `Napier.w` log.
+- **iOS scheduling**: bridges to existing `cmp-worker-ios` BGTaskScheduler integration
+  (BGProcessingTaskRequest + BGAppRefreshTaskRequest) + adds `UNUserNotificationCenter`
+  actual (FIRST time wired in worker-kmp). Lazy `requestAuthorization(options: [.alert, .sound])`
+  on first `scheduleNotification` call.
+- **Desktop**: in-process via `ScheduledExecutorService.schedule(...)` for at-exact-time;
+  notifications via `java.awt.SystemTray.displayMessage` with `GraphicsEnvironment.isHeadless`
+  fallback. v1.1 follow-up will layer on cmp-worker-desktop-daemon when daemon is
+  execute-capable.
+- **Web (wasmJs)**: `setTimeout(handler, delayMs)` actual (in-tab only, fires while tab is
+  active). Notifications via existing `WebNotifications.kt` in cmp-worker-web. v1.1 follow-up
+  adds Service Worker periodicSync (Chrome-only, requires bundler config).
+- **NiA-shaped sync contracts**: `Synchronizer` + `Syncable` (with 2-arg `syncWith(synchronizer, payload: WorkData)`
+  overload) + `NetworkChange` + `changeListSync` extension (delta APIs) + `snapshotSync`
+  sibling extension (snapshot APIs like Frankfurter/WorldBank) — all in
+  `io.github.mobilebytelabs.worker.scheduler.sync`. `ChangeListVersions` (Long-typed for
+  snapshotSync epochSeconds), `SyncManager` observer interface, `SyncStatePersister`
+  DataStore-backed persistence.
+- **`AbstractDataSyncWorker(ctx, syncables: List<Syncable>, persister: SyncStatePersister)`**
+  base class — consumer's `DataSyncWorker` becomes a 3-line subclass listing its specific
+  Syncable repos. doWork iterates `coroutineScope { syncables.map { async { it.syncWith(...) } }.awaitAll() }`.
+- **`NotificationWorker`** generic CoroutineWorker reading inputData → delegates to
+  `expect fun renderNotification(content: NotificationContent)`.
+
+### Sample-side impact
+
+`samples/kmp-project-template/sync/` shrinks from 14 files to ~4: only adopter-specific
+`OfflineFirstCurrencyRepository` + `OfflineFirstMacroIndicatorsRepository` + 3-line
+`DataSyncWorker` subclass + `SyncModule` (Koin wiring) remain. Cross-module demo
+`feature/loans/LoanReminderUseCase` imports flipped from `org.mifos.sync.*` to
+`io.github.mobilebytelabs.worker.scheduler.*`.
+
+PRs updated: [MobileByteLabs/worker-kmp#27](https://github.com/MobileByteLabs/worker-kmp/pull/27) +
+[openMF/kmp-project-template#182](https://github.com/openMF/kmp-project-template/pull/182).
+
+### Backward compatibility
+
+No breaking changes. Existing consumers of `cmp-worker-compose-all` automatically gain the
+scheduling APIs at v3.1.0; no migration required. Sample-side `WorkScheduler` consumers
+must update imports (`org.mifos.sync.*` → `io.github.mobilebytelabs.worker.scheduler.*`) — see
+`docs/getting-started/scheduler-api.md` migration section.
+
+---
+
 ## [Unreleased]
 
 ### Added

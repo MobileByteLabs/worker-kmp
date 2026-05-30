@@ -75,6 +75,7 @@ kotlin {
                 api(project(":cmp-worker-kmp"))
                 api(project(":cmp-worker-compose"))
                 api(project(":cmp-worker-koin"))
+                api(project(":cmp-worker-scheduler"))
                 api(project(":cmp-worker-store5"))
             }
         }

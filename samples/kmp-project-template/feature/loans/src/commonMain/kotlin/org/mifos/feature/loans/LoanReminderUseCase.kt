@@ -5,9 +5,9 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import io.github.mobilebytelabs.worker.workDataOf
-import org.mifos.sync.WorkScheduler
-import org.mifos.sync.NotificationContent
-import org.mifos.sync.WorkMode
+import io.github.mobilebytelabs.worker.scheduler.WorkScheduler
+import io.github.mobilebytelabs.worker.scheduler.NotificationContent
+import io.github.mobilebytelabs.worker.scheduler.WorkMode
 
 /**
  * Cross-module usage demo (D18 + D24).

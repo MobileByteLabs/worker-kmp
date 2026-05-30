@@ -6,7 +6,9 @@ import io.github.mobilebytelabs.worker.WorkManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
-import org.mifos.core.data.util.SyncManager
+import io.github.mobilebytelabs.worker.scheduler.SYNC_WORK_NAME
+import io.github.mobilebytelabs.worker.scheduler.WorkScheduler
+import io.github.mobilebytelabs.worker.scheduler.sync.SyncManager
 
 class WorkManagerSyncManager(
     private val workManager: WorkManager,

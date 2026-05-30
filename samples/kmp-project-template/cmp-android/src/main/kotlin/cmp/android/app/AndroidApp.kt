@@ -13,8 +13,8 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import cmp.shared.utils.initKoin
-import org.mifos.sync.Sync
-import org.mifos.sync.WorkScheduler
+import io.github.mobilebytelabs.worker.scheduler.Sync
+import io.github.mobilebytelabs.worker.scheduler.WorkScheduler
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader

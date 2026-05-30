@@ -9,10 +9,10 @@ android { namespace = "org.mifos.sync" }
 kotlin {
     sourceSets.commonMain.dependencies {
         implementation(project(":core:data"))
-        implementation(project(":core:datastore"))
-        implementation(libs.kotlinx.coroutines.core)
-        implementation(libs.kotlinx.serialization.json)
-        // worker-compose-all and koin-compose come from the convention plugin
+        // cmp-worker-compose-all (via convention plugin) brings cmp-worker-scheduler
+        // transitively — WorkScheduler, DefaultWorkScheduler, SyncStatePersister,
+        // AbstractDataSyncWorker, Synchronizer/Syncable, NotificationWorker, etc.
+        // kotlinx-coroutines and kotlinx-serialization come transitively via the library.
     }
     sourceSets.androidMain.dependencies {
         implementation(libs.androidx.core.ktx)  // NotificationManagerCompat
