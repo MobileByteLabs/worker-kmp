@@ -24,8 +24,7 @@ interface Synchronizer {
 interface Syncable {
     suspend fun syncWith(synchronizer: Synchronizer): Boolean
 
-    suspend fun syncWith(synchronizer: Synchronizer, payload: WorkData): Boolean =
-        syncWith(synchronizer)
+    suspend fun syncWith(synchronizer: Synchronizer, payload: WorkData): Boolean = syncWith(synchronizer)
 }
 
 /**
@@ -80,10 +79,7 @@ suspend fun <T : NetworkChange> Synchronizer.changeListSync(
  * Returns true on success, false on any throw.
  */
 @OptIn(kotlin.time.ExperimentalTime::class)
-suspend fun Synchronizer.snapshotSync(
-    name: String,
-    fetcher: suspend () -> Unit,
-): Boolean = kotlin.runCatching {
+suspend fun Synchronizer.snapshotSync(name: String, fetcher: suspend () -> Unit): Boolean = kotlin.runCatching {
     fetcher()
     val now = kotlin.time.Clock.System.now().epochSeconds
     updateChangeListVersions { copy(versions = versions + (name to now)) }

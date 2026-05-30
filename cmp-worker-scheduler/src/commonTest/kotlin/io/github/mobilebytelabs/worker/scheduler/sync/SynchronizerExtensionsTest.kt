@@ -1,13 +1,12 @@
 package io.github.mobilebytelabs.worker.scheduler.sync
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.ExperimentalTime
-import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalTime::class)
-
 class SynchronizerExtensionsTest {
     @Test
     fun changeListSync_partitionsAndBumpsVersion() = runTest {

@@ -42,46 +42,46 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-store5.api
 ```
 public abstract class io/github/mobilebytelabs/worker/store5/MutableStoreSyncWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
-	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/MutableStore;Ljava/lang/Object;Ljava/lang/Object;)V
-	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected fun isRetryable (Ljava/lang/Throwable;)Z
-	protected fun mapWriteResponseToWorkData (Lorg/mobilenativefoundation/store/store5/StoreWriteResponse$Success;)Lio/github/mobilebytelabs/worker/WorkData;
+    public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/MutableStore;Ljava/lang/Object;Ljava/lang/Object;)V
+    public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    protected fun isRetryable (Ljava/lang/Throwable;)Z
+    protected fun mapWriteResponseToWorkData (Lorg/mobilenativefoundation/store/store5/StoreWriteResponse$Success;)Lio/github/mobilebytelabs/worker/WorkData;
 }
 
 public abstract class io/github/mobilebytelabs/worker/store5/StoreBackedWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
-	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/Store;Ljava/lang/Object;)V
-	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected fun isRetryable (Ljava/lang/Throwable;)Z
-	protected fun mapOutputToWorkData (Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/WorkData;
+    public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/Store;Ljava/lang/Object;)V
+    public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    protected fun isRetryable (Ljava/lang/Throwable;)Z
+    protected fun mapOutputToWorkData (Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/WorkData;
 }
 
 public abstract class io/github/mobilebytelabs/worker/store5/StoreFreshnessWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
-	public static final field Companion Lio/github/mobilebytelabs/worker/store5/StoreFreshnessWorker$Companion;
-	public static final field KEY_SKIPPED Ljava/lang/String;
-	public static final field VALUE_FRESH Ljava/lang/String;
-	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/Store;Ljava/lang/Object;Lorg/mobilenativefoundation/store/store5/Validator;)V
-	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected fun isRetryable (Ljava/lang/Throwable;)Z
+    public static final field Companion Lio/github/mobilebytelabs/worker/store5/StoreFreshnessWorker$Companion;
+    public static final field KEY_SKIPPED Ljava/lang/String;
+    public static final field VALUE_FRESH Ljava/lang/String;
+    public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Lorg/mobilenativefoundation/store/store5/Store;Ljava/lang/Object;Lorg/mobilenativefoundation/store/store5/Validator;)V
+    public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    protected fun isRetryable (Ljava/lang/Throwable;)Z
 }
 
 public final class io/github/mobilebytelabs/worker/store5/StoreFreshnessWorker$Companion {
 }
 
 public final class io/github/mobilebytelabs/worker/store5/StoreRefreshScheduler {
-	public static final field Companion Lio/github/mobilebytelabs/worker/store5/StoreRefreshScheduler$Companion;
-	public static final field TAG_PREFIX Ljava/lang/String;
-	public fun <init> (Lio/github/mobilebytelabs/worker/WorkManager;)V
-	public final fun cancelRefresh (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun enqueueUnique (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun observeRefreshes (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+    public static final field Companion Lio/github/mobilebytelabs/worker/store5/StoreRefreshScheduler$Companion;
+    public static final field TAG_PREFIX Ljava/lang/String;
+    public fun <init> (Lio/github/mobilebytelabs/worker/WorkManager;)V
+    public final fun cancelRefresh (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public final fun enqueueUnique (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public final fun observeRefreshes (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public final class io/github/mobilebytelabs/worker/store5/StoreRefreshScheduler$Companion {
-	public final fun refreshTag (Ljava/lang/String;)Ljava/lang/String;
+    public final fun refreshTag (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class io/github/mobilebytelabs/worker/store5/koin/WorkStore5KoinModuleKt {
-	public static final fun getWorkStore5KoinModule ()Lorg/koin/core/module/Module;
+    public static final fun getWorkStore5KoinModule ()Lorg/koin/core/module/Module;
 }
 ```
 

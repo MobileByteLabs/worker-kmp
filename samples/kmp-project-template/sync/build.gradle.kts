@@ -15,7 +15,7 @@ kotlin {
         // kotlinx-coroutines and kotlinx-serialization come transitively via the library.
     }
     sourceSets.androidMain.dependencies {
-        implementation(libs.androidx.core.ktx)  // NotificationManagerCompat
+        implementation(libs.androidx.core.ktx) // NotificationManagerCompat
     }
     sourceSets.commonTest.dependencies {
         implementation(libs.kotlin.test)

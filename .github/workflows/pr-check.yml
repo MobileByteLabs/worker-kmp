@@ -169,4 +169,8 @@ jobs:
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
       - name: Assemble samples/kmp-project-template all KMP targets
-        run: ./gradlew :samples:kmp-project-template:assemble --no-configuration-cache
+        # samples/kmp-project-template is a separate Gradle build (own settings.gradle.kts
+        # + gradlew). Invoke its own wrapper from inside the directory rather than via
+        # `:samples:kmp-project-template:assemble` from the root build.
+        working-directory: samples/kmp-project-template
+        run: ./gradlew assemble --no-configuration-cache

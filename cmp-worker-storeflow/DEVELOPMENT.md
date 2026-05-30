@@ -42,53 +42,53 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-storeflow.api
 ```
 public final class io/github/mobilebytelabs/worker/storeflow/koin/WorkStoreFlowKoinModuleKt {
-	public static final fun getWorkStoreFlowKoinModule ()Lorg/koin/core/module/Module;
+    public static final fun getWorkStoreFlowKoinModule ()Lorg/koin/core/module/Module;
 }
 
 public abstract class io/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
-	public static final field Companion Lio/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker$Companion;
-	public static final field DEFAULT_PAGE_COUNT I
-	public static final field KEY_PAGES_FETCHED Ljava/lang/String;
-	public static final field KEY_PAGE_COUNT Ljava/lang/String;
-	public static final field KEY_START_PAGE Ljava/lang/String;
-	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
-	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	protected abstract fun fetchPage (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public static final field Companion Lio/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker$Companion;
+    public static final field DEFAULT_PAGE_COUNT I
+    public static final field KEY_PAGES_FETCHED Ljava/lang/String;
+    public static final field KEY_PAGE_COUNT Ljava/lang/String;
+    public static final field KEY_START_PAGE Ljava/lang/String;
+    public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+    public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    protected abstract fun fetchPage (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/github/mobilebytelabs/worker/storeflow/paging/PrefetchPagingWorker$Companion {
 }
 
 public final class io/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy : java/lang/Enum {
-	public static final field CACHE_ONLY Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
-	public static final field CACHE_THEN_NETWORK Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
-	public static final field NETWORK_ONLY Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
-	public static fun values ()[Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
+    public static final field CACHE_ONLY Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
+    public static final field CACHE_THEN_NETWORK Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
+    public static final field NETWORK_ONLY Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
+    public static fun getEntries ()Lkotlin/enums/EnumEntries;
+    public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
+    public static fun values ()[Lio/github/mobilebytelabs/worker/storeflow/policy/FetchPolicy;
 }
 
 public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler {
-	public fun <init> (Lio/github/mobilebytelabs/worker/storeflow/submit/SubmitOutbox;Lkotlin/jvm/functions/Function2;)V
-	public final fun draft (Ljava/lang/Object;)V
-	public final fun getState ()Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State;
-	public final fun rehydrateFromOutbox (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun reset ()V
-	public final fun submit (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun <init> (Lio/github/mobilebytelabs/worker/storeflow/submit/SubmitOutbox;Lkotlin/jvm/functions/Function2;)V
+    public final fun draft (Ljava/lang/Object;)V
+    public final fun getState ()Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State;
+    public final fun rehydrateFromOutbox (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public final fun reset ()V
+    public final fun submit (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
 }
 
 public final class io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting : io/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State {
-	public fun <init> (Ljava/lang/Object;)V
-	public final fun component1 ()Ljava/lang/Object;
-	public final fun copy (Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPayload ()Ljava/lang/Object;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+    public fun <init> (Ljava/lang/Object;)V
+    public final fun component1 ()Ljava/lang/Object;
+    public final fun copy (Ljava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;Ljava/lang/Object;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/storeflow/submit/DraftSubmitHandler$State$Drafting;
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getPayload ()Ljava/lang/Object;
+    public fun hashCode ()I
+    public fun toString ()Ljava/lang/String;
 }
 ```
 

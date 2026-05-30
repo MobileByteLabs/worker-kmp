@@ -10,13 +10,6 @@ import io.github.mobilebytelabs.worker.periodicWorkRequest
 import io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker
 import io.github.mobilebytelabs.worker.scheduler.sync.SyncStatePersister
 import io.github.mobilebytelabs.worker.workDataOf
-import kotlin.time.Clock
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
-import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +23,13 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
+import kotlin.uuid.ExperimentalUuidApi
 
 /**
  * Default [WorkScheduler] backed by the library's [WorkManager].
@@ -63,11 +63,7 @@ class DefaultWorkScheduler(
         return WorkHandle(id = request.id, uniqueName = SYNC_WORK_NAME)
     }
 
-    override fun scheduleNotification(
-        content: NotificationContent,
-        delay: Duration,
-        mode: WorkMode,
-    ): WorkHandle {
+    override fun scheduleNotification(content: NotificationContent, delay: Duration, mode: WorkMode): WorkHandle {
         val uniqueName = "$NOTIFICATION_WORK_PREFIX-${content.title.hashCode()}"
         val request = oneTimeWorkRequest<NotificationWorker> {
             setInputData(
@@ -87,11 +83,7 @@ class DefaultWorkScheduler(
         return WorkHandle(id = request.id, uniqueName = uniqueName)
     }
 
-    override fun scheduleDailyDataSync(
-        timeOfDay: LocalTime,
-        timeZone: TimeZone,
-        payload: WorkData,
-    ): WorkHandle {
+    override fun scheduleDailyDataSync(timeOfDay: LocalTime, timeZone: TimeZone, payload: WorkData): WorkHandle {
         val nowInstant = Clock.System.now()
         val nextOccurrence = nowInstant.nextOccurrenceOf(timeOfDay, timeZone)
         val initialDelay = nextOccurrence - nowInstant
@@ -101,15 +93,13 @@ class DefaultWorkScheduler(
             setConstraints(SyncConstraints)
             addTag(DAILY_SYNC_WORK_NAME)
         }
-        scope.launch { workManager.enqueueUniquePeriodicWork(DAILY_SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request) }
+        scope.launch {
+            workManager.enqueueUniquePeriodicWork(DAILY_SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+        }
         return WorkHandle(id = request.id, uniqueName = DAILY_SYNC_WORK_NAME)
     }
 
-    override fun schedulePeriodicDataSync(
-        interval: Duration,
-        initialDelay: Duration,
-        payload: WorkData,
-    ): WorkHandle {
+    override fun schedulePeriodicDataSync(interval: Duration, initialDelay: Duration, payload: WorkData): WorkHandle {
         val clampedInterval = maxOf(interval, 15.minutes)
         val request = periodicWorkRequest<AbstractDataSyncWorker>(repeatInterval = clampedInterval) {
             setInitialDelay(initialDelay)
@@ -117,7 +107,9 @@ class DefaultWorkScheduler(
             setConstraints(SyncConstraints)
             addTag(PERIODIC_SYNC_WORK_NAME)
         }
-        scope.launch { workManager.enqueueUniquePeriodicWork(PERIODIC_SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request) }
+        scope.launch {
+            workManager.enqueueUniquePeriodicWork(PERIODIC_SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+        }
         return WorkHandle(id = request.id, uniqueName = PERIODIC_SYNC_WORK_NAME)
     }
 
@@ -148,18 +140,17 @@ class DefaultWorkScheduler(
         return scheduleNotification(content, delay, mode)
     }
 
-    override fun observeWork(name: String): Flow<WorkStatus> =
-        workManager.getWorkInfosByTag(name).map { infos ->
-            when (infos.firstOrNull()?.state) {
-                WorkInfo.State.ENQUEUED -> WorkStatus.Pending
-                WorkInfo.State.RUNNING -> WorkStatus.Running
-                WorkInfo.State.SUCCEEDED -> WorkStatus.Succeeded
-                WorkInfo.State.FAILED -> WorkStatus.Failed
-                WorkInfo.State.CANCELLED -> WorkStatus.Cancelled
-                WorkInfo.State.BLOCKED -> WorkStatus.Pending
-                null -> WorkStatus.Pending
-            }
+    override fun observeWork(name: String): Flow<WorkStatus> = workManager.getWorkInfosByTag(name).map { infos ->
+        when (infos.firstOrNull()?.state) {
+            WorkInfo.State.ENQUEUED -> WorkStatus.Pending
+            WorkInfo.State.RUNNING -> WorkStatus.Running
+            WorkInfo.State.SUCCEEDED -> WorkStatus.Succeeded
+            WorkInfo.State.FAILED -> WorkStatus.Failed
+            WorkInfo.State.CANCELLED -> WorkStatus.Cancelled
+            WorkInfo.State.BLOCKED -> WorkStatus.Pending
+            null -> WorkStatus.Pending
         }
+    }
 
     override fun cancelWork(name: String) {
         scope.launch { workManager.cancelAllWorkByTag(name) }
@@ -168,7 +159,10 @@ class DefaultWorkScheduler(
     private fun Instant.nextOccurrenceOf(timeOfDay: LocalTime, tz: TimeZone): Instant {
         val today = toLocalDateTime(tz).date
         val todayAtTime = LocalDateTime(today, timeOfDay).toInstant(tz)
-        return if (todayAtTime > this) todayAtTime
-        else LocalDateTime(today.plus(1, DateTimeUnit.DAY), timeOfDay).toInstant(tz)
+        return if (todayAtTime > this) {
+            todayAtTime
+        } else {
+            LocalDateTime(today.plus(1, DateTimeUnit.DAY), timeOfDay).toInstant(tz)
+        }
     }
 }

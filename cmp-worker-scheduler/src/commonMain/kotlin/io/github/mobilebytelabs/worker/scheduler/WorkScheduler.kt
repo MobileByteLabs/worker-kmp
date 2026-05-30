@@ -2,29 +2,22 @@ package io.github.mobilebytelabs.worker.scheduler
 
 import io.github.mobilebytelabs.worker.WorkData
 import io.github.mobilebytelabs.worker.workDataOf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.TimeZone
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.LocalTime
-import kotlinx.datetime.TimeZone
 
 /** Foreground = setExpedited + persistent notification; Background = default WorkManager scheduling. */
 enum class WorkMode { Foreground, Background }
 
-data class NotificationContent(
-    val title: String,
-    val body: String,
-    val channelId: String? = null,
-)
+data class NotificationContent(val title: String, val body: String, val channelId: String? = null)
 
 @OptIn(ExperimentalUuidApi::class)
-data class WorkHandle(
-    val id: Uuid,
-    val uniqueName: String? = null,
-) {
+data class WorkHandle(val id: Uuid, val uniqueName: String? = null) {
     constructor(uniqueName: String?) : this(id = Uuid.random(), uniqueName = uniqueName)
 }
 
@@ -45,10 +38,7 @@ enum class WorkStatus { Pending, Running, Succeeded, Failed, Cancelled }
 @OptIn(ExperimentalTime::class)
 interface WorkScheduler {
     /** Existing — one-time, immediate (or expedited if WorkMode.Foreground). */
-    fun enqueueDataSync(
-        mode: WorkMode = WorkMode.Background,
-        payload: WorkData = workDataOf(),
-    ): WorkHandle
+    fun enqueueDataSync(mode: WorkMode = WorkMode.Background, payload: WorkData = workDataOf()): WorkHandle
 
     /** Existing — one-time notification after [delay]. */
     fun scheduleNotification(

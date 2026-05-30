@@ -72,11 +72,8 @@ private class RecordingFallback : WorkScheduler {
     var scheduleDataSyncAtCalls = 0
     override fun enqueueDataSync(mode: WorkMode, payload: io.github.mobilebytelabs.worker.WorkData) =
         WorkHandle(uniqueName = "fallback-enqueue")
-    override fun scheduleNotification(
-        content: NotificationContent,
-        delay: kotlin.time.Duration,
-        mode: WorkMode,
-    ) = WorkHandle(uniqueName = "fallback-notif")
+    override fun scheduleNotification(content: NotificationContent, delay: kotlin.time.Duration, mode: WorkMode) =
+        WorkHandle(uniqueName = "fallback-notif")
     override fun scheduleDailyDataSync(
         timeOfDay: kotlinx.datetime.LocalTime,
         timeZone: kotlinx.datetime.TimeZone,

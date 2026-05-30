@@ -3,11 +3,11 @@
 package io.github.mobilebytelabs.worker.scheduler
 
 import io.github.mobilebytelabs.worker.WorkData
-import kotlin.time.Instant
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.datetime.toNSDate
 import platform.BackgroundTasks.BGProcessingTaskRequest
 import platform.BackgroundTasks.BGTaskScheduler
+import kotlin.time.Instant
 
 /**
  * iOS actual for [ExactAlarmScheduler].
@@ -23,9 +23,7 @@ import platform.BackgroundTasks.BGTaskScheduler
  * Consumer-app `Info.plist` MUST declare [BG_TASK_ID] in `BGTaskSchedulerPermittedIdentifiers`
  * before app launch. `cmp-worker-ios`'s `InfoPlistValidator` enforces this at startup.
  */
-actual class ExactAlarmScheduler actual constructor(
-    private val fallback: WorkScheduler,
-) {
+actual class ExactAlarmScheduler actual constructor(private val fallback: WorkScheduler) {
     actual fun scheduleExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle {
         val request = BGProcessingTaskRequest(identifier = BG_TASK_ID).apply {
             earliestBeginDate = instant.toNSDate()

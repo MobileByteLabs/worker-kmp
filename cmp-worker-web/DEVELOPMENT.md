@@ -44,55 +44,55 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-web.api
 ```
 public final class io/github/mobilebytelabs/worker/web/BackgroundSyncScriptKt {
-	public static final fun backgroundSyncServiceWorkerScript ()Ljava/lang/String;
+    public static final fun backgroundSyncServiceWorkerScript ()Ljava/lang/String;
 }
 
 public final class io/github/mobilebytelabs/worker/web/BroadcastChannelBridge_jvmKt {
-	public static final fun openWorkerKmpBroadcastChannel (Lkotlin/jvm/functions/Function2;)Lio/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription;
+    public static final fun openWorkerKmpBroadcastChannel (Lkotlin/jvm/functions/Function2;)Lio/github/mobilebytelabs/worker/web/WorkerKmpBroadcastSubscription;
 }
 
 public final class io/github/mobilebytelabs/worker/web/NotificationPermission : java/lang/Enum {
-	public static final field DEFAULT Lio/github/mobilebytelabs/worker/web/NotificationPermission;
-	public static final field DENIED Lio/github/mobilebytelabs/worker/web/NotificationPermission;
-	public static final field GRANTED Lio/github/mobilebytelabs/worker/web/NotificationPermission;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/web/NotificationPermission;
-	public static fun values ()[Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+    public static final field DEFAULT Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+    public static final field DENIED Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+    public static final field GRANTED Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+    public static fun getEntries ()Lkotlin/enums/EnumEntries;
+    public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/web/NotificationPermission;
+    public static fun values ()[Lio/github/mobilebytelabs/worker/web/NotificationPermission;
 }
 
 public final class io/github/mobilebytelabs/worker/web/WebNotificationsKt {
-	public static final fun requestNotificationPermission (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun showWorkerNotification (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
-	public static synthetic fun showWorkerNotification$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
+    public static final fun requestNotificationPermission (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public static final fun showWorkerNotification (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
+    public static synthetic fun showWorkerNotification$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)V
 }
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/github/mobilebytelabs/worker/WorkManager {
-	public static final field $stable I
-	public fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;)V
-	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
-	public final fun shutdown ()V
+    public static final field $stable I
+    public fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;)V
+    public synthetic fun <init> (Lio/github/mobilebytelabs/worker/web/WebWorkerFactory;Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+    public final fun shutdown ()V
 }
 
 public final class io/github/mobilebytelabs/worker/web/WebWorkManagerConfig {
-	public static final field $stable I
-	public static final field Companion Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Companion;
-	public fun <init> ()V
-	public fun <init> (JZLjava/lang/String;ZLjava/lang/String;Z)V
-	public synthetic fun <init> (JZLjava/lang/String;ZLjava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()J
-	public final fun component2 ()Z
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Z
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Z
-	public final fun copy (JZLjava/lang/String;ZLjava/lang/String;Z)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;JZLjava/lang/String;ZLjava/lang/String;ZILjava/lang/Object;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+    public static final field $stable I
+    public static final field Companion Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig$Companion;
+    public fun <init> ()V
+    public fun <init> (JZLjava/lang/String;ZLjava/lang/String;Z)V
+    public synthetic fun <init> (JZLjava/lang/String;ZLjava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    public final fun component1 ()J
+    public final fun component2 ()Z
+    public final fun component3 ()Ljava/lang/String;
+    public final fun component4 ()Z
+    public final fun component5 ()Ljava/lang/String;
+    public final fun component6 ()Z
+    public final fun copy (JZLjava/lang/String;ZLjava/lang/String;Z)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;JZLjava/lang/String;ZLjava/lang/String;ZILjava/lang/Object;)Lio/github/mobilebytelabs/worker/web/WebWorkManagerConfig;
 ```
 
 ### cmp-worker-web.klib.api

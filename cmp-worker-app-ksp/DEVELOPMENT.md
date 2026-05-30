@@ -42,53 +42,53 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-app-ksp.api
 ```
 public final class io/github/mobilebytelabs/worker/app/ksp/CodegenModel {
-	public static final field Companion Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/util/List;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAndroidApplicationId ()Ljava/lang/String;
-	public final fun getAndroidPermissions ()Ljava/util/List;
-	public final fun getContentFnFqn ()Ljava/lang/String;
-	public final fun getIosBundleId ()Ljava/lang/String;
-	public final fun getKoinModulesFnFqn ()Ljava/lang/String;
-	public final fun getPackageName ()Ljava/lang/String;
-	public final fun getTitle ()Ljava/lang/String;
-	public final fun getWebCanvasId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+    public static final field Companion Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel$Companion;
+    public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+    public final fun component1 ()Ljava/lang/String;
+    public final fun component2 ()Ljava/lang/String;
+    public final fun component3 ()Ljava/lang/String;
+    public final fun component4 ()Ljava/lang/String;
+    public final fun component5 ()Ljava/util/List;
+    public final fun component6 ()Ljava/lang/String;
+    public final fun component7 ()Ljava/lang/String;
+    public final fun component8 ()Ljava/lang/String;
+    public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getAndroidApplicationId ()Ljava/lang/String;
+    public final fun getAndroidPermissions ()Ljava/util/List;
+    public final fun getContentFnFqn ()Ljava/lang/String;
+    public final fun getIosBundleId ()Ljava/lang/String;
+    public final fun getKoinModulesFnFqn ()Ljava/lang/String;
+    public final fun getPackageName ()Ljava/lang/String;
+    public final fun getTitle ()Ljava/lang/String;
+    public final fun getWebCanvasId ()Ljava/lang/String;
+    public fun hashCode ()I
+    public fun toString ()Ljava/lang/String;
 }
 
 public final synthetic class io/github/mobilebytelabs/worker/app/ksp/CodegenModel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+    public static final field INSTANCE Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel$$serializer;
+    public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+    public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;
+    public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+    public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+    public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/mobilebytelabs/worker/app/ksp/CodegenModel;)V
+    public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 
 public final class io/github/mobilebytelabs/worker/app/ksp/CodegenModel$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+    public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class io/github/mobilebytelabs/worker/app/ksp/WorkerKmpAppProcessor : com/google/devtools/ksp/processing/SymbolProcessor {
-	public static final field MODEL_FILE_EXT Ljava/lang/String;
-	public static final field MODEL_FILE_NAME Ljava/lang/String;
-	public static final field MODEL_PACKAGE Ljava/lang/String;
-	public static final field WORKER_KMP_APP_CONTENT_FQN Ljava/lang/String;
-	public static final field WORKER_KMP_APP_FQN Ljava/lang/String;
-	public fun <init> (Lcom/google/devtools/ksp/processing/CodeGenerator;Lcom/google/devtools/ksp/processing/KSPLogger;)V
-	public fun process (Lcom/google/devtools/ksp/processing/Resolver;)Ljava/util/List;
+    public static final field MODEL_FILE_EXT Ljava/lang/String;
+    public static final field MODEL_FILE_NAME Ljava/lang/String;
+    public static final field MODEL_PACKAGE Ljava/lang/String;
+    public static final field WORKER_KMP_APP_CONTENT_FQN Ljava/lang/String;
+    public static final field WORKER_KMP_APP_FQN Ljava/lang/String;
+    public fun <init> (Lcom/google/devtools/ksp/processing/CodeGenerator;Lcom/google/devtools/ksp/processing/KSPLogger;)V
+    public fun process (Lcom/google/devtools/ksp/processing/Resolver;)Ljava/util/List;
 }
 ```
 

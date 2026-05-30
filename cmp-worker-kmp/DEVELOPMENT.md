@@ -46,55 +46,55 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-kmp.api
 ```
 public final class io/github/mobilebytelabs/worker/BackgroundCapabilities {
-	public fun <init> (ZZ)V
-	public final fun component1 ()Z
-	public final fun component2 ()Z
-	public final fun copy (ZZ)Lio/github/mobilebytelabs/worker/BackgroundCapabilities;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/BackgroundCapabilities;ZZILjava/lang/Object;)Lio/github/mobilebytelabs/worker/BackgroundCapabilities;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getSupportsOsScheduling ()Z
-	public final fun getSupportsPersistence ()Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+    public fun <init> (ZZ)V
+    public final fun component1 ()Z
+    public final fun component2 ()Z
+    public final fun copy (ZZ)Lio/github/mobilebytelabs/worker/BackgroundCapabilities;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/BackgroundCapabilities;ZZILjava/lang/Object;)Lio/github/mobilebytelabs/worker/BackgroundCapabilities;
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getSupportsOsScheduling ()Z
+    public final fun getSupportsPersistence ()Z
+    public fun hashCode ()I
+    public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/mobilebytelabs/worker/BackgroundCapabilities_jvmKt {
-	public static final fun platformBackgroundCapabilities ()Lio/github/mobilebytelabs/worker/BackgroundCapabilities;
+    public static final fun platformBackgroundCapabilities ()Lio/github/mobilebytelabs/worker/BackgroundCapabilities;
 }
 
 public final class io/github/mobilebytelabs/worker/BackoffPolicy : java/lang/Enum {
-	public static final field EXPONENTIAL Lio/github/mobilebytelabs/worker/BackoffPolicy;
-	public static final field LINEAR Lio/github/mobilebytelabs/worker/BackoffPolicy;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/BackoffPolicy;
-	public static fun values ()[Lio/github/mobilebytelabs/worker/BackoffPolicy;
+    public static final field EXPONENTIAL Lio/github/mobilebytelabs/worker/BackoffPolicy;
+    public static final field LINEAR Lio/github/mobilebytelabs/worker/BackoffPolicy;
+    public static fun getEntries ()Lkotlin/enums/EnumEntries;
+    public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/BackoffPolicy;
+    public static fun values ()[Lio/github/mobilebytelabs/worker/BackoffPolicy;
 }
 
 public abstract class io/github/mobilebytelabs/worker/ConditionalWorker : io/github/mobilebytelabs/worker/CoroutineWorker {
-	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
-	public abstract fun condition (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun doConditionalWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;)V
+    public abstract fun condition (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public abstract fun doConditionalWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public final fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class io/github/mobilebytelabs/worker/Constraints {
-	public static final field Companion Lio/github/mobilebytelabs/worker/Constraints$Companion;
-	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/NetworkType;ZZZZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getContentUriTriggers ()Ljava/util/List;
-	public final fun getRequiredNetworkType ()Lio/github/mobilebytelabs/worker/NetworkType;
-	public final fun getRequiresBatteryNotLow ()Z
-	public final fun getRequiresCharging ()Z
-	public final fun getRequiresDeviceIdle ()Z
-	public final fun getRequiresStorageNotLow ()Z
-	public fun hashCode ()I
+    public static final field Companion Lio/github/mobilebytelabs/worker/Constraints$Companion;
+    public synthetic fun <init> (Lio/github/mobilebytelabs/worker/NetworkType;ZZZZLjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getContentUriTriggers ()Ljava/util/List;
+    public final fun getRequiredNetworkType ()Lio/github/mobilebytelabs/worker/NetworkType;
+    public final fun getRequiresBatteryNotLow ()Z
+    public final fun getRequiresCharging ()Z
+    public final fun getRequiresDeviceIdle ()Z
+    public final fun getRequiresStorageNotLow ()Z
+    public fun hashCode ()I
 }
 
 public final class io/github/mobilebytelabs/worker/Constraints$Builder {
-	public fun <init> ()V
-	public final fun addContentUriTrigger (Ljava/lang/String;Z)Lio/github/mobilebytelabs/worker/Constraints$Builder;
-	public final fun build ()Lio/github/mobilebytelabs/worker/Constraints;
-	public final fun setRequiredNetworkType (Lio/github/mobilebytelabs/worker/NetworkType;)Lio/github/mobilebytelabs/worker/Constraints$Builder;
+    public fun <init> ()V
+    public final fun addContentUriTrigger (Ljava/lang/String;Z)Lio/github/mobilebytelabs/worker/Constraints$Builder;
+    public final fun build ()Lio/github/mobilebytelabs/worker/Constraints;
+    public final fun setRequiredNetworkType (Lio/github/mobilebytelabs/worker/NetworkType;)Lio/github/mobilebytelabs/worker/Constraints$Builder;
 ```
 
 ### cmp-worker-kmp.klib.api

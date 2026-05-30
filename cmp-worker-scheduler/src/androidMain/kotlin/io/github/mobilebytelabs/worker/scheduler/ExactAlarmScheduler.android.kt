@@ -28,18 +28,15 @@ import org.koin.mp.KoinPlatform
  * - Battery: prefer this for user-visible scheduled actions (e.g., reminders); for
  *   sync-only work, flex-window via scheduleDataSyncAt is more battery-respectful.
  */
-actual class ExactAlarmScheduler actual constructor(
-    private val fallback: WorkScheduler,
-) {
-    actual fun scheduleExact(
-        instant: Instant,
-        mode: WorkMode,
-        payload: WorkData,
-    ): WorkHandle {
+actual class ExactAlarmScheduler actual constructor(private val fallback: WorkScheduler) {
+    actual fun scheduleExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle {
         val context: Context = KoinPlatform.getKoin().get()
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            Log.w("ExactAlarmScheduler", "SCHEDULE_EXACT_ALARM permission not granted; falling back to flex-window scheduleDataSyncAt")
+            Log.w(
+                "ExactAlarmScheduler",
+                "SCHEDULE_EXACT_ALARM permission not granted; falling back to flex-window scheduleDataSyncAt",
+            )
             fallback.scheduleDataSyncAt(instant, mode, payload)
         } else {
             val pendingIntent = buildPendingIntent(context, instant)

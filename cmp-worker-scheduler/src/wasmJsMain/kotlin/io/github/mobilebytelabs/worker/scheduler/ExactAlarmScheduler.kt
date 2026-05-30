@@ -16,9 +16,7 @@ import kotlin.time.Instant
  * — deferred from v1 due to bundler-config (sw.js registration) coupling.
  */
 @OptIn(ExperimentalTime::class)
-actual class ExactAlarmScheduler actual constructor(
-    private val fallback: WorkScheduler,
-) {
+actual class ExactAlarmScheduler actual constructor(private val fallback: WorkScheduler) {
     actual fun scheduleExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle {
         val delayMs = (instant.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds())
             .coerceAtLeast(0)

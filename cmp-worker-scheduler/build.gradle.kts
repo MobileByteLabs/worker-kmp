@@ -16,8 +16,14 @@ version = providers.gradleProperty("worker.version").get()
 kotlin {
     android {
         namespace = "io.github.mobilebytelabs.worker.scheduler"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.android.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
         withHostTestBuilder {}.configure {}
         compilerOptions { jvmTarget = JvmTarget.JVM_11 }
     }

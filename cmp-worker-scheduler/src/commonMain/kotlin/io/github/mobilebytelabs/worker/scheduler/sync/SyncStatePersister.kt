@@ -10,9 +10,7 @@ import kotlinx.serialization.json.Json
  *
  * D9: serializes ChangeListVersions as kotlinx.serialization JSON.
  */
-class SyncStatePersister(
-    private val json: Json = Json { ignoreUnknownKeys = true },
-) {
+class SyncStatePersister(private val json: Json = Json { ignoreUnknownKeys = true }) {
     private val state = MutableStateFlow(ChangeListVersions())
 
     suspend fun read(): ChangeListVersions = state.value

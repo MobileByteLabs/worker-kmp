@@ -42,8 +42,8 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-koin.api
 ```
 public final class io/github/mobilebytelabs/worker/koin/WorkKoinModuleKt {
-	public static final fun workKoinModule (Lio/github/mobilebytelabs/worker/config/WorkerConfig;Lio/github/mobilebytelabs/worker/registry/WorkerRegistry;Lio/github/mobilebytelabs/worker/WorkManagerFactory;)Lorg/koin/core/module/Module;
-	public static synthetic fun workKoinModule$default (Lio/github/mobilebytelabs/worker/config/WorkerConfig;Lio/github/mobilebytelabs/worker/registry/WorkerRegistry;Lio/github/mobilebytelabs/worker/WorkManagerFactory;ILjava/lang/Object;)Lorg/koin/core/module/Module;
+    public static final fun workKoinModule (Lio/github/mobilebytelabs/worker/config/WorkerConfig;Lio/github/mobilebytelabs/worker/registry/WorkerRegistry;Lio/github/mobilebytelabs/worker/WorkManagerFactory;)Lorg/koin/core/module/Module;
+    public static synthetic fun workKoinModule$default (Lio/github/mobilebytelabs/worker/config/WorkerConfig;Lio/github/mobilebytelabs/worker/registry/WorkerRegistry;Lio/github/mobilebytelabs/worker/WorkManagerFactory;ILjava/lang/Object;)Lorg/koin/core/module/Module;
 }
 ```
 

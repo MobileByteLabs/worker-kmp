@@ -18,7 +18,8 @@ abstract class AbstractDataSyncWorker(
     ctx: WorkerContext,
     private val syncables: List<Syncable>,
     private val persister: SyncStatePersister,
-) : CoroutineWorker(ctx), Synchronizer {
+) : CoroutineWorker(ctx),
+    Synchronizer {
 
     private var workingVersions: ChangeListVersions = ChangeListVersions()
 
@@ -38,7 +39,9 @@ abstract class AbstractDataSyncWorker(
             if (results.all { it }) {
                 persister.write(workingVersions)
                 WorkResult.success()
-            } else WorkResult.retry()
+            } else {
+                WorkResult.retry()
+            }
         } catch (t: Throwable) {
             WorkResult.failure(t.message ?: t::class.simpleName ?: "sync failed")
         }

@@ -42,53 +42,53 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-desktop-daemon.api
 ```
 public final class io/github/mobilebytelabs/worker/daemon/DesktopBackgroundDaemonKt {
-	public static final fun main ([Ljava/lang/String;)V
+    public static final fun main ([Ljava/lang/String;)V
 }
 
 public abstract interface class io/github/mobilebytelabs/worker/daemon/DesktopBackgroundInstaller {
-	public abstract fun install (Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;)Lio/github/mobilebytelabs/worker/daemon/InstallResult;
-	public abstract fun isInstalled (Ljava/lang/String;)Z
-	public abstract fun probe ()Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;
-	public abstract fun uninstall (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/InstallResult;
+    public abstract fun install (Lio/github/mobilebytelabs/worker/config/DesktopBackgroundConfig;)Lio/github/mobilebytelabs/worker/daemon/InstallResult;
+    public abstract fun isInstalled (Ljava/lang/String;)Z
+    public abstract fun probe ()Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;
+    public abstract fun uninstall (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/InstallResult;
 }
 
 public final class io/github/mobilebytelabs/worker/daemon/DesktopBackgroundInstallerKt {
-	public static final fun createDesktopBackgroundInstaller ()Lio/github/mobilebytelabs/worker/daemon/DesktopBackgroundInstaller;
+    public static final fun createDesktopBackgroundInstaller ()Lio/github/mobilebytelabs/worker/daemon/DesktopBackgroundInstaller;
 }
 
 public final class io/github/mobilebytelabs/worker/daemon/DesktopOsCapability {
-	public fun <init> (Lio/github/mobilebytelabs/worker/daemon/OsFamily;ZZZZLjava/lang/String;)V
-	public final fun component1 ()Lio/github/mobilebytelabs/worker/daemon/OsFamily;
-	public final fun component2 ()Z
-	public final fun component3 ()Z
-	public final fun component4 ()Z
-	public final fun component5 ()Z
-	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Lio/github/mobilebytelabs/worker/daemon/OsFamily;ZZZZLjava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;Lio/github/mobilebytelabs/worker/daemon/OsFamily;ZZZZLjava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getHasCron ()Z
-	public final fun getHasLaunchctl ()Z
-	public final fun getHasSchtasks ()Z
-	public final fun getHasSystemctlUser ()Z
-	public final fun getNotes ()Ljava/lang/String;
-	public final fun getOsFamily ()Lio/github/mobilebytelabs/worker/daemon/OsFamily;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+    public fun <init> (Lio/github/mobilebytelabs/worker/daemon/OsFamily;ZZZZLjava/lang/String;)V
+    public final fun component1 ()Lio/github/mobilebytelabs/worker/daemon/OsFamily;
+    public final fun component2 ()Z
+    public final fun component3 ()Z
+    public final fun component4 ()Z
+    public final fun component5 ()Z
+    public final fun component6 ()Ljava/lang/String;
+    public final fun copy (Lio/github/mobilebytelabs/worker/daemon/OsFamily;ZZZZLjava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;Lio/github/mobilebytelabs/worker/daemon/OsFamily;ZZZZLjava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/daemon/DesktopOsCapability;
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getHasCron ()Z
+    public final fun getHasLaunchctl ()Z
+    public final fun getHasSchtasks ()Z
+    public final fun getHasSystemctlUser ()Z
+    public final fun getNotes ()Ljava/lang/String;
+    public final fun getOsFamily ()Lio/github/mobilebytelabs/worker/daemon/OsFamily;
+    public fun hashCode ()I
+    public fun toString ()Ljava/lang/String;
 }
 
 public abstract class io/github/mobilebytelabs/worker/daemon/InstallResult {
 }
 
 public final class io/github/mobilebytelabs/worker/daemon/InstallResult$Failure : io/github/mobilebytelabs/worker/daemon/InstallResult {
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/InstallResult$Failure;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/daemon/InstallResult$Failure;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/daemon/InstallResult$Failure;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getReason ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+    public fun <init> (Ljava/lang/String;)V
+    public final fun component1 ()Ljava/lang/String;
+    public final fun copy (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/InstallResult$Failure;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/daemon/InstallResult$Failure;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/daemon/InstallResult$Failure;
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getReason ()Ljava/lang/String;
+    public fun hashCode ()I
+    public fun toString ()Ljava/lang/String;
 }
 ```
 

@@ -17,9 +17,7 @@ import kotlin.time.Instant
  * launchctl / systemd) once that module's daemon API gains execute-capability.
  */
 @OptIn(ExperimentalTime::class)
-actual class ExactAlarmScheduler actual constructor(
-    private val fallback: WorkScheduler,
-) {
+actual class ExactAlarmScheduler actual constructor(private val fallback: WorkScheduler) {
     private val executor: ScheduledExecutorService =
         Executors.newSingleThreadScheduledExecutor { r ->
             Thread(r, "worker-kmp-desktop-exact-alarm").also { it.isDaemon = true }

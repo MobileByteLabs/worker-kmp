@@ -42,55 +42,55 @@ Legend: ✅ real impl, 🟡 UnsupportedPlatform stub, ⛔ not declared, — N/A.
 ### cmp-worker-desktop.api
 ```
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManager : io/github/mobilebytelabs/worker/WorkManager {
-	public static final field $stable I
-	public fun <init> (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;)V
-	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
-	public final fun shutdown ()V
+    public static final field $stable I
+    public fun <init> (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;)V
+    public synthetic fun <init> (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;Lio/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    public fun cancelAllWorkByTag (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+    public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+    public final fun shutdown ()V
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig {
-	public static final field $stable I
-	public static final field Companion Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig$Companion;
-	public fun <init> ()V
-	public fun <init> (IZLjava/io/File;J)V
-	public synthetic fun <init> (IZLjava/io/File;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()Z
-	public final fun component3 ()Ljava/io/File;
-	public final fun component4 ()J
-	public final fun copy (IZLjava/io/File;J)Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;IZLjava/io/File;JILjava/lang/Object;)Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getConstraintCheckIntervalMs ()J
-	public final fun getMaxConcurrentWorkers ()I
-	public final fun getPersistenceEnabled ()Z
-	public final fun getPersistencePath ()Ljava/io/File;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
+    public static final field $stable I
+    public static final field Companion Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig$Companion;
+    public fun <init> ()V
+    public fun <init> (IZLjava/io/File;J)V
+    public synthetic fun <init> (IZLjava/io/File;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    public final fun component1 ()I
+    public final fun component2 ()Z
+    public final fun component3 ()Ljava/io/File;
+    public final fun component4 ()J
+    public final fun copy (IZLjava/io/File;J)Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
+    public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;IZLjava/io/File;JILjava/lang/Object;)Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
+    public fun equals (Ljava/lang/Object;)Z
+    public final fun getConstraintCheckIntervalMs ()J
+    public final fun getMaxConcurrentWorkers ()I
+    public final fun getPersistenceEnabled ()Z
+    public final fun getPersistencePath ()Ljava/io/File;
+    public fun hashCode ()I
+    public fun toString ()Ljava/lang/String;
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig$Companion {
-	public final fun getDEFAULT ()Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
-	public final fun getIN_MEMORY ()Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
+    public final fun getDEFAULT ()Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
+    public final fun getIN_MEMORY ()Lio/github/mobilebytelabs/worker/desktop/DesktopWorkManagerConfig;
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManagerInitKt {
-	public static final fun desktopWorkManagerFactory ()Lio/github/mobilebytelabs/worker/WorkManagerFactory;
+    public static final fun desktopWorkManagerFactory ()Lio/github/mobilebytelabs/worker/WorkManagerFactory;
 }
 
 public abstract interface class io/github/mobilebytelabs/worker/desktop/DesktopWorkerFactory {
-	public abstract fun create (Ljava/lang/String;Lio/github/mobilebytelabs/worker/WorkerContext;)Lio/github/mobilebytelabs/worker/CoroutineWorker;
+    public abstract fun create (Ljava/lang/String;Lio/github/mobilebytelabs/worker/WorkerContext;)Lio/github/mobilebytelabs/worker/CoroutineWorker;
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/LaunchDesktopWorkerAppKt {
-	public static final fun launchDesktopWorkerApp (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
-	public static final fun startWorkerKoinIfAbsent (Lkotlin/jvm/functions/Function0;)V
+    public static final fun launchDesktopWorkerApp (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
+    public static final fun startWorkerKoinIfAbsent (Lkotlin/jvm/functions/Function0;)V
 ```
 
 ### cmp-worker-desktop.klib.api
