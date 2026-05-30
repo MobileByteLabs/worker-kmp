@@ -146,6 +146,11 @@ The convention plugin uses `pluginManager.apply("io.github.mobilebytelabs.worker
 
 See [`samples/cmp-worker-sample-compose-store/build.gradle.kts`](https://github.com/MobileByteLabs/worker-kmp/blob/development/samples/cmp-worker-sample-compose-store/build.gradle.kts) — applies the worker-app plugin inline with no convention wrapper (the simpler shape for a single sample). The 6 lines of worker-kmp wiring are exactly what the convention plugin above encapsulates.
 
+- [`samples/kmp-project-template/build-logic/convention/src/main/kotlin/WorkerComposeConventionPlugin.kt`](https://github.com/MobileByteLabs/worker-kmp/blob/development/samples/kmp-project-template/build-logic/convention/src/main/kotlin/WorkerComposeConventionPlugin.kt)
+  — the convention plugin applied to a real consumer's `sync/` module inside a verbatim
+  `openMF/kmp-project-template` clone. The most realistic example in this repo: shows the
+  `org.convention.*` namespace pattern used by template-style monorepos.
+
 ## See also
 
 - [Quick Start](quick-start.md) — simpler one-file setup for single-module projects

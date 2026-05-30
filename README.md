@@ -143,6 +143,13 @@ fun WorkDashboard() {
 
 All published under `io.github.mobilebytelabs` on Maven Central.
 
+## Samples
+
+| Sample | Description |
+|---|---|
+| [`samples/cmp-worker-sample-compose-store/`](samples/cmp-worker-sample-compose-store/) | Reference Compose Multiplatform app showing all worker-kmp patterns in a single-module setup. |
+| [`samples/kmp-project-template/`](samples/kmp-project-template/) | Production-shape integration of worker-kmp into [openMF/kmp-project-template](https://github.com/openMF/kmp-project-template) — clones the template, adds a `sync/` module mirroring Now in Android's architecture using `worker-compose-all` + Koin. PR-ready for upstream. See [`samples/kmp-project-template/sync/README.md`](samples/kmp-project-template/sync/README.md). |
+
 ## Documentation
 
 Full docs live in [`docs/`](docs/Home.md) and mirror the [GitHub Wiki](https://github.com/MobileByteLabs/worker-kmp/wiki):

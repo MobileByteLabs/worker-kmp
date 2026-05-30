@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `samples/kmp-project-template/` — production-shape integration of worker-kmp into a
+  verbatim clone of [openMF/kmp-project-template](https://github.com/openMF/kmp-project-template).
+  New `sync/` module mirroring Now in Android's architecture using `worker-compose-all` + Koin.
+  `WorkerComposeConventionPlugin` added to the clone's `build-logic/`. PR-ready for upstream —
+  see [`samples/kmp-project-template/PR_README.md`](samples/kmp-project-template/PR_README.md).
+
 ## [3.0.0] - 2026-05-29
 
 ### ⚠ Breaking Changes
