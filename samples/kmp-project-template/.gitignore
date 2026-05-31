@@ -1,0 +1,116 @@
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.idea
+/*.iml
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin/
+gen/
+out/
+build/
+build-cache/
+.externalNativeBuild
+.cxx
+iosApp/Podfile.lock
+iosApp/Pods/*
+iosApp/iosApp.xcworkspace/*
+iosApp/iosApp.xcodeproj/*
+!iosApp/iosApp.xcodeproj/project.pbxproj
+cmp-shared/mifospay-shared.podspec
+cmp-ios/Pods/*
+cmp-ios/Podfile.lock
+
+# Eclipse project files
+.classpath
+.project
+
+# Windows thumbnail db
+.DS_Store
+
+# IDEA/Android Studio project files, because
+# the project can be imported from settings.gradle.kts
+*.iml
+.idea/*
+!.idea/copyright
+# Keep the code styles.
+!/.idea/codeStyles
+/.idea/codeStyles/*
+!/.idea/codeStyles/Project.xml
+!/.idea/codeStyles/codeStyleConfig.xml
+
+# Kotlin
+.kotlin
+
+# Android Studio captures folder
+captures/
+
+/app/app-release.apk
+app/app.iml
+app/manifest-merger-release-report.txt
+
+# Exclude Google services from prod flavour
+cmp-android/src/prod/google-services.json
+
+# Keystores - NEVER COMMIT THESE!
+keystores/*.keystore
+keystores/*.jks
+*.keystore
+*.jks
+
+version.txt
+fastlane/report.xml
+secrets/firebaseAppDistributionServiceCredentialsFile.json
+secrets/playStorePublishServiceCredentialsFile.json
+
+# Secrets and Configuration - NEVER COMMIT THESE!
+secrets.env
+secrets/
+!secrets/.gitkeep
+!secrets/*.template
+.env.local
+!.env.local.example
+PROJECT_SETUP_INFO.txt
+
+# iOS Secrets - NEVER COMMIT THESE!
+secrets/shared_keys.env
+secrets/.match_password
+secrets/AuthKey*.p8
+secrets/APNAuthKey.p8
+secrets/match_ci_key
+secrets/match_ci_key.pub
+fastlane/metadata/
+fastlane/fastlane/metadata/
+fastlane/screenshots/
+# Ruby stuff we don't care about
+.bundle/
+vendor/
+
+# Sync Log File
+*.log
+/build-logic/convention/secrets-backup/
+
+# Backup files created by scripts
+*.bak
+.claude
+
+# Room schemas are committed — required at build time for @AutoMigration
+# (KSP needs the previous version's schema JSON to generate migration code).
+
+# Security — NEVER commit encryption keys or secure storage
+*.key
+*.pem
+.mifos-secure/
+*.hprof
