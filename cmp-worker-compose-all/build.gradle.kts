@@ -7,11 +7,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  * Single dep for CMP consumer apps. Re-exports via `api(project(...))`:
  *  - cmp-worker-kmp          (core API)
  *  - cmp-worker-compose      (Compose UI helpers — WorkInfoCard, etc.)
- *  - cmp-worker-koin              (Koin DI integration)
- *  - cmp-worker-scheduler         (high-level WorkScheduler + Syncable contracts)
- *  - cmp-worker-scheduler-store5  (Store5 adapter — StoreSyncable + MutableStoreSyncable)
- *  - cmp-worker-store5            (StoreBackedWorker)
- *  - cmp-worker-android           (androidMain — Android factory + launchers)
+ *  - cmp-worker-koin         (Koin DI integration)
+ *  - cmp-worker-scheduler    (high-level WorkScheduler + Syncable contracts)
+ *  - cmp-worker-store5       (StoreBackedWorker + StoreSyncable / MutableStoreSyncable
+ *                             adapters bridging Store5 ↔ scheduler Syncable contract)
+ *  - cmp-worker-android      (androidMain — Android factory + launchers)
  *  - cmp-worker-desktop      (jvmMain/desktopMain — Desktop factory + launcher)
  *  - cmp-worker-ios          (iosMain — iOS factory + launcher)
  *  - cmp-worker-web          (jsMain + wasmJsMain — Web factory + launcher)
@@ -78,7 +78,6 @@ kotlin {
                 api(project(":cmp-worker-compose"))
                 api(project(":cmp-worker-koin"))
                 api(project(":cmp-worker-scheduler"))
-                api(project(":cmp-worker-scheduler-store5"))
                 api(project(":cmp-worker-store5"))
             }
         }

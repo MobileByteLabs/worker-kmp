@@ -21,13 +21,13 @@ The library bundles `cmp-worker-kmp.WorkManager` via `api()`, so consumers get b
 
 ## 2. Add the dependency
 
-If you already use `cmp-worker-compose-all`, you're done — scheduler + Store5 adapter are re-exported via `api()`. Otherwise:
+If you already use `cmp-worker-compose-all`, you're done — scheduler + Store5 (with adapters) are re-exported via `api()`. Otherwise:
 
 ```kotlin
 // build.gradle.kts (commonMain)
 implementation("io.github.mobilebytelabs:worker-scheduler:3.1.1")
-// Optional, only if you sync from Store5 instances:
-implementation("io.github.mobilebytelabs:worker-scheduler-store5:3.1.1")
+// Optional, only if you sync from Store5 instances — bundles the adapters:
+implementation("io.github.mobilebytelabs:worker-store5:3.1.1")
 ```
 
 ## 3. Five-minute setup
@@ -67,19 +67,32 @@ The reified `<AppSyncWorker>` is how the scheduler knows which class WorkManager
 
 ## 4. The 7 WorkScheduler methods
 
-All 5 schedule methods are reified — the worker class is supplied at the call site, so one `WorkScheduler` instance serves any number of distinct worker classes.
+All 5 schedule methods are reified — the worker class is supplied at the call site, so one `WorkScheduler` instance serves any number of distinct worker classes. Each also accepts an optional `configure` lambda that runs on the underlying `OneTimeWorkRequestBuilder<W>` or `PeriodicWorkRequestBuilder<W>` AFTER the library's defaults (so any consumer override wins).
 
-| Method | Use case | Backed by |
+| Method (reified signature) | Use case | Backed by |
 |---|---|---|
-| `enqueueDataSync<W>(mode, payload)` | One-shot, immediate (or expedited if Foreground) | OneTimeWorkRequest |
-| `scheduleDailyDataSync<W>(timeOfDay, tz, payload)` | Sync once a day at HH:MM | PeriodicWorkRequest 24h + setInitialDelay(nextOccurrence) + KEEP |
-| `schedulePeriodicDataSync<W>(interval, initialDelay, payload)` | Sync every N (≥15min) | PeriodicWorkRequest + KEEP |
-| `scheduleDataSyncAt<W>(instant, mode, payload)` | One-shot at specific instant (flex window ~5min) | OneTimeWorkRequest + setInitialDelay |
-| `scheduleDataSyncAtExact<W>(instant, mode, payload)` | One-shot at exact instant (battery-impacting) | AlarmManager.setExactAndAllowWhileIdle on Android; BGProcessingTaskRequest on iOS |
+| `enqueueDataSync<W>(mode, payload) { configure }` | One-shot, immediate (or expedited if Foreground) | OneTimeWorkRequest |
+| `scheduleDailyDataSync<W>(timeOfDay, tz, payload) { configure }` | Sync once a day at HH:MM | PeriodicWorkRequest 24h + setInitialDelay(nextOccurrence) + KEEP |
+| `schedulePeriodicDataSync<W>(interval, initialDelay, payload) { configure }` | Sync every N (≥15min) | PeriodicWorkRequest + KEEP |
+| `scheduleDataSyncAt<W>(instant, mode, payload) { configure }` | One-shot at specific instant (flex window ~5min) | OneTimeWorkRequest + setInitialDelay |
+| `scheduleDataSyncAtExact<W>(instant, mode, payload) { configure }` | One-shot at exact instant (battery-impacting) | AlarmManager.setExactAndAllowWhileIdle on Android; BGProcessingTaskRequest on iOS |
 | `observeWork(name)` | `Flow<WorkStatus>` for live progress | WorkManager.getWorkInfosByTag flow |
 | `cancelWork(name)` | Cancel all work tagged with `name` | WorkManager.cancelAllWorkByTag |
 
 `W` is constrained to `W : AbstractDataSyncWorker`. For non-sync workers, use raw `WorkManager.enqueue(oneTimeWorkRequest<W> { ... })` directly (see §8).
+
+### Per-call configuration via the builder lambda
+
+```kotlin
+// Tighter network constraint + exponential backoff + custom tag for one scheduled call
+scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0)) {
+    setConstraints(Constraints { setRequiredNetworkType(NetworkType.UNMETERED) })
+    setBackoffCriteria(BackoffPolicy.EXPONENTIAL, RetryConfig.DEFAULT)
+    addTag("morning-refresh")
+}
+```
+
+The library applies `SyncConstraints` + standard tag + payload + foreground-expedited mapping FIRST, then runs the lambda — so anything the consumer sets in the lambda overrides the default.
 
 ### Multi-worker example
 
@@ -89,6 +102,23 @@ scheduler.scheduleDailyDataSync<UserSyncWorker>(timeOfDay = LocalTime(7, 0))    
 scheduler.scheduleDailyDataSync<AnalyticsRollupWorker>(timeOfDay = LocalTime(23, 0)) // nightly rollup
 scheduler.schedulePeriodicDataSync<MetricsExportWorker>(interval = 1.hours)      // hourly metrics
 scheduler.enqueueDataSync<UserSyncWorker>(payload = workDataOf("trigger" to "manual"))
+```
+
+### Custom WorkScheduler implementations
+
+`DefaultWorkScheduler` is `open` — subclass to override any single method (project-wide telemetry, swap `SyncConstraints`, change the unique-name scheme, etc.) or implement `WorkScheduler` from scratch for fully custom behavior.
+
+```kotlin
+class TracedWorkScheduler(workManager: WorkManager, persister: SyncStatePersister) :
+    DefaultWorkScheduler(workManager, persister) {
+    override fun <W : AbstractDataSyncWorker> enqueueDataSync(
+        workerClass: KClass<W>, mode: WorkMode, payload: WorkData,
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit,
+    ): WorkHandle {
+        tracer.event("enqueueDataSync:${workerClass.simpleName}")
+        return super.enqueueDataSync(workerClass, mode, payload, configure)
+    }
+}
 ```
 
 ## 5. Per-platform exact-time notes
@@ -168,13 +198,13 @@ class AppSyncWorker(
 ) : AbstractDataSyncWorker(ctx, syncables = listOf(currencySyncable), persister = persister)
 ```
 
-### 6.3 Store5 pattern via `StoreSyncable` (requires `cmp-worker-scheduler-store5`)
+### 6.3 Store5 pattern via `StoreSyncable` (in `cmp-worker-store5`)
 
-Adapter module `cmp-worker-scheduler-store5` provides `Syncable` wrappers for Mobile Native Foundation Store5 instances:
+`cmp-worker-store5` provides `Syncable` wrappers for Mobile Native Foundation Store5 instances. The module already exists (it ships `StoreBackedWorker`); the new adapters live alongside under the `.scheduler` sub-package and add an `api(cmp-worker-scheduler)` dep so the `Syncable` contract is on consumers' classpath.
 
 ```kotlin
-import io.github.mobilebytelabs.worker.scheduler.store5.StoreSyncable
-import io.github.mobilebytelabs.worker.scheduler.store5.MutableStoreSyncable
+import io.github.mobilebytelabs.worker.store5.scheduler.StoreSyncable
+import io.github.mobilebytelabs.worker.store5.scheduler.MutableStoreSyncable
 import org.mobilenativefoundation.store.store5.Store
 import org.mobilenativefoundation.store.store5.MutableStore
 
@@ -252,7 +282,7 @@ class AppSyncWorker(
 | Module | Coords | Purpose |
 |---|---|---|
 | `cmp-worker-scheduler` | `io.github.mobilebytelabs:worker-scheduler` | `WorkScheduler` + `AbstractDataSyncWorker` + `Synchronizer` + `Syncable` + `FetcherSyncable` + `CompositeSyncable` |
-| `cmp-worker-scheduler-store5` | `io.github.mobilebytelabs:worker-scheduler-store5` | `StoreSyncable` + `MutableStoreSyncable` + `Synchronizer.storeSync` + `Synchronizer.mutableStoreSync` |
+| `cmp-worker-store5` | `io.github.mobilebytelabs:worker-store5` | `StoreBackedWorker` + `StoreSyncable` + `MutableStoreSyncable` + `Synchronizer.storeSync` + `Synchronizer.mutableStoreSync`. Depends on `cmp-worker-scheduler` via `api(...)`. |
 | `cmp-worker-compose-all` | `io.github.mobilebytelabs:worker-compose-all` | Umbrella re-exporting both above + cmp-worker-kmp + cmp-worker-koin + per-platform engines |
 
 Standalone usage: the `io.github.mobilebytelabs.worker.scheduler.sync.*` types (`Synchronizer`, `Syncable`, `changeListSync`, `snapshotSync`) have no WorkManager dependency at the contract level — you can use them as a NiA-shaped pattern in any KMP project without engaging the scheduler.

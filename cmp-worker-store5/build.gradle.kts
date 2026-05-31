@@ -36,6 +36,10 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":cmp-worker-kmp"))
+                // Scheduler is api-scoped because StoreSyncable / MutableStoreSyncable
+                // adapters extend Syncable from cmp-worker-scheduler; consumers using
+                // these adapters need that contract on their classpath.
+                api(project(":cmp-worker-scheduler"))
                 api(libs.store5)
                 // koin-core is api-scoped because `workStore5KoinModule` returns a koin `Module`
                 // type in its public API surface — consumers need it on their classpath at use site.

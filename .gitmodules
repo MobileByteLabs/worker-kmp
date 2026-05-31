@@ -1,0 +1,4 @@
+[submodule "samples/kmp-project-template"]
+	path = samples/kmp-project-template
+	url = https://github.com/openMF/kmp-project-template.git
+	branch = feat/worker-kmp-sync-module

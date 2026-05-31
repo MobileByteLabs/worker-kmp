@@ -34,22 +34,33 @@ import kotlin.uuid.ExperimentalUuidApi
 /**
  * Default [WorkScheduler] backed by the library's [WorkManager].
  *
- * ## Strategy
+ * ## Defaults + customization
  *
- * - Every scheduled work gets an `addTag(uniqueName)` so the WorkManager API's tag-based
- *   methods ([WorkManager.getWorkInfosByTag], [WorkManager.cancelAllWorkByTag]) serve as
- *   the unique-name lookup channel for [observeWork] / [cancelWork].
- * - Suspend bridging: WorkManager's enqueue methods are suspend; the [WorkScheduler] interface
- *   exposes non-suspend `fun schedule…(): WorkHandle` for ergonomic call sites. The impl
- *   holds a [CoroutineScope] and `launch`-es the suspend enqueue. [WorkHandle] is returned
- *   immediately with the request's pre-allocated Uuid.
- * - Worker-class threading: each schedule method receives a [KClass]`<W : AbstractDataSyncWorker>`
- *   parameter; the impl reads `simpleName` and passes it to [OneTimeWorkRequestBuilder] /
- *   [PeriodicWorkRequestBuilder]. WorkManager looks up the matching factory in
- *   [io.github.mobilebytelabs.worker.registry.WorkerRegistry] at execution time.
+ * Each schedule method applies library defaults first ([SyncConstraints], standard tags,
+ * payload, expedited-on-Foreground), then invokes the consumer's `configure` lambda on the
+ * underlying [OneTimeWorkRequestBuilder] / [PeriodicWorkRequestBuilder] — so anything the
+ * consumer sets in the lambda overrides the default.
+ *
+ * ## Subclassing
+ *
+ * The class is `open`. Override a single method to add project-wide telemetry, swap
+ * `SyncConstraints`, change the unique-name scheme, etc.:
+ *
+ * ```kotlin
+ * class TracedWorkScheduler(workManager: WorkManager, persister: SyncStatePersister) :
+ *     DefaultWorkScheduler(workManager, persister) {
+ *     override fun <W : AbstractDataSyncWorker> enqueueDataSync(
+ *         workerClass: KClass<W>, mode: WorkMode, payload: WorkData,
+ *         configure: OneTimeWorkRequestBuilder<W>.() -> Unit,
+ *     ): WorkHandle {
+ *         tracer.event("enqueueDataSync:${workerClass.simpleName}")
+ *         return super.enqueueDataSync(workerClass, mode, payload, configure)
+ *     }
+ * }
+ * ```
  */
 @OptIn(ExperimentalUuidApi::class, ExperimentalTime::class)
-class DefaultWorkScheduler(
+open class DefaultWorkScheduler(
     private val workManager: WorkManager,
     @Suppress("UNUSED_PARAMETER") private val persister: SyncStatePersister,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
@@ -59,6 +70,7 @@ class DefaultWorkScheduler(
         workerClass: KClass<W>,
         mode: WorkMode,
         payload: WorkData,
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit,
     ): WorkHandle {
         val name = workerClass.requireSimpleName()
         val request = OneTimeWorkRequestBuilder<W>(name).apply {
@@ -68,6 +80,7 @@ class DefaultWorkScheduler(
             if (mode == WorkMode.Foreground) {
                 setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             }
+            configure()
         }.build()
         scope.launch { workManager.enqueue(request) }
         return WorkHandle(id = request.id, uniqueName = SYNC_WORK_NAME)
@@ -78,6 +91,7 @@ class DefaultWorkScheduler(
         timeOfDay: LocalTime,
         timeZone: TimeZone,
         payload: WorkData,
+        configure: PeriodicWorkRequestBuilder<W>.() -> Unit,
     ): WorkHandle {
         val name = workerClass.requireSimpleName()
         val nowInstant = Clock.System.now()
@@ -88,6 +102,7 @@ class DefaultWorkScheduler(
             setInputData(payload)
             setConstraints(SyncConstraints)
             addTag(DAILY_SYNC_WORK_NAME)
+            configure()
         }.build()
         scope.launch {
             workManager.enqueueUniquePeriodicWork(DAILY_SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
@@ -100,6 +115,7 @@ class DefaultWorkScheduler(
         interval: Duration,
         initialDelay: Duration,
         payload: WorkData,
+        configure: PeriodicWorkRequestBuilder<W>.() -> Unit,
     ): WorkHandle {
         val name = workerClass.requireSimpleName()
         val clampedInterval = maxOf(interval, 15.minutes)
@@ -108,6 +124,7 @@ class DefaultWorkScheduler(
             setInputData(payload)
             setConstraints(SyncConstraints)
             addTag(PERIODIC_SYNC_WORK_NAME)
+            configure()
         }.build()
         scope.launch {
             workManager.enqueueUniquePeriodicWork(PERIODIC_SYNC_WORK_NAME, ExistingPeriodicWorkPolicy.KEEP, request)
@@ -120,6 +137,7 @@ class DefaultWorkScheduler(
         instant: Instant,
         mode: WorkMode,
         payload: WorkData,
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit,
     ): WorkHandle {
         val name = workerClass.requireSimpleName()
         val delay = (instant - Clock.System.now()).coerceAtLeast(Duration.ZERO)
@@ -130,6 +148,7 @@ class DefaultWorkScheduler(
             setConstraints(SyncConstraints)
             addTag(uniqueName)
             if (mode == WorkMode.Foreground) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            configure()
         }.build()
         scope.launch { workManager.enqueue(request) }
         return WorkHandle(id = request.id, uniqueName = uniqueName)
@@ -145,7 +164,8 @@ class DefaultWorkScheduler(
         instant: Instant,
         mode: WorkMode,
         payload: WorkData,
-    ): WorkHandle = scheduleDataSyncAt(workerClass, instant, mode, payload)
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit,
+    ): WorkHandle = scheduleDataSyncAt(workerClass, instant, mode, payload, configure)
 
     override fun observeWork(name: String): Flow<WorkStatus> = workManager.getWorkInfosByTag(name).map { infos ->
         when (infos.firstOrNull()?.state) {

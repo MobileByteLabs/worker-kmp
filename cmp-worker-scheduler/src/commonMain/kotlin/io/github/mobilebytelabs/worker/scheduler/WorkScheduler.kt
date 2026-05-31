@@ -1,5 +1,7 @@
 package io.github.mobilebytelabs.worker.scheduler
 
+import io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder
+import io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder
 import io.github.mobilebytelabs.worker.WorkData
 import io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker
 import io.github.mobilebytelabs.worker.workDataOf
@@ -30,26 +32,45 @@ enum class WorkStatus { Pending, Running, Succeeded, Failed, Cancelled }
  *
  * ## Responsibility split
  *
- * - **Library** = **when** sync work runs (daily 9 AM / every 6 hours / at instant X).
- * - **Consumer** = **what the work does** — your concrete `class AppSyncWorker : AbstractDataSyncWorker(...)`
- *   subclass declares which [io.github.mobilebytelabs.worker.scheduler.sync.Syncable] adopters
- *   fan out in parallel. The library schedules YOUR class by name.
+ * - **Library** = **when** sync work runs (daily 9 AM / every 6 hours / at instant X) +
+ *   sensible defaults for constraints/backoff/tags.
+ * - **Consumer** = **what the work does** (concrete [AbstractDataSyncWorker] subclass)
+ *   + any per-call configuration tweaks via the `configure` lambda.
  *
  * ## Typed worker API
  *
- * Every schedule method takes a [KClass]`<W : AbstractDataSyncWorker>` parameter, mirroring
- * `cmp-worker-kmp`'s `oneTimeWorkRequest<W> { ... }` DSL. The reified inline extension
- * functions in this file let you write the type at the call site:
+ * Every schedule method takes a [KClass]`<W : AbstractDataSyncWorker>` parameter so the
+ * library knows which concrete subclass to enqueue. Reified inline extensions in this file
+ * let consumers write the type at the call site:
  *
  * ```kotlin
  * scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0))
  * scheduler.enqueueDataSync<AppSyncWorker>(payload = workDataOf("currency.base" to "USD"))
  * ```
  *
- * Multi-worker apps (one daily sync + one hourly analytics rollup) just call with different
- * `<W>` — one `WorkScheduler` instance serves all of them. The library reads `W::simpleName`
- * at enqueue time and threads it to `WorkManager` — your consumer registers each worker class
- * with [io.github.mobilebytelabs.worker.registry.WorkerRegistry] exactly once at app start.
+ * ## Builder-block configuration
+ *
+ * Every schedule method also takes a `configure` lambda — a receiver over
+ * [OneTimeWorkRequestBuilder]`<W>` or [PeriodicWorkRequestBuilder]`<W>` so consumers can
+ * override constraints, backoff, tags, expedited policy, etc.:
+ *
+ * ```kotlin
+ * scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0)) {
+ *     setConstraints(Constraints { setRequiredNetworkType(NetworkType.UNMETERED) })
+ *     setBackoffCriteria(BackoffPolicy.EXPONENTIAL, RetryConfig.DEFAULT)
+ *     addTag("morning-refresh")
+ * }
+ * ```
+ *
+ * The library applies its defaults (e.g. [SyncConstraints], standard tags, foreground
+ * expedited mapping) FIRST, then invokes the `configure` lambda — so any consumer override
+ * wins. The lambda runs on the actual builder instance returned by
+ * `oneTimeWorkRequest<W> { ... }` / `periodicWorkRequest<W>(interval) { ... }`.
+ *
+ * ## Custom WorkScheduler implementations
+ *
+ * [DefaultWorkScheduler] is `open` — subclass it to override individual methods (e.g. add
+ * project-wide telemetry) or implement [WorkScheduler] from scratch for fully custom behavior.
  *
  * ## Non-sync workers
  *
@@ -64,19 +85,20 @@ interface WorkScheduler {
         workerClass: KClass<W>,
         mode: WorkMode = WorkMode.Background,
         payload: WorkData = workDataOf(),
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit = {},
     ): WorkHandle
 
     /**
      * Periodic — daily at [timeOfDay] in [timeZone].
      * Backed by PeriodicWorkRequest + setInitialDelay(nextOccurrence - now) + 24h repeat,
      * enqueued via `enqueueUniquePeriodicWork(DAILY_SYNC_WORK_NAME, KEEP, ...)`.
-     * Flex window ~1-15min (WorkManager-managed; battery-friendly).
      */
     fun <W : AbstractDataSyncWorker> scheduleDailyDataSync(
         workerClass: KClass<W>,
         timeOfDay: LocalTime,
         timeZone: TimeZone = TimeZone.currentSystemDefault(),
         payload: WorkData = workDataOf(),
+        configure: PeriodicWorkRequestBuilder<W>.() -> Unit = {},
     ): WorkHandle
 
     /**
@@ -88,6 +110,7 @@ interface WorkScheduler {
         interval: Duration,
         initialDelay: Duration = Duration.ZERO,
         payload: WorkData = workDataOf(),
+        configure: PeriodicWorkRequestBuilder<W>.() -> Unit = {},
     ): WorkHandle
 
     /**
@@ -99,19 +122,21 @@ interface WorkScheduler {
         instant: Instant,
         mode: WorkMode = WorkMode.Background,
         payload: WorkData = workDataOf(),
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit = {},
     ): WorkHandle
 
     /**
      * One-time sync at exact [instant] (opt-in exact tier).
      * Android: AlarmManager.setExactAndAllowWhileIdle (needs SCHEDULE_EXACT_ALARM permission).
      * iOS: BGProcessingTaskRequest with earliestBeginDate.
-     * Common default: falls back to scheduleDataSyncAt (flex-window).
+     * Common default: falls back to [scheduleDataSyncAt] (flex-window).
      */
     fun <W : AbstractDataSyncWorker> scheduleDataSyncAtExact(
         workerClass: KClass<W>,
         instant: Instant,
         mode: WorkMode = WorkMode.Background,
         payload: WorkData = workDataOf(),
+        configure: OneTimeWorkRequestBuilder<W>.() -> Unit = {},
     ): WorkHandle
 
     /** Observe live status of work tagged with [name]. Returns a hot Flow. */
@@ -125,48 +150,52 @@ interface WorkScheduler {
 // Reified inline extensions — the consumer-facing call shape.
 // ──────────────────────────────────────────────────────────────────────────────
 
-/** Reified: `scheduler.enqueueDataSync<AppSyncWorker>(...)`. */
+/** Reified: `scheduler.enqueueDataSync<AppSyncWorker>(...) { addTag("x") }`. */
 @OptIn(ExperimentalTime::class)
 inline fun <reified W : AbstractDataSyncWorker> WorkScheduler.enqueueDataSync(
     mode: WorkMode = WorkMode.Background,
     payload: WorkData = workDataOf(),
-): WorkHandle = enqueueDataSync(W::class, mode, payload)
+    noinline configure: OneTimeWorkRequestBuilder<W>.() -> Unit = {},
+): WorkHandle = enqueueDataSync(W::class, mode, payload, configure)
 
-/** Reified: `scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0))`. */
+/** Reified: `scheduler.scheduleDailyDataSync<AppSyncWorker>(LocalTime(9, 0)) { ... }`. */
 @OptIn(ExperimentalTime::class)
 inline fun <reified W : AbstractDataSyncWorker> WorkScheduler.scheduleDailyDataSync(
     timeOfDay: LocalTime,
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
     payload: WorkData = workDataOf(),
-): WorkHandle = scheduleDailyDataSync(W::class, timeOfDay, timeZone, payload)
+    noinline configure: PeriodicWorkRequestBuilder<W>.() -> Unit = {},
+): WorkHandle = scheduleDailyDataSync(W::class, timeOfDay, timeZone, payload, configure)
 
-/** Reified: `scheduler.schedulePeriodicDataSync<AppSyncWorker>(interval = 6.hours)`. */
+/** Reified: `scheduler.schedulePeriodicDataSync<AppSyncWorker>(6.hours) { ... }`. */
 @OptIn(ExperimentalTime::class)
 inline fun <reified W : AbstractDataSyncWorker> WorkScheduler.schedulePeriodicDataSync(
     interval: Duration,
     initialDelay: Duration = Duration.ZERO,
     payload: WorkData = workDataOf(),
-): WorkHandle = schedulePeriodicDataSync(W::class, interval, initialDelay, payload)
+    noinline configure: PeriodicWorkRequestBuilder<W>.() -> Unit = {},
+): WorkHandle = schedulePeriodicDataSync(W::class, interval, initialDelay, payload, configure)
 
-/** Reified: `scheduler.scheduleDataSyncAt<AppSyncWorker>(instant = meetingStart)`. */
+/** Reified: `scheduler.scheduleDataSyncAt<AppSyncWorker>(meetingStart) { ... }`. */
 @OptIn(ExperimentalTime::class)
 inline fun <reified W : AbstractDataSyncWorker> WorkScheduler.scheduleDataSyncAt(
     instant: Instant,
     mode: WorkMode = WorkMode.Background,
     payload: WorkData = workDataOf(),
-): WorkHandle = scheduleDataSyncAt(W::class, instant, mode, payload)
+    noinline configure: OneTimeWorkRequestBuilder<W>.() -> Unit = {},
+): WorkHandle = scheduleDataSyncAt(W::class, instant, mode, payload, configure)
 
-/** Reified: `scheduler.scheduleDataSyncAtExact<AppSyncWorker>(instant = paymentDueAt)`. */
+/** Reified: `scheduler.scheduleDataSyncAtExact<AppSyncWorker>(paymentDueAt) { ... }`. */
 @OptIn(ExperimentalTime::class)
 inline fun <reified W : AbstractDataSyncWorker> WorkScheduler.scheduleDataSyncAtExact(
     instant: Instant,
     mode: WorkMode = WorkMode.Background,
     payload: WorkData = workDataOf(),
-): WorkHandle = scheduleDataSyncAtExact(W::class, instant, mode, payload)
+    noinline configure: OneTimeWorkRequestBuilder<W>.() -> Unit = {},
+): WorkHandle = scheduleDataSyncAtExact(W::class, instant, mode, payload, configure)
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Standard tag names — passed to addTag() by impls so observe/cancel by name works.
-// Consumers can use these constants OR their own tags when scheduling via raw WorkManager.
 // ──────────────────────────────────────────────────────────────────────────────
 
 const val DAILY_SYNC_WORK_NAME = "data-sync-daily"

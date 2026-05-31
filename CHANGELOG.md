@@ -9,26 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ⚠ Breaking changes (pre-release — no consumers yet)
 
-- **Typed worker API on `WorkScheduler`**: all 5 schedule methods now take a
-  `KClass<W : AbstractDataSyncWorker>` parameter so the library knows which
-  concrete consumer-defined worker class to enqueue. Without this fix the 3.1.0
-  shipped impl built every request as `oneTimeWorkRequest<AbstractDataSyncWorker>`
-  (abstract — runtime lookup against `WorkerRegistry` would fail). Mirror the
-  existing `oneTimeWorkRequest<W> { ... }` DSL.
+1. **Typed worker API on `WorkScheduler`**: all 5 schedule methods now take a
+   `KClass<W : AbstractDataSyncWorker>` parameter so the library knows which
+   concrete consumer-defined worker class to enqueue. The 3.1.0 shipped impl
+   built every request as `oneTimeWorkRequest<AbstractDataSyncWorker>` (abstract
+   — runtime lookup against `WorkerRegistry` would fail). Mirrors the existing
+   `oneTimeWorkRequest<W> { ... }` DSL.
 
-  ```kotlin
-  // Before (3.1.0)
-  scheduler.enqueueDataSync(payload = workDataOf("k" to "v"))
+2. **Builder-lambda configuration**: every schedule method also takes a
+   `configure` lambda — a receiver over `OneTimeWorkRequestBuilder<W>` /
+   `PeriodicWorkRequestBuilder<W>` so consumers can override constraints,
+   backoff, tags, expedited policy, etc. Library applies its defaults FIRST,
+   then runs the lambda — consumer overrides win.
 
-  // After (3.1.1) — pass your concrete worker type at the call site
-  scheduler.enqueueDataSync<AppSyncWorker>(payload = workDataOf("k" to "v"))
-  scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0))
-  scheduler.scheduleDataSyncAtExact<AppSyncWorker>(instant = paymentDueAt)
-  ```
+3. **`DefaultWorkScheduler` is `open`**: subclass it to override individual
+   methods (add project-wide telemetry, swap `SyncConstraints`, change unique
+   names, etc.) or implement `WorkScheduler` from scratch for fully custom behavior.
 
-  Multi-worker apps just call with a different `<W>` — one `WorkScheduler`
-  instance serves daily-sync + hourly-analytics + weekly-cleanup workers
-  simultaneously.
+   ```kotlin
+   // Before (3.1.0)
+   scheduler.enqueueDataSync(payload = workDataOf("k" to "v"))
+
+   // After (3.1.1) — typed worker + optional builder lambda
+   scheduler.enqueueDataSync<AppSyncWorker>(payload = workDataOf("k" to "v"))
+
+   scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0)) {
+       setConstraints(Constraints { setRequiredNetworkType(NetworkType.UNMETERED) })
+       setBackoffCriteria(BackoffPolicy.EXPONENTIAL, RetryConfig.DEFAULT)
+       addTag("morning-refresh")
+   }
+   ```
+
+   Multi-worker apps just call with a different `<W>` — one `WorkScheduler`
+   instance serves daily-sync + hourly-analytics + weekly-cleanup workers
+   simultaneously.
 
 ### Added
 
@@ -48,11 +62,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   parallel fan-out, list them directly in `AbstractDataSyncWorker`'s
   `syncables` parameter instead).
 
-- **NEW MODULE: `cmp-worker-scheduler-store5`** (`io.github.mobilebytelabs:worker-scheduler-store5:3.1.1`) —
-  adapter wiring Mobile Native Foundation Store5 into the scheduler. Two
-  adapter classes + two extension functions:
+- **Store5 adapters added to `cmp-worker-store5`** (`io.github.mobilebytelabs:worker-store5`) —
+  new sub-package `io.github.mobilebytelabs.worker.store5.scheduler.*`:
   - `StoreSyncable<K, V>(name, key, store)` — wraps a Store5 `Store` as a
-    `Syncable`; on sync, calls `store.fresh(key)` to force network reload.
+    `Syncable`; on sync, calls `store.stream(StoreReadRequest.fresh(key)).first {...}`
+    to force network reload + cache write.
   - `MutableStoreSyncable<K, V>(name, key, value, mutableStore)` — wraps a
     Store5 `MutableStore` for write-path sync (push pending mutations).
   - `Synchronizer.storeSync(name, key, store)` — for use inside custom
@@ -60,18 +74,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `Synchronizer.mutableStoreSync(name, key, value, mutableStore)` — same
     for the write path.
 
-  The new module is re-exported via `cmp-worker-compose-all` so umbrella-dep
-  consumers get it automatically. Targets match `cmp-worker-store5`:
-  jvm + iosArm64 + iosSimulatorArm64 + js(IR) + wasmJs.
+  `cmp-worker-store5` now declares `api(cmp-worker-scheduler)` so the
+  `Syncable` contract is on consumers' classpath. Targets unchanged
+  (jvm + iosArm64 + iosSimulatorArm64 + js + wasmJs).
 
-### Module structure clarification
+### Changed
+
+- **`samples/kmp-project-template` is now a git submodule** pointing at
+  [openMF/kmp-project-template](https://github.com/openMF/kmp-project-template)
+  branch `feat/worker-kmp-sync-module` (PR
+  [openMF/kmp-project-template#182](https://github.com/openMF/kmp-project-template/pull/182)).
+  Previously vendored as a 1,540-file frozen snapshot inside worker-kmp; now
+  worker-kmp tracks the upstream consumer repo via submodule pointer.
+  Integration changes flow through PR #182 on openMF side.
+
+  Clone with: `git submodule update --init --recursive`.
+
+  CI on worker-kmp side no longer asserts the integration build — that's
+  openMF's CI responsibility. worker-kmp's own `samples/cmp-worker-sample*`
+  modules continue to demonstrate library APIs in isolation.
+
+### Module structure
 
 - `io.github.mobilebytelabs.worker.scheduler.*` — scheduling APIs (depend on WorkManager).
-- `io.github.mobilebytelabs.worker.scheduler.sync.*` — sync contracts (NiA-shaped,
-  agnostic of WorkManager). Use standalone if you don't want our scheduler.
-- `io.github.mobilebytelabs.worker.scheduler.store5.*` (new module) — Store5 adapters
-  for the contracts. Opt-in: depend on `cmp-worker-scheduler-store5` only if your
-  sync targets include Store5 instances.
+- `io.github.mobilebytelabs.worker.scheduler.sync.*` — sync contracts (NiA-shaped).
+- `io.github.mobilebytelabs.worker.store5.scheduler.*` (in `cmp-worker-store5`) —
+  Store5 adapters bridging Store5 ↔ `Syncable` contract.
+
+### Removed
+
+- **`cmp-worker-scheduler-store5` module** — never published as a separate
+  artifact. Folded into `cmp-worker-store5` because the Store5 adapters
+  naturally live next to `StoreBackedWorker` (which already exists in that
+  module). One less artifact to publish + version-pin.
 
 ### Migration
 
@@ -82,6 +117,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `scheduler.schedulePeriodicDataSync(...)` | `scheduler.schedulePeriodicDataSync<AppSyncWorker>(...)` |
 | `scheduler.scheduleDataSyncAt(...)` | `scheduler.scheduleDataSyncAt<AppSyncWorker>(...)` |
 | `scheduler.scheduleDataSyncAtExact(...)` | `scheduler.scheduleDataSyncAtExact<AppSyncWorker>(...)` |
+| `setConstraints(...)` / `addTag(...)` etc. NOT POSSIBLE | Pass them in the `configure` lambda: `scheduler.scheduleDailyDataSync<AppSyncWorker>(...) { setConstraints(...); addTag(...) }` |
+| `import io.github.mobilebytelabs.worker.scheduler.store5.*` (planned module) | `import io.github.mobilebytelabs.worker.store5.scheduler.*` (folded into `cmp-worker-store5`) |
 
 `observeWork(name)` and `cancelWork(name)` unchanged.
 
