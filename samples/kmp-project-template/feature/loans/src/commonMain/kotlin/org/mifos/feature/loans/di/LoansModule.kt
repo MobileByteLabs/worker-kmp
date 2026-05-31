@@ -36,5 +36,8 @@ val LoansModule = module {
             loanId = params.getOrNull(),
         )
     }
-    single { LoanReminderUseCase(workScheduler = get()) }  // WorkScheduler comes from SyncModule
+    // WorkScheduler comes from SyncModule; WorkManager from cmp-worker-android's androidWorkerModule
+    // (or platform-equivalent). LoanReminderUseCase uses raw WorkManager for the sample's
+    // NotificationWorker (consumer-owned class), and WorkScheduler for sync.
+    single { LoanReminderUseCase(workScheduler = get(), workManager = get()) }
 }

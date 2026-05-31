@@ -11,10 +11,8 @@ import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-/** Foreground = setExpedited + persistent notification; Background = default WorkManager scheduling. */
+/** Foreground = setExpedited; Background = default WorkManager scheduling. */
 enum class WorkMode { Foreground, Background }
-
-data class NotificationContent(val title: String, val body: String, val channelId: String? = null)
 
 @OptIn(ExperimentalUuidApi::class)
 data class WorkHandle(val id: Uuid, val uniqueName: String? = null) {
@@ -24,31 +22,28 @@ data class WorkHandle(val id: Uuid, val uniqueName: String? = null) {
 enum class WorkStatus { Pending, Running, Succeeded, Failed, Cancelled }
 
 /**
- * Koin-injectable façade over worker-kmp's WorkManager. Any commonMain module can
- * inject `WorkScheduler` and schedule work without touching WorkManager directly.
+ * Koin-injectable façade over worker-kmp's WorkManager. Schedules data-sync work
+ * (via [AbstractDataSyncWorker]) at flex-window, exact-time, periodic, or daily cadences.
+ *
+ * Library responsibility = **when work runs**. Consumer responsibility = **what the work
+ * does** — extend [AbstractDataSyncWorker] (sync via Synchronizer/Syncable) for sync,
+ * or use raw [io.github.mobilebytelabs.worker.WorkManager.enqueue] for any other Worker class
+ * (e.g. notification rendering).
  *
  * Usage:
  *   class MyUseCase(private val scheduler: WorkScheduler) {
- *       fun doIt() {
- *           scheduler.scheduleNotification(NotificationContent("Hi", "Hello"))
- *           scheduler.enqueueDataSync(mode = WorkMode.Background)
+ *       fun installDailyRefresh() {
+ *           scheduler.scheduleDailyDataSync(timeOfDay = LocalTime(9, 0))
  *       }
  *   }
  */
 @OptIn(ExperimentalTime::class)
 interface WorkScheduler {
-    /** Existing — one-time, immediate (or expedited if WorkMode.Foreground). */
+    /** One-time, immediate sync (or expedited if WorkMode.Foreground). */
     fun enqueueDataSync(mode: WorkMode = WorkMode.Background, payload: WorkData = workDataOf()): WorkHandle
 
-    /** Existing — one-time notification after [delay]. */
-    fun scheduleNotification(
-        content: NotificationContent,
-        delay: Duration = Duration.ZERO,
-        mode: WorkMode = WorkMode.Background,
-    ): WorkHandle
-
     /**
-     * NEW (D22) — Periodic. Daily at [timeOfDay] in [timeZone].
+     * Periodic — daily at [timeOfDay] in [timeZone].
      * Uses PeriodicWorkRequest + setInitialDelay(nextOccurrence - now) + setRepeatInterval(24h),
      * enqueued via enqueueUniquePeriodicWork(DAILY_SYNC_WORK_NAME, KEEP, ...).
      * Flex window ~1-15min (WorkManager-managed; battery-friendly).
@@ -60,7 +55,7 @@ interface WorkScheduler {
     ): WorkHandle
 
     /**
-     * NEW (D22) — Periodic. Repeats every [interval] starting after [initialDelay].
+     * Periodic — repeats every [interval] starting after [initialDelay].
      * Minimum [interval] is 15min per WorkManager rules; smaller values clamp to 15min.
      */
     fun schedulePeriodicDataSync(
@@ -70,8 +65,8 @@ interface WorkScheduler {
     ): WorkHandle
 
     /**
-     * NEW (D22) — One-time at [instant]. Uses setInitialDelay(instant - now);
-     * subject to WorkManager flex window. Cross-platform.
+     * One-time sync at [instant]. Uses setInitialDelay(instant - now); subject to
+     * WorkManager flex window. Cross-platform.
      */
     fun scheduleDataSyncAt(
         instant: Instant,
@@ -80,7 +75,7 @@ interface WorkScheduler {
     ): WorkHandle
 
     /**
-     * NEW (D22, opt-in exact tier) — One-time at exact [instant].
+     * One-time sync at exact [instant] (opt-in exact tier).
      * Android: AlarmManager.setExactAndAllowWhileIdle (needs SCHEDULE_EXACT_ALARM permission).
      * Common default: falls back to scheduleDataSyncAt (flex-window).
      */
@@ -88,16 +83,6 @@ interface WorkScheduler {
         instant: Instant,
         mode: WorkMode = WorkMode.Background,
         payload: WorkData = workDataOf(),
-    ): WorkHandle
-
-    /**
-     * NEW (D22) — One-time notification at exact [instant].
-     * Same exact-tier rules as scheduleDataSyncAtExact.
-     */
-    fun scheduleNotificationAt(
-        instant: Instant,
-        content: NotificationContent,
-        mode: WorkMode = WorkMode.Background,
     ): WorkHandle
 
     fun observeWork(name: String): Flow<WorkStatus>

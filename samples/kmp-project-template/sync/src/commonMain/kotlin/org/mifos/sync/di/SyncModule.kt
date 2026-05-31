@@ -7,9 +7,9 @@ import io.github.mobilebytelabs.worker.scheduler.WorkScheduler
 import io.github.mobilebytelabs.worker.scheduler.sync.SyncStatePersister
 import org.koin.core.module.Module
 import org.koin.dsl.module
-import org.mifos.sync.DataSyncWorker
-import io.github.mobilebytelabs.worker.scheduler.NotificationWorker
 import io.github.mobilebytelabs.worker.scheduler.sync.SyncManager
+import org.mifos.sync.DataSyncWorker
+import org.mifos.sync.NotificationWorker
 
 val SyncModule: Module = module {
     single { SyncStatePersister() }

@@ -1,17 +1,22 @@
 # Scheduler API (cmp-worker-scheduler)
 
-High-level Koin-injectable `WorkScheduler` façade. Schedule daily syncs, periodic syncs, one-time-at-instant syncs, exact-time syncs, and notifications from any commonMain module without touching `WorkManager` directly.
+High-level Koin-injectable `WorkScheduler` façade. Schedule daily syncs, periodic syncs, one-time-at-instant syncs, and exact-time syncs from any commonMain module without touching `WorkManager` directly.
 
 Available since **3.1.0**. Bundled into `cmp-worker-compose-all`, so any consumer already depending on the umbrella gets the scheduler "for free."
 
-## 1. Why a scheduler façade
+## 1. Library responsibility = scheduling. Consumer responsibility = the work itself.
 
-`cmp-worker-kmp`'s `WorkManager` is the low-level engine — sufficient, but verbose for common patterns (daily-at-9am sync, periodic-every-6h sync, exact-time reminder). `WorkScheduler` provides:
+`cmp-worker-scheduler` schedules **sync** work — when it runs (daily 9am, every 6 hours, at an exact instant). It does **not** render notifications, update UI, or perform any work-specific action; those are the consumer's job inside their own `CoroutineWorker.doWork()`.
 
-- **9 idiomatic methods** covering the 95% of use cases — `enqueueDataSync`, `scheduleNotification`, `scheduleDailyDataSync`, `schedulePeriodicDataSync`, `scheduleDataSyncAt`, `scheduleDataSyncAtExact`, `scheduleNotificationAt`, `observeWork`, `cancelWork`.
-- **Koin-injectable** — declare `single<WorkScheduler> { DefaultWorkScheduler(workManager = get(), persister = get()) }` once; every consumer module just injects `WorkScheduler` in its constructor.
-- **Cross-platform actuals** — Android (AlarmManager exact tier), iOS (BGTaskScheduler + UNUserNotificationCenter), Desktop JVM (ScheduledExecutorService + SystemTray), wasmJs (setTimeout + Notification API).
-- **Synchronizer/Syncable contracts** — NiA-shaped: `changeListSync` (id-list diff) + `snapshotSync` (epoch-bumped full snapshot). Repos extend `Syncable`; `AbstractDataSyncWorker` fans out via `awaitAll`.
+| Concern | Owner | How |
+|---|---|---|
+| When sync runs | **Library** | `WorkScheduler.scheduleDailyDataSync(LocalTime(9, 0))` |
+| Sync implementation | **Consumer** | Extend `AbstractDataSyncWorker` + list `Syncable` repos in constructor |
+| When a notification fires | **Consumer** | Build `oneTimeWorkRequest<MyNotificationWorker>` + `workManager.enqueue(...)` |
+| Notification rendering | **Consumer** | `NotificationCompat.Builder(...)` (Android) / `UNUserNotificationCenter` (iOS) / etc. inside `MyNotificationWorker.doWork()` |
+| Any custom domain worker | **Consumer** | Extend `CoroutineWorker`; schedule via raw `WorkManager.enqueue(oneTimeWorkRequest<YourWorker> { ... })` |
+
+The library bundles `cmp-worker-kmp.WorkManager` via `api()`, so consumers get both the high-level `WorkScheduler` and the low-level `WorkManager` from one dep.
 
 ## 2. Add the dependency
 
@@ -28,9 +33,8 @@ implementation("io.github.mobilebytelabs:worker-scheduler:3.1.0")
 // 1. Mark your repository Syncable
 class CurrencyRepository(private val api: CurrencyApi, private val dao: CurrencyDao) : Syncable {
     override suspend fun syncWith(synchronizer: Synchronizer): Boolean = synchronizer.snapshotSync(
-        versionReader = { it.currency },
-        modelUpdater = { dao.upsertAll(api.fetchCurrencies()) },
-        versionUpdater = { copy(currency = currency + 1) },
+        name = "currency-rates",
+        fetcher = { dao.upsertAll(api.fetchCurrencies()) },
     )
 }
 
@@ -56,44 +60,38 @@ val scheduler: WorkScheduler by KoinPlatform.getKoin().inject()
 scheduler.scheduleDailyDataSync(timeOfDay = LocalTime(9, 0))
 ```
 
-## 4. The 9 WorkScheduler methods
+## 4. The 7 WorkScheduler methods
 
 | Method | Use case | Backed by |
 |---|---|---|
 | `enqueueDataSync(mode, payload)` | One-shot, immediate (or expedited if Foreground) | OneTimeWorkRequest |
-| `scheduleNotification(content, delay, mode)` | Fire-and-forget notification after delay | OneTimeWorkRequest + setInitialDelay |
 | `scheduleDailyDataSync(timeOfDay, tz, payload)` | Sync once a day at HH:MM | PeriodicWorkRequest 24h + setInitialDelay(nextOccurrence) + KEEP |
 | `schedulePeriodicDataSync(interval, initialDelay, payload)` | Sync every N (≥15min) | PeriodicWorkRequest + KEEP |
 | `scheduleDataSyncAt(instant, mode, payload)` | One-shot at specific instant (flex window ~5min) | OneTimeWorkRequest + setInitialDelay |
 | `scheduleDataSyncAtExact(instant, mode, payload)` | One-shot at exact instant (battery-impacting) | AlarmManager.setExactAndAllowWhileIdle on Android; BGProcessingTaskRequest on iOS |
-| `scheduleNotificationAt(content, instant, mode)` | User-visible notification at exact instant | NotificationWorker + setInitialDelay |
-| `observeWork(handle)` | `Flow<WorkStatus>` for live progress | WorkManager.getWorkInfoByIdLiveData / WorkInfo flow |
-| `cancelWork(handle)` | Cancel by handle | WorkManager.cancelWorkById |
+| `observeWork(name)` | `Flow<WorkStatus>` for live progress | WorkManager.getWorkInfosByTag flow |
+| `cancelWork(name)` | Cancel all work tagged with `name` | WorkManager.cancelAllWorkByTag |
 
-## 5. Per-platform notes
+## 5. Per-platform exact-time notes
 
 ### Android — AlarmManager + WorkManager
 
 - `scheduleDataSyncAtExact` requires the **`SCHEDULE_EXACT_ALARM`** permission in `AndroidManifest.xml` (Android 12+, API 31+; user-grantable from Settings).
-- When denied, falls back automatically to flex-window `scheduleDataSyncAt` with a `Napier.w("SCHEDULE_EXACT_ALARM permission not granted; falling back…")` log.
+- When denied, falls back automatically to flex-window `scheduleDataSyncAt` with a `Log.w("ExactAlarmScheduler", "...")` log.
 - Doze respects `setExactAndAllowWhileIdle` (wakes device); consecutive exact alarms within ~9-min are throttled.
-- Notifications use `NotificationManagerCompat` + idempotent `createNotificationChannel`. Caller is responsible for the `POST_NOTIFICATIONS` runtime permission on Android 13+.
 
-### iOS — BGTaskScheduler + UNUserNotificationCenter
+### iOS — BGTaskScheduler
 
-- `scheduleDataSyncAtExact` submits a `BGProcessingTaskRequest` with `earliestBeginDate = instant.toNSDate()`. iOS does **not** guarantee exact timing — the OS decides actual run time based on battery / connectivity / app-usage heuristics. For user-visible exact-time triggers, prefer `scheduleNotificationAt` (UNCalendarNotificationTrigger respects the requested instant precisely).
-- Consumer-app `Info.plist` must register the identifier `io.github.mobilebytelabs.worker.scheduler.exact-sync` under `BGTaskSchedulerPermittedIdentifiers`.
-- Notifications request `.alert + .sound` authorization on first call; consumer should set `NSUserNotificationsUsageDescription` in `Info.plist`.
+- `scheduleDataSyncAtExact` submits a `BGProcessingTaskRequest` with `earliestBeginDate = instant.toNSDate()`. iOS does **not** guarantee exact timing — the OS decides actual run time based on battery / connectivity / app-usage heuristics. For user-visible exact-time triggers, fire your own `UNUserNotificationCenter` notification from inside your `CoroutineWorker.doWork()` (consumer responsibility).
+- Consumer-app `Info.plist` must register the identifier `io.github.mobilebytelabs.worker.scheduler.exact_sync` under `BGTaskSchedulerPermittedIdentifiers`.
 
-### Desktop (JVM) — ScheduledExecutorService + SystemTray
+### Desktop (JVM) — ScheduledExecutorService
 
 - `scheduleDataSyncAtExact` uses `ScheduledExecutorService.schedule(...)` — in-process only, **lost on JVM restart**. v1.1 will layer on `cmp-worker-desktop-daemon` when its alpha gains execute-capability.
-- Notifications use `java.awt.SystemTray.displayMessage(...)`. Headless environments (`GraphicsEnvironment.isHeadless() == true`) and unsupported OSes (some Linux DEs) fall back to a log-only stub.
 
-### wasmJs — setTimeout + (optional) Notification API
+### Web (wasmJs + js) — setTimeout
 
 - `scheduleDataSyncAtExact` uses `setTimeout(handler, delayMs)` — **in-tab only**. Background scheduling requires Service Worker `periodicSync` (Chrome-only, requires bundler config + `sw.js` scaffold; ships as a separate epic in 3.2.0).
-- Notifications delegate to the existing `cmp-worker-web`'s `showWorkerNotification(id, title, body)` browser API binding. First call requests permission; denied = silent drop.
 
 ## 6. Synchronizer / Syncable
 
@@ -115,7 +113,7 @@ interface Syncable {
 // Use changeListSync for id-list diff APIs (most server APIs)
 // Use snapshotSync for whole-payload-replace APIs (single-shot snapshots)
 suspend fun <Model> Synchronizer.changeListSync(...): Boolean
-suspend fun <Model> Synchronizer.snapshotSync(...): Boolean
+suspend fun Synchronizer.snapshotSync(name: String, fetcher: suspend () -> Unit): Boolean
 ```
 
 `AbstractDataSyncWorker` does the fan-out: each `Syncable` in the constructor list is synced in parallel via `awaitAll`; success = all true; any false → retry; throwable → failure.
@@ -133,7 +131,32 @@ class DataSyncWorker(
 )
 ```
 
-## 7. Migrating from sample-side sync
+## 7. Scheduling non-sync workers (notifications, etc.)
+
+Use raw `WorkManager.enqueue(...)` for any worker class that isn't `AbstractDataSyncWorker`:
+
+```kotlin
+class MyNotificationWorker(ctx: WorkerContext) : CoroutineWorker(ctx) {
+    override suspend fun doWork(): WorkResult {
+        val title = inputData.getString("title") ?: return WorkResult.failure("missing title")
+        // Consumer-owned rendering — NotificationCompat (Android),
+        // UNUserNotificationCenter (iOS), SystemTray (Desktop), etc.
+        renderNotification(title)
+        return WorkResult.success()
+    }
+}
+
+// Scheduling — use raw WorkManager, NOT WorkScheduler:
+val request = oneTimeWorkRequest<MyNotificationWorker> {
+    setInputData(workDataOf("title" to "Loan due", "body" to "Payment due today"))
+    setInitialDelay(15.minutes)
+}
+workManager.enqueue(request)
+```
+
+`cmp-worker-scheduler` bundles `cmp-worker-kmp` via `api()`, so injecting `WorkManager` in the same module that uses `WorkScheduler` requires no extra dep.
+
+## 8. Migrating from sample-side sync
 
 If your codebase used the `samples/kmp-project-template/sync/` types (`org.mifos.sync.*` or `org.mifos.core.data.infra.*`):
 
@@ -141,12 +164,12 @@ If your codebase used the `samples/kmp-project-template/sync/` types (`org.mifos
 |---|---|
 | `org.mifos.sync.WorkScheduler` | `io.github.mobilebytelabs.worker.scheduler.WorkScheduler` |
 | `org.mifos.sync.DefaultWorkScheduler` | `io.github.mobilebytelabs.worker.scheduler.DefaultWorkScheduler` |
-| `org.mifos.sync.WorkMode` / `WorkHandle` / `WorkStatus` / `NotificationContent` | `io.github.mobilebytelabs.worker.scheduler.*` |
-| `org.mifos.sync.SyncInitializer` / `Sync` | `io.github.mobilebytelabs.worker.scheduler.*` |
-| `org.mifos.sync.NotificationWorker` / `SyncWorkHelpers` | `io.github.mobilebytelabs.worker.scheduler.*` |
+| `org.mifos.sync.WorkMode` / `WorkHandle` / `WorkStatus` | `io.github.mobilebytelabs.worker.scheduler.*` |
 | `org.mifos.core.data.infra.Synchronizer` / `Syncable` / `ChangeListVersions` / `NetworkChange` | `io.github.mobilebytelabs.worker.scheduler.sync.*` |
 | `org.mifos.core.data.util.SyncManager` | `io.github.mobilebytelabs.worker.scheduler.sync.SyncManager` |
 | `org.mifos.core.datastore.SyncStatePersister` | `io.github.mobilebytelabs.worker.scheduler.sync.SyncStatePersister` |
 | Hand-rolled `DataSyncWorker` with fan-out logic | Extend `AbstractDataSyncWorker(ctx, syncables = listOf(...), persister)` |
+| `org.mifos.sync.NotificationWorker` + `NotificationContent` + `renderNotification` | **Stay in consumer code** — library doesn't ship these |
+| `WorkScheduler.scheduleNotification(...)` / `scheduleNotificationAt(...)` | **Removed from library** — use `workManager.enqueue(oneTimeWorkRequest<MyNotificationWorker> { setInputData(...); setInitialDelay(...) })` |
 
-The `samples/kmp-project-template/` reference app demonstrates the final shape: `DataSyncWorker` is now 3 lines (just the constructor + `: AbstractDataSyncWorker(...)`), and the entire sync infrastructure is library-side.
+The `samples/kmp-project-template/` reference app demonstrates the final shape: `DataSyncWorker` is 3 lines (just constructor + `: AbstractDataSyncWorker(...)`), `NotificationWorker` + `renderNotification` actuals live in the sample's own `sync/` module, and `LoanReminderUseCase` uses `WorkScheduler` for sync + raw `WorkManager` for notifications.

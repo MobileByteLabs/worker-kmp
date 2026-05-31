@@ -1,10 +1,15 @@
-package io.github.mobilebytelabs.worker.scheduler
+package org.mifos.sync
 
 import io.github.mobilebytelabs.worker.CoroutineWorker
 import io.github.mobilebytelabs.worker.WorkResult
 import io.github.mobilebytelabs.worker.WorkerContext
 
-/** Reads NotificationContent from inputData and delegates to expect/actual renderNotification. */
+/**
+ * Sample-side worker: reads NotificationContent from inputData and delegates to
+ * the expect/actual `renderNotification`. Consumer schedules this worker via raw
+ * `workManager.enqueue(oneTimeWorkRequest<NotificationWorker> { setInitialDelay(...); setInputData(...) })`
+ * — see [org.mifos.feature.loans.LoanReminderUseCase] for the canonical use pattern.
+ */
 class NotificationWorker(ctx: WorkerContext) : CoroutineWorker(ctx) {
 
     override suspend fun doWork(): WorkResult {

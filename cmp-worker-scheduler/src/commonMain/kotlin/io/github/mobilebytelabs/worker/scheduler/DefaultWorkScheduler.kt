@@ -63,26 +63,6 @@ class DefaultWorkScheduler(
         return WorkHandle(id = request.id, uniqueName = SYNC_WORK_NAME)
     }
 
-    override fun scheduleNotification(content: NotificationContent, delay: Duration, mode: WorkMode): WorkHandle {
-        val uniqueName = "$NOTIFICATION_WORK_PREFIX-${content.title.hashCode()}"
-        val request = oneTimeWorkRequest<NotificationWorker> {
-            setInputData(
-                workDataOf(
-                    "title" to content.title,
-                    "body" to content.body,
-                    "channelId" to (content.channelId ?: ""),
-                ),
-            )
-            addTag(uniqueName)
-            if (delay > Duration.ZERO) setInitialDelay(delay)
-            if (mode == WorkMode.Foreground) {
-                setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            }
-        }
-        scope.launch { workManager.enqueue(request) }
-        return WorkHandle(id = request.id, uniqueName = uniqueName)
-    }
-
     override fun scheduleDailyDataSync(timeOfDay: LocalTime, timeZone: TimeZone, payload: WorkData): WorkHandle {
         val nowInstant = Clock.System.now()
         val nextOccurrence = nowInstant.nextOccurrenceOf(timeOfDay, timeZone)
@@ -134,11 +114,6 @@ class DefaultWorkScheduler(
      */
     override fun scheduleDataSyncAtExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle =
         scheduleDataSyncAt(instant, mode, payload)
-
-    override fun scheduleNotificationAt(instant: Instant, content: NotificationContent, mode: WorkMode): WorkHandle {
-        val delay = (instant - Clock.System.now()).coerceAtLeast(Duration.ZERO)
-        return scheduleNotification(content, delay, mode)
-    }
 
     override fun observeWork(name: String): Flow<WorkStatus> = workManager.getWorkInfosByTag(name).map { infos ->
         when (infos.firstOrNull()?.state) {
