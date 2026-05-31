@@ -1,9 +1,11 @@
 package io.github.mobilebytelabs.worker.scheduler
 
 import io.github.mobilebytelabs.worker.WorkData
+import io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import kotlin.reflect.KClass
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -23,12 +25,17 @@ actual class ExactAlarmScheduler actual constructor(private val fallback: WorkSc
             Thread(r, "worker-kmp-desktop-exact-alarm").also { it.isDaemon = true }
         }
 
-    actual fun scheduleExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle {
+    actual fun <W : AbstractDataSyncWorker> scheduleExact(
+        workerClass: KClass<W>,
+        instant: Instant,
+        mode: WorkMode,
+        payload: WorkData,
+    ): WorkHandle {
         val delayMs = (instant.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds())
             .coerceAtLeast(0)
         val uniqueName = "exact-sync-${instant.toEpochMilliseconds()}"
         executor.schedule(
-            { fallback.enqueueDataSync(mode, payload) },
+            { fallback.enqueueDataSync(workerClass, mode, payload) },
             delayMs,
             TimeUnit.MILLISECONDS,
         )

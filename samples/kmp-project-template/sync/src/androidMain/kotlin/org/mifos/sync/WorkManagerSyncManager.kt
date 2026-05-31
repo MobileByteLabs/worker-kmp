@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import io.github.mobilebytelabs.worker.scheduler.SYNC_WORK_NAME
 import io.github.mobilebytelabs.worker.scheduler.WorkScheduler
+import io.github.mobilebytelabs.worker.scheduler.enqueueDataSync
 import io.github.mobilebytelabs.worker.scheduler.sync.SyncManager
+import org.koin.mp.KoinPlatform
 
 class WorkManagerSyncManager(
     private val workManager: WorkManager,
@@ -18,7 +20,7 @@ class WorkManagerSyncManager(
         workManager.getWorkInfosByUniqueWorkNameFlow(SYNC_WORK_NAME)
             .map { infos -> infos.any { it.state == WorkInfo.State.RUNNING } }
             .conflate()
-    override fun requestSync() { scheduler.enqueueDataSync() }
+    override fun requestSync() { scheduler.enqueueDataSync<DataSyncWorker>() }
 }
 
 actual fun provideSyncManager(workManager: WorkManager): SyncManager =

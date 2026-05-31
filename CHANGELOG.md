@@ -5,7 +5,91 @@ All notable changes to worker-kmp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.1.0] - 2026-05-31 (WIP)
+## [3.1.1] - 2026-05-31 (WIP)
+
+### ⚠ Breaking changes (pre-release — no consumers yet)
+
+- **Typed worker API on `WorkScheduler`**: all 5 schedule methods now take a
+  `KClass<W : AbstractDataSyncWorker>` parameter so the library knows which
+  concrete consumer-defined worker class to enqueue. Without this fix the 3.1.0
+  shipped impl built every request as `oneTimeWorkRequest<AbstractDataSyncWorker>`
+  (abstract — runtime lookup against `WorkerRegistry` would fail). Mirror the
+  existing `oneTimeWorkRequest<W> { ... }` DSL.
+
+  ```kotlin
+  // Before (3.1.0)
+  scheduler.enqueueDataSync(payload = workDataOf("k" to "v"))
+
+  // After (3.1.1) — pass your concrete worker type at the call site
+  scheduler.enqueueDataSync<AppSyncWorker>(payload = workDataOf("k" to "v"))
+  scheduler.scheduleDailyDataSync<AppSyncWorker>(timeOfDay = LocalTime(9, 0))
+  scheduler.scheduleDataSyncAtExact<AppSyncWorker>(instant = paymentDueAt)
+  ```
+
+  Multi-worker apps just call with a different `<W>` — one `WorkScheduler`
+  instance serves daily-sync + hourly-analytics + weekly-cleanup workers
+  simultaneously.
+
+### Added
+
+- **`FetcherSyncable`** in `io.github.mobilebytelabs.worker.scheduler.sync.*` —
+  wraps any `suspend (WorkData) -> Unit` fetcher as a `Syncable` without
+  needing to write a whole class. Use for one-off sync sources where a full
+  repository implementation is overkill:
+
+  ```kotlin
+  val currency = FetcherSyncable("currency-rates") { payload ->
+      dao.upsertAll(api.fetchLatest(base = payload.getString("currency.base") ?: "USD"))
+  }
+  ```
+
+- **`CompositeSyncable`** in the same package — sequences multiple `Syncable`s
+  in declaration order (use when one sync depends on another being current; for
+  parallel fan-out, list them directly in `AbstractDataSyncWorker`'s
+  `syncables` parameter instead).
+
+- **NEW MODULE: `cmp-worker-scheduler-store5`** (`io.github.mobilebytelabs:worker-scheduler-store5:3.1.1`) —
+  adapter wiring Mobile Native Foundation Store5 into the scheduler. Two
+  adapter classes + two extension functions:
+  - `StoreSyncable<K, V>(name, key, store)` — wraps a Store5 `Store` as a
+    `Syncable`; on sync, calls `store.fresh(key)` to force network reload.
+  - `MutableStoreSyncable<K, V>(name, key, value, mutableStore)` — wraps a
+    Store5 `MutableStore` for write-path sync (push pending mutations).
+  - `Synchronizer.storeSync(name, key, store)` — for use inside custom
+    `Syncable` implementations that need payload routing.
+  - `Synchronizer.mutableStoreSync(name, key, value, mutableStore)` — same
+    for the write path.
+
+  The new module is re-exported via `cmp-worker-compose-all` so umbrella-dep
+  consumers get it automatically. Targets match `cmp-worker-store5`:
+  jvm + iosArm64 + iosSimulatorArm64 + js(IR) + wasmJs.
+
+### Module structure clarification
+
+- `io.github.mobilebytelabs.worker.scheduler.*` — scheduling APIs (depend on WorkManager).
+- `io.github.mobilebytelabs.worker.scheduler.sync.*` — sync contracts (NiA-shaped,
+  agnostic of WorkManager). Use standalone if you don't want our scheduler.
+- `io.github.mobilebytelabs.worker.scheduler.store5.*` (new module) — Store5 adapters
+  for the contracts. Opt-in: depend on `cmp-worker-scheduler-store5` only if your
+  sync targets include Store5 instances.
+
+### Migration
+
+| Before (3.1.0) | After (3.1.1) |
+|---|---|
+| `scheduler.enqueueDataSync(...)` | `scheduler.enqueueDataSync<AppSyncWorker>(...)` |
+| `scheduler.scheduleDailyDataSync(...)` | `scheduler.scheduleDailyDataSync<AppSyncWorker>(...)` |
+| `scheduler.schedulePeriodicDataSync(...)` | `scheduler.schedulePeriodicDataSync<AppSyncWorker>(...)` |
+| `scheduler.scheduleDataSyncAt(...)` | `scheduler.scheduleDataSyncAt<AppSyncWorker>(...)` |
+| `scheduler.scheduleDataSyncAtExact(...)` | `scheduler.scheduleDataSyncAtExact<AppSyncWorker>(...)` |
+
+`observeWork(name)` and `cancelWork(name)` unchanged.
+
+PR: [MobileByteLabs/worker-kmp#TBD](https://github.com/MobileByteLabs/worker-kmp).
+
+---
+
+## [3.1.0] - 2026-05-31
 
 ### Added — NEW `cmp-worker-scheduler` module
 

@@ -4,7 +4,11 @@ import io.github.mobilebytelabs.worker.WorkManager
 import io.github.mobilebytelabs.worker.oneTimeWorkRequest
 import io.github.mobilebytelabs.worker.scheduler.WorkMode
 import io.github.mobilebytelabs.worker.scheduler.WorkScheduler
+import io.github.mobilebytelabs.worker.scheduler.enqueueDataSync
+import io.github.mobilebytelabs.worker.scheduler.scheduleDailyDataSync
+import io.github.mobilebytelabs.worker.scheduler.scheduleDataSyncAtExact
 import io.github.mobilebytelabs.worker.workDataOf
+import org.mifos.sync.DataSyncWorker
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -45,7 +49,7 @@ class LoanReminderUseCase(
 
     /** Set up the daily morning refresh — called once at app start. */
     fun installDailyRefresh(borrowerCountryCode: String = "US") {
-        workScheduler.scheduleDailyDataSync(
+        workScheduler.scheduleDailyDataSync<DataSyncWorker>(
             timeOfDay = LocalTime(hour = 9, minute = 0),
             timeZone = TimeZone.currentSystemDefault(),
             payload = workDataOf(
@@ -81,7 +85,7 @@ class LoanReminderUseCase(
         // 2. Sync exchange rates RIGHT BEFORE the due instant so the
         //    loan-details screen renders with fresh data when the user opens it.
         val refreshAt = dueAt.minus(15.minutes)
-        workScheduler.scheduleDataSyncAtExact(
+        workScheduler.scheduleDataSyncAtExact<DataSyncWorker>(
             instant = refreshAt,
             mode = WorkMode.Background,
             payload = workDataOf(
@@ -93,7 +97,7 @@ class LoanReminderUseCase(
 
     /** Manual refresh button — pull-to-refresh from the loans list. */
     fun refreshNow() {
-        workScheduler.enqueueDataSync(
+        workScheduler.enqueueDataSync<DataSyncWorker>(
             mode = WorkMode.Background,
             payload = workDataOf("currency.base" to "USD"),
         )
