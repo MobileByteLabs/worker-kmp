@@ -3,10 +3,12 @@
 package io.github.mobilebytelabs.worker.scheduler
 
 import io.github.mobilebytelabs.worker.WorkData
+import io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.datetime.toNSDate
 import platform.BackgroundTasks.BGProcessingTaskRequest
 import platform.BackgroundTasks.BGTaskScheduler
+import kotlin.reflect.KClass
 import kotlin.time.Instant
 
 /**
@@ -24,7 +26,12 @@ import kotlin.time.Instant
  * before app launch. `cmp-worker-ios`'s `InfoPlistValidator` enforces this at startup.
  */
 actual class ExactAlarmScheduler actual constructor(private val fallback: WorkScheduler) {
-    actual fun scheduleExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle {
+    actual fun <W : AbstractDataSyncWorker> scheduleExact(
+        workerClass: KClass<W>,
+        instant: Instant,
+        mode: WorkMode,
+        payload: WorkData,
+    ): WorkHandle {
         val request = BGProcessingTaskRequest(identifier = BG_TASK_ID).apply {
             earliestBeginDate = instant.toNSDate()
             requiresNetworkConnectivity = true
@@ -34,7 +41,7 @@ actual class ExactAlarmScheduler actual constructor(private val fallback: WorkSc
         return runCatching {
             BGTaskScheduler.sharedScheduler.submitTaskRequest(request, error = null)
             WorkHandle(uniqueName)
-        }.getOrElse { fallback.scheduleDataSyncAt(instant, mode, payload) }
+        }.getOrElse { fallback.scheduleDataSyncAt(workerClass, instant, mode, payload) }
     }
 
     companion object {

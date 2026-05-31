@@ -8,7 +8,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  *  - cmp-worker-kmp          (core API)
  *  - cmp-worker-compose      (Compose UI helpers — WorkInfoCard, etc.)
  *  - cmp-worker-koin         (Koin DI integration)
- *  - cmp-worker-store5       (StoreBackedWorker)
+ *  - cmp-worker-scheduler    (high-level WorkScheduler + Syncable contracts)
+ *  - cmp-worker-store5       (StoreBackedWorker + StoreSyncable / MutableStoreSyncable
+ *                             adapters bridging Store5 ↔ scheduler Syncable contract)
  *  - cmp-worker-android      (androidMain — Android factory + launchers)
  *  - cmp-worker-desktop      (jvmMain/desktopMain — Desktop factory + launcher)
  *  - cmp-worker-ios          (iosMain — iOS factory + launcher)

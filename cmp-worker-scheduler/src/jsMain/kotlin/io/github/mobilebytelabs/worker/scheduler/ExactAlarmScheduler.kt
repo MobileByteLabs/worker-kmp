@@ -1,6 +1,8 @@
 package io.github.mobilebytelabs.worker.scheduler
 
 import io.github.mobilebytelabs.worker.WorkData
+import io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker
+import kotlin.reflect.KClass
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
@@ -15,12 +17,17 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalTime::class)
 actual class ExactAlarmScheduler actual constructor(private val fallback: WorkScheduler) {
-    actual fun scheduleExact(instant: Instant, mode: WorkMode, payload: WorkData): WorkHandle {
+    actual fun <W : AbstractDataSyncWorker> scheduleExact(
+        workerClass: KClass<W>,
+        instant: Instant,
+        mode: WorkMode,
+        payload: WorkData,
+    ): WorkHandle {
         val delayMs = (instant.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds())
             .coerceAtLeast(0)
             .toInt()
         val uniqueName = "exact-sync-${instant.toEpochMilliseconds()}"
-        setTimeout({ fallback.enqueueDataSync(mode, payload) }, delayMs)
+        setTimeout({ fallback.enqueueDataSync(workerClass, mode, payload) }, delayMs)
         return WorkHandle(uniqueName)
     }
 }
