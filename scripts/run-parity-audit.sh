@@ -87,11 +87,14 @@ probe_marker() {
 # Emit JSON matrix
 # ────────────────────────────────────────────────────────────────────
 emit_json() {
+  # Deterministic output — fields stable across runs unless feature wiring actually
+  # changed. NEVER include per-run metadata (timestamp / HEAD sha / branch name)
+  # in this JSON: the CI workflow uses git-diff to decide whether to open a PR,
+  # and per-run-volatile fields create an infinite-PR loop. Per-run metadata is
+  # already tracked by the git commit itself (author/timestamp/sha) — duplicating
+  # it here is pure noise + active harm.
   local first=1
   echo "{"
-  echo "  \"generated_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\","
-  echo "  \"commit\": \"$(git rev-parse HEAD)\","
-  echo "  \"branch\": \"$(git rev-parse --abbrev-ref HEAD)\","
   echo "  \"features\": ["
   for marker in "${MARKERS[@]}"; do
     IFS='|' read -r platform feature pattern path <<< "$marker"
@@ -113,14 +116,21 @@ emit_json() {
 # Refresh "Last audited" timestamp in the report doc (default mode)
 # ────────────────────────────────────────────────────────────────────
 refresh_report_timestamp() {
+  # Refresh the report's "Last audited" line ONLY if scripts/parity-audit-matrix.json
+  # changed in this run (i.e. some feature's wired/absent flipped). On a no-op run
+  # the timestamp stays stable so the CI workflow's diff-detector doesn't trigger
+  # a self-referential PR loop. The git commit metadata is the authoritative
+  # "when this last ran" record.
   if [[ ! -f "$REPORT" ]]; then
     echo "report doc missing: $REPORT" >&2
     return 1
   fi
+  if git diff --quiet -- "$MATRIX" 2>/dev/null; then
+    return 0  # matrix unchanged → don't touch the report doc
+  fi
   local today commit
   today="$(date -u +%Y-%m-%d)"
   commit="$(git rev-parse HEAD)"
-  # Replace the "> **Last audited:** ..." line
   perl -i -pe "s|^> \*\*Last audited:\*\*.*\$|> **Last audited:** ${today} against commit \`${commit:0:7}\` on \`development\`.|" "$REPORT"
 }
 
@@ -157,17 +167,18 @@ check_doc_consistency() {
 # ────────────────────────────────────────────────────────────────────
 case "$MODE" in
   --verify)
-    # Read-only. Regenerate JSON in-memory, compare to disk — but exclude the
-    # `generated_at` + `commit` + `branch` fields from comparison (they change per-run).
+    # Read-only. Regenerate JSON in-memory, compare to disk. The emit is now
+    # deterministic (no timestamp/sha/branch metadata) so a plain whole-file
+    # diff is the correct comparison.
     if [[ ! -f "$MATRIX" ]]; then
       echo "::error::$MATRIX missing — run \`bash scripts/run-parity-audit.sh\` first" >&2
       exit 1
     fi
-    expected_features="$(emit_json | jq -S '.features')"
-    actual_features="$(jq -S '.features' < "$MATRIX")"
-    if ! diff -q <(echo "$expected_features") <(echo "$actual_features") >/dev/null 2>&1; then
-      echo "::error::$MATRIX features section is stale — re-run \`bash scripts/run-parity-audit.sh\`" >&2
-      diff <(echo "$expected_features") <(echo "$actual_features") | head -20 >&2 || true
+    expected="$(emit_json | jq -S .)"
+    actual="$(jq -S . < "$MATRIX")"
+    if ! diff -q <(echo "$expected") <(echo "$actual") >/dev/null 2>&1; then
+      echo "::error::$MATRIX is stale — re-run \`bash scripts/run-parity-audit.sh\`" >&2
+      diff <(echo "$expected") <(echo "$actual") | head -20 >&2 || true
       exit 1
     fi
     check_doc_consistency || exit $?
