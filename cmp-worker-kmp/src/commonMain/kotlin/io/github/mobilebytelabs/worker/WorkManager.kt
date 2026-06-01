@@ -77,6 +77,35 @@ interface WorkManager {
     ): Uuid
 
     /**
+     * Enqueues a one-time work request with a uniqueness name and conflict policy.
+     *
+     * Only one one-time work unit with [uniqueWorkName] may be ENQUEUED or RUNNING at a time.
+     * [existingWorkPolicy] controls what happens when one already exists:
+     * - [ExistingWorkPolicy.REPLACE] — cancel the existing work and enqueue the new request.
+     * - [ExistingWorkPolicy.KEEP] — leave the existing work; drop the new request.
+     * - [ExistingWorkPolicy.APPEND] — chain the new work after the existing work completes.
+     * - [ExistingWorkPolicy.APPEND_OR_REPLACE] — APPEND if existing healthy; REPLACE if FAILED/CANCELLED.
+     *
+     * Mirrors AndroidX `WorkManager.enqueueUniqueWork(uniqueWorkName, policy, request)`. Sibling
+     * of [enqueueUniquePeriodicWork] (periodic equivalent).
+     *
+     * Added by cross-platform-worker-parity-audit sub-plan 03 (closes G2). Every platform actual
+     * provides its own impl — Android delegates to `androidx.work.WorkManager.enqueueUniqueWork`;
+     * iOS / Desktop / Web manage uniqueness via their internal name-keyed registries.
+     *
+     * @param uniqueWorkName globally-unique name for this one-time work unit.
+     * @param existingWorkPolicy conflict resolution when work with the same name exists.
+     * @param request the one-time work to schedule.
+     * @return the [Uuid] of the active (possibly pre-existing) work unit.
+     * @throws WorkEnqueueException if the platform scheduler rejects the request.
+     */
+    suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: ExistingWorkPolicy,
+        request: OneTimeWorkRequest,
+    ): Uuid
+
+    /**
      * Cancels the work identified by [id].
      *
      * No-op when the work is already in a terminal state ([WorkInfo.State.SUCCEEDED],

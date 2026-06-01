@@ -4,6 +4,7 @@ import androidx.work.Data
 import io.github.mobilebytelabs.worker.BackoffPolicy
 import io.github.mobilebytelabs.worker.Constraints
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
+import io.github.mobilebytelabs.worker.ExistingWorkPolicy
 import io.github.mobilebytelabs.worker.NetworkType
 import io.github.mobilebytelabs.worker.OutOfQuotaPolicy
 import io.github.mobilebytelabs.worker.WorkData
@@ -13,6 +14,7 @@ import kotlin.uuid.Uuid
 import androidx.work.BackoffPolicy as AndroidBackoffPolicy
 import androidx.work.Constraints as AndroidConstraints
 import androidx.work.ExistingPeriodicWorkPolicy as AndroidExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy as AndroidExistingWorkPolicy
 import androidx.work.NetworkType as AndroidNetworkType
 import androidx.work.OutOfQuotaPolicy as AndroidOutOfQuotaPolicy
 import androidx.work.WorkInfo as AndroidWorkInfo
@@ -67,6 +69,15 @@ internal fun ExistingPeriodicWorkPolicy.toAndroid(): AndroidExistingPeriodicWork
     ExistingPeriodicWorkPolicy.KEEP -> AndroidExistingPeriodicWorkPolicy.KEEP
     ExistingPeriodicWorkPolicy.REPLACE -> AndroidExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
     ExistingPeriodicWorkPolicy.UPDATE -> AndroidExistingPeriodicWorkPolicy.UPDATE
+}
+
+// cross-platform-worker-parity-audit sub-plan 03 (closes G2) — convert commonMain's
+// ExistingWorkPolicy to AndroidX's.
+internal fun ExistingWorkPolicy.toAndroid(): AndroidExistingWorkPolicy = when (this) {
+    ExistingWorkPolicy.REPLACE -> AndroidExistingWorkPolicy.REPLACE
+    ExistingWorkPolicy.KEEP -> AndroidExistingWorkPolicy.KEEP
+    ExistingWorkPolicy.APPEND -> AndroidExistingWorkPolicy.APPEND
+    ExistingWorkPolicy.APPEND_OR_REPLACE -> AndroidExistingWorkPolicy.APPEND_OR_REPLACE
 }
 
 internal fun AndroidWorkInfo.State.toKmp(): WorkInfo.State = when (this) {

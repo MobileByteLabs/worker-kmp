@@ -215,6 +215,11 @@ private class RecordingWorkManager : WorkManager {
         state.value = state.value + (request.id to WorkInfo(request.id, WorkInfo.State.ENQUEUED, tags = request.tags))
         return request.id
     }
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest,
+    ): kotlin.uuid.Uuid = enqueue(request)
 
     override suspend fun cancelWorkById(id: Uuid) {
         _cancelledIds += id

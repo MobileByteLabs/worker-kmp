@@ -5,6 +5,42 @@ All notable changes to worker-kmp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Cross-platform worker parity audit + gap closures.** New
+  `docs/operations/cross-platform-parity-audit.md` evidence ledger + reusable
+  `scripts/run-parity-audit.sh` harness + nightly `.github/workflows/parity-audit.yml`.
+  Closed 7 surgical gaps surfaced by the 6-subagent probe:
+  - **G1** — iOS 17+ `BGContinuedProcessingTaskRequest` integration scaffold
+    (`cmp-worker-kmp/src/iosMain/.../BgContinuedProcessing.kt` — ObjC-runtime lookup,
+    falls back to `BGProcessingTask + UNNotification` shim until Kotlin/Native exposes
+    the class natively).
+  - **G2** — Android `WorkManager.enqueueUniqueWork(name, ExistingWorkPolicy, request)`
+    surfaced through commonMain + Android actual delegates to `androidx.work`.
+  - **G3** — iOS `IosWorkManager.cancelTask(identifier)` exposes
+    `BGTaskScheduler.cancel(forTaskWithIdentifier:)`.
+  - **G4** — Desktop persistence schema v2 (`workerClass` + `inputDataJson` payload)
+    + new `DaemonWorkerFactory` ServiceLoader contract for daemon-side worker dispatch.
+  - **G5** — WasmJs `BroadcastChannelBridge` + `WebPushSubscriber` real `@JsFun`-bound
+    impls (replaces alpha06 no-op stubs).
+  - **G6** — `docs/Home.md` + `docs/platform-support/true-background-matrix.md` aligned
+    to actual code state; SCAFFOLD disclaimer dropped; harness asserts ongoing consistency.
+  - **G7** — `@ExperimentalForegroundApi` graduated from experimental to stable:
+    `@Deprecated` (1-release-cycle source compat) marks consumer `@OptIn` annotations as
+    redundant — they can be removed.
+
+### Changed
+
+- **`@ExperimentalForegroundApi` is now `@Deprecated`** ("Foreground API is stable.").
+  Existing `@OptIn(ExperimentalForegroundApi::class)` sites keep compiling with a
+  redundant-opt-in warning; next major release removes the annotation entirely.
+
+- **`IosWorkerConfig.continuedProcessingTaskIdentifier`** added (optional, default `""`).
+  Set this to opt into iOS 17+ `BGContinuedProcessingTaskRequest` instead of the
+  BGProcessing shim.
+
 ## [3.1.3] - 2026-06-01
 
 ### Added

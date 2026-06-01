@@ -49,6 +49,11 @@ internal class FakeWorkManager : WorkManager {
         update(request.id, WorkInfo(id = request.id, state = WorkInfo.State.ENQUEUED, tags = request.tags))
         return request.id
     }
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest,
+    ): kotlin.uuid.Uuid = enqueue(request)
 
     override suspend fun cancelWorkById(id: Uuid) {
         _cancelledIds += id

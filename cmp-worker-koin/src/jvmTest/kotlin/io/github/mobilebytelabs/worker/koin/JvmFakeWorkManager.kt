@@ -1,6 +1,7 @@
 package io.github.mobilebytelabs.worker.koin
 
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
+import io.github.mobilebytelabs.worker.ExistingWorkPolicy
 import io.github.mobilebytelabs.worker.OneTimeWorkRequest
 import io.github.mobilebytelabs.worker.PeriodicWorkRequest
 import io.github.mobilebytelabs.worker.WorkInfo
@@ -15,6 +16,11 @@ internal class JvmFakeWorkManager : WorkManager {
         uniqueWorkName: String,
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
         request: PeriodicWorkRequest,
+    ): Uuid = Uuid.random()
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: ExistingWorkPolicy,
+        request: OneTimeWorkRequest,
     ): Uuid = Uuid.random()
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = flowOf(emptyList())
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = null

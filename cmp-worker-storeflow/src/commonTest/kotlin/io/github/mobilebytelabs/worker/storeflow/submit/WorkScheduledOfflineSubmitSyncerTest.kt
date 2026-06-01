@@ -55,6 +55,12 @@ class WorkScheduledOfflineSubmitSyncerTest {
         override suspend fun cancelAllWorkByTag(tag: String) {
             cancelledTags += tag
         }
+
+        override suspend fun enqueueUniqueWork(
+            uniqueWorkName: String,
+            existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+            request: OneTimeWorkRequest,
+        ): Uuid = enqueue(request)
     }
 
     @Test

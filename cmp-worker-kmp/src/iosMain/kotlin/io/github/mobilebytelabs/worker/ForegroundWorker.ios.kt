@@ -41,11 +41,20 @@ import platform.UserNotifications.UNUserNotificationCenter
  */
 @ExperimentalForegroundApi
 public actual suspend fun runAsForeground(worker: ForegroundWorker, info: ForegroundInfo) {
+    // iOS 17+ ContinuedProcessing path — only fires when (a) iOS >= 17, (b) consumer set
+    // IosWorkerConfig.continuedProcessingTaskIdentifier, (c) ObjC runtime exposes the class.
+    // Always also post a user notification so the user sees what's happening (parity with
+    // the BGProcessing shim path's UX). Added by cross-platform-worker-parity-audit sub-plan 02.
+    if (BgContinuedProcessing.trySchedule(info)) {
+        postUserNotification(identifier = BgContinuedProcessing.getIdentifier(), info = info)
+        return
+    }
     val majorVersion = parseMajorIosVersion(UIDevice.currentDevice.systemVersion)
-    if (majorVersion >= IOS_17) {
+    if (majorVersion >= IOS_17 && BgContinuedProcessing.getIdentifier().isEmpty()) {
         Logger.withTag("worker-kmp.foreground.ios").d {
-            "iOS $majorVersion detected; BGContinuedProcessingTaskRequest binding not yet in K/N — " +
-                "falling back to BGProcessingTask + UNNotification shim. id=${info.notificationId}"
+            "iOS $majorVersion — IosWorkerConfig.continuedProcessingTaskIdentifier is empty; " +
+                "to opt into BGContinuedProcessing set the identifier (and register it in Info.plist). " +
+                "Falling back to BGProcessingTask + UNNotification shim. id=${info.notificationId}"
         }
     }
     scheduleProcessingWithNotification(info)

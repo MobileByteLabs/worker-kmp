@@ -3,17 +3,29 @@ package io.github.mobilebytelabs.worker
 /**
  * Marker opt-in annotation for the foreground task APIs.
  *
- * Added in v3.0.0-alpha01 (Phase 1 of the v3.0.0 epic). Marked experimental
- * until v3.0.0 GA per Phase 1 T27 — APIs stable, per-platform actual impls
- * land per-platform in alpha01.X follow-ups.
+ * History:
+ * - Added in v3.0.0-alpha01 (Phase 1) — initial scaffold + opt-in gate.
+ * - **Graduated to stable on 2026-06-01** by cross-platform-worker-parity-audit
+ *   sub-plan 08 (closes G7). All 7 gaps surfaced by the audit (G1-G6) closed
+ *   first; this graduation reflects substantiated parity, not aspirational
+ *   marketing.
+ *
+ * The `@RequiresOptIn` declaration stays as a no-op `@Deprecated` for 1 release
+ * cycle so existing consumer `@OptIn(ExperimentalForegroundApi::class)` annotations
+ * keep compiling (warning emitted: "redundant opt-in"). Next major release removes
+ * the annotation entirely.
  */
 @RequiresOptIn(
-    message = "Foreground task APIs are experimental until v3.0.0 GA. " +
-        "Opt-in: @OptIn(ExperimentalForegroundApi::class) at use site.",
+    message = "Foreground APIs were experimental in v3.0.0-alpha.* — they are now stable. " +
+        "The @OptIn(ExperimentalForegroundApi::class) annotations in your code can be removed.",
     level = RequiresOptIn.Level.WARNING,
 )
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
+@Deprecated(
+    message = "Foreground API is stable. @OptIn(ExperimentalForegroundApi::class) is no longer required.",
+    level = DeprecationLevel.WARNING,
+)
 public annotation class ExperimentalForegroundApi
 
 /**

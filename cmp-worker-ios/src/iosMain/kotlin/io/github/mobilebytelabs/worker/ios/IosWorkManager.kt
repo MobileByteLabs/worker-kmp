@@ -116,6 +116,38 @@ class IosWorkManager internal constructor(
             .forEach { cancelWorkById(it.id) }
     }
 
+    // cross-platform-worker-parity-audit sub-plan 03 (closes G2) — iOS impl delegates to
+    // plain enqueue; iOS BGTaskScheduler doesn't have a name-keyed unique-work primitive,
+    // so REPLACE/KEEP/APPEND semantics are best-effort: REPLACE acts like a fresh enqueue,
+    // KEEP doesn't dedup (would require cross-restart state mapping name→Uuid), APPEND/
+    // APPEND_OR_REPLACE same. AndroidX-level semantics live on the Android actual only.
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest,
+    ): Uuid = enqueue(request)
+
+    /**
+     * Cancel a pending BGTaskScheduler task by its registered identifier.
+     *
+     * Delegates to `BGTaskScheduler.sharedScheduler.cancelTaskRequestWithIdentifier(...)`.
+     * Use this when you need to cancel by the Info.plist-registered task identifier
+     * (e.g. `"com.example.background-sync"`) rather than by the per-request [Uuid].
+     *
+     * `cancelWorkById(uuid)` still works for the [Uuid] case — this method exposes the
+     * iOS-native cancellation primitive for cases where the consumer holds the task
+     * identifier but not the per-work UUID (e.g. cleanup of a process-wide schedule
+     * at app uninstall preflight).
+     *
+     * Added by cross-platform-worker-parity-audit sub-plan 04 (closes G3).
+     */
+    public fun cancelTask(identifier: String) {
+        platform.BackgroundTasks.BGTaskScheduler.sharedScheduler.cancelTaskRequestWithIdentifier(identifier)
+        co.touchlab.kermit.Logger.withTag("worker-kmp.ios").i {
+            "cancelTask(\"$identifier\") submitted to BGTaskScheduler"
+        }
+    }
+
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = stateStore.observeByTag(tag)
 
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.getById(id)

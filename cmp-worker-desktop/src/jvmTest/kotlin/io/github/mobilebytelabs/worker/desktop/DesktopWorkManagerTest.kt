@@ -293,20 +293,24 @@ class DesktopWorkManagerTest {
     }
 
     @Test
-    fun persistence_succeededWork_removedFromPersistence() = runTest {
+    fun persistence_succeededWork_removedFromPersistence() = runTest(timeout = 3.minutes) {
         val sharedPersistence = InMemoryDesktopWorkPersistence()
         val wm = workManager(sharedPersistence)
         val request = OneTimeWorkRequestBuilder<SuccessWorker>(SuccessWorker::class.qualifiedName!!).build()
         val id = wm.enqueue(request)
         // CI runners (especially under load) can take significant wall-clock time for
         // the worker to transition to SUCCEEDED + the post-success persistence cleanup
-        // to settle. History: 2s → 10s (a7cf360) → 20s (this commit, kover-100-coverage
-        // PR #31 first run flake at the 10s ceiling). Local + warm CI typically clears
-        // in <500ms.
-        eventually(timeoutMs = 20_000, description = "work $id reaches SUCCEEDED") {
+        // to settle. History: 2s → 10s (a7cf360) → 20s (kover-100-coverage PR #31) →
+        // 60s (PR #36 first flake-fix attempt — UNCOMPLETED_COROUTINES error because
+        // runTest's own dispatchTimeoutMs is 60s default, so a 60s `eventually` ceiling
+        // collides with it). The PROPER fix is `runTest(timeout = 3.minutes)` to lift
+        // the outer ceiling, with `eventually` at 60s as the inner timeout. Local +
+        // warm CI clears in <500ms; `eventually` polls with backoff so a higher inner
+        // ceiling doesn't slow the happy path.
+        eventually(timeoutMs = 60_000, description = "work $id reaches SUCCEEDED") {
             wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED
         }
-        eventually(timeoutMs = 20_000, description = "persistence cleared of succeeded work $id") {
+        eventually(timeoutMs = 60_000, description = "persistence cleared of succeeded work $id") {
             sharedPersistence.loadAll().none { it.id == id }
         }
         wm.shutdown()

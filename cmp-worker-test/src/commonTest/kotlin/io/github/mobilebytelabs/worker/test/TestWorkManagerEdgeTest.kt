@@ -2,6 +2,7 @@ package io.github.mobilebytelabs.worker.test
 
 import io.github.mobilebytelabs.worker.CoroutineWorker
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
+import io.github.mobilebytelabs.worker.ExistingWorkPolicy
 import io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkResult
@@ -46,6 +47,30 @@ class TestWorkManagerEdgeTest {
         wm.cancelAllWorkByTag("done")
         // Already terminal — stays SUCCEEDED.
         assertEquals(WorkInfo.State.SUCCEEDED, wm.getWorkInfoById(id)?.state)
+    }
+
+    @Test
+    fun enqueueUniqueWork_replacePolicy_cancelsExisting() = runTest {
+        val wm = TestWorkManager()
+        val first = io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<FakeEdgeWorker>("W").build()
+        wm.enqueueUniqueWork("sync", ExistingWorkPolicy.REPLACE, first)
+        val second = io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<FakeEdgeWorker>("W").build()
+        wm.enqueueUniqueWork("sync", ExistingWorkPolicy.REPLACE, second)
+        // REPLACE path cancels the first one before enqueuing the second.
+        assertEquals(WorkInfo.State.CANCELLED, wm.getWorkInfoById(first.id)?.state)
+        assertEquals(WorkInfo.State.ENQUEUED, wm.getWorkInfoById(second.id)?.state)
+    }
+
+    @Test
+    fun enqueueUniqueWork_keepPolicy_doesNotCancelExisting() = runTest {
+        val wm = TestWorkManager()
+        val first = io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<FakeEdgeWorker>("W").build()
+        wm.enqueueUniqueWork("sync", ExistingWorkPolicy.KEEP, first)
+        val second = io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<FakeEdgeWorker>("W").build()
+        wm.enqueueUniqueWork("sync", ExistingWorkPolicy.KEEP, second)
+        // KEEP path leaves both ENQUEUED.
+        assertEquals(WorkInfo.State.ENQUEUED, wm.getWorkInfoById(first.id)?.state)
+        assertEquals(WorkInfo.State.ENQUEUED, wm.getWorkInfoById(second.id)?.state)
     }
 
     @Test

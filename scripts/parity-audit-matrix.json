@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-06-01T13:23:36Z",
+  "commit": "f6038d970bdeb2a5373515389bd0129a3db023f3",
+  "branch": "feat/cross-platform-worker-parity-audit",
+  "features": [
+    {"platform":"android","feature":"OneTimeWorkRequest","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
+    {"platform":"android","feature":"PeriodicWorkRequest","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
+    {"platform":"android","feature":"setExpedited","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
+    {"platform":"android","feature":"ForegroundBridge","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
+    {"platform":"android","feature":"beginUniqueWork","status":"absent","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
+    {"platform":"ios","feature":"BGProcessingTaskRequest","status":"wired","probed_path":"cmp-worker-ios/src/iosMain/kotlin"},
+    {"platform":"ios","feature":"BGAppRefreshTaskRequest","status":"wired","probed_path":"cmp-worker-ios/src/iosMain/kotlin"},
+    {"platform":"ios","feature":"BGContinuedProcessing","status":"absent","probed_path":"cmp-worker-ios/src/iosMain/kotlin"},
+    {"platform":"ios","feature":"cancelTask","status":"wired","probed_path":"cmp-worker-ios/src/iosMain/kotlin"},
+    {"platform":"ios","feature":"InfoPlistValidator","status":"absent","probed_path":"cmp-worker-ios/src/iosMain/kotlin"},
+    {"platform":"desktop","feature":"OneTimeWorkRequest","status":"wired","probed_path":"cmp-worker-desktop/src/jvmMain/kotlin"},
+    {"platform":"desktop","feature":"PeriodicWorkRequest","status":"wired","probed_path":"cmp-worker-desktop/src/jvmMain/kotlin"},
+    {"platform":"desktop","feature":"file-persistence","status":"wired","probed_path":"cmp-worker-desktop/src/jvmMain/kotlin"},
+    {"platform":"desktop","feature":"persistence-v2","status":"wired","probed_path":"cmp-worker-desktop/src/jvmMain/kotlin"},
+    {"platform":"desktop","feature":"daemon-dispatch","status":"absent","probed_path":"cmp-worker-desktop-daemon"},
+    {"platform":"desktop","feature":"win-installer","status":"wired","probed_path":"cmp-worker-desktop-daemon"},
+    {"platform":"desktop","feature":"macos-installer","status":"wired","probed_path":"cmp-worker-desktop-daemon"},
+    {"platform":"desktop","feature":"linux-installer","status":"wired","probed_path":"cmp-worker-desktop-daemon"},
+    {"platform":"web-js","feature":"ServiceWorker","status":"wired","probed_path":"cmp-worker-web/src/jsMain/kotlin"},
+    {"platform":"web-js","feature":"BroadcastChannel","status":"wired","probed_path":"cmp-worker-web/src/jsMain/kotlin"},
+    {"platform":"web-js","feature":"IndexedDB","status":"wired","probed_path":"cmp-worker-web/src/jsMain/kotlin"},
+    {"platform":"web-js","feature":"WebPush","status":"wired","probed_path":"cmp-worker-web-push/src/jsMain/kotlin"},
+    {"platform":"web-wasmjs","feature":"BroadcastChannel","status":"wired","probed_path":"cmp-worker-web/src/wasmJsMain/kotlin"},
+    {"platform":"web-wasmjs","feature":"WebPush","status":"wired","probed_path":"cmp-worker-web-push/src/wasmJsMain/kotlin"}
+  ]
+}

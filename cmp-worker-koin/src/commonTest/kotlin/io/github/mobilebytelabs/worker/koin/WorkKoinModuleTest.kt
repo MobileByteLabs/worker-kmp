@@ -105,6 +105,11 @@ internal class StubWorkManager : WorkManager {
         existingPeriodicWorkPolicy: ExistingPeriodicWorkPolicy,
         request: PeriodicWorkRequest,
     ): Uuid = Uuid.random()
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: OneTimeWorkRequest,
+    ): Uuid = Uuid.random()
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = flowOf(emptyList())
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = null
     override suspend fun cancelWorkById(id: Uuid) = Unit
