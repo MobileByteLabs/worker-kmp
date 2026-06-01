@@ -1,7 +1,4 @@
 {
-  "generated_at": "2026-06-01T14:27:25Z",
-  "commit": "42ed95e7c78393cf8a7a5f72a740bb68532d6612",
-  "branch": "development",
   "features": [
     {"platform":"android","feature":"OneTimeWorkRequest","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
     {"platform":"android","feature":"PeriodicWorkRequest","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},

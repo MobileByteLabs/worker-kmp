@@ -4,14 +4,21 @@
 #   1. Runs `bash scripts/run-parity-audit.sh` to regenerate
 #      scripts/parity-audit-matrix.json + the "Last audited" timestamp in
 #      docs/operations/cross-platform-parity-audit.md.
-#   2. If anything changed, opens a PR titled "chore(audit): refresh parity matrix".
+#   2. If the matrix's feature wiring changed, opens a PR titled
+#      "chore(audit): refresh parity matrix".
 #
 # Triggers
 #   - schedule: nightly at 06:00 UTC
 #   - workflow_dispatch: manual run from the Actions tab
-#   - push: when cmp-worker-* sources, the report, or the harness itself change
-#     on development (so a feature merge that closes/opens a gap doesn't sit
-#     stale on the published matrix until the nightly refresh)
+#   - push: when cmp-worker-* sources or the harness itself change on
+#     development (so a feature merge that closes/opens a gap doesn't sit
+#     stale until the nightly refresh)
+#
+# Self-referential triggers: this workflow's own outputs (the matrix JSON, the
+# audit report doc, and any auto-PR merge commits) are EXCLUDED from the push
+# trigger via paths-ignore. Otherwise the workflow would re-trigger itself on
+# every auto-PR merge, creating an infinite-PR loop (root cause of PRs #37-#40
+# on 2026-06-01).
 
 name: Parity audit
 
@@ -22,8 +29,10 @@ on:
   push:
     branches: [development]
     paths:
+      # Narrow allowlist — must NOT include the workflow's own outputs
+      # (parity-audit-matrix.json + cross-platform-parity-audit.md) or
+      # auto-merging the refresh PR will re-trigger this workflow → infinite loop.
       - "cmp-worker-*/**"
-      - "docs/operations/cross-platform-parity-audit.md"
       - "scripts/run-parity-audit.sh"
       - ".github/workflows/parity-audit.yml"
 
