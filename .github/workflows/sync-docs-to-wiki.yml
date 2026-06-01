@@ -6,15 +6,25 @@
 #      step initializes the underlying `worker-kmp.wiki.git` repo. Without it,
 #      the sync action below fails with `Repository not found`.
 #
-# After that, every push to development that touches docs/** publishes the
-# updated tree to the wiki. The wiki tree mirrors docs/ verbatim:
-#   docs/Home.md                              → Wiki Home page
-#   docs/_Sidebar.md                          → Wiki Sidebar
-#   docs/getting-started/installation.md      → Wiki page at /getting-started/installation
-#   docs/getting-started/convention-plugin.md → Wiki page at /getting-started/convention-plugin
+# What this workflow does
+# -----------------------
+# 1. Run `.github/scripts/rewrite-wiki-links.py` to copy docs/ → .wiki-build/
+#    while rewriting internal `.md` links to absolute /wiki/{basename} URLs.
+#    GitHub Wiki indexes every .md by basename (subdir context dropped), so
+#    relative links like `[text](getting-started/installation.md)` and
+#    `[text](installation.md)` BREAK on the wiki. The script fixes them.
+# 2. Run a smoke test to catch script regressions.
+# 3. Hand .wiki-build/ to the wiki sync action.
+#
+# Wiki layout: every doc lives at /wiki/{basename}. e.g.:
+#   docs/Home.md                              → /wiki/Home
+#   docs/_Sidebar.md                          → /wiki/_Sidebar
+#   docs/getting-started/installation.md      → /wiki/installation
+#   docs/getting-started/convention-plugin.md → /wiki/convention-plugin
+#   docs/platform-support/android.md          → /wiki/android
 #   …etc.
 #
-# Manual dispatch is also supported for ad-hoc syncs.
+# Manual dispatch is supported for ad-hoc syncs.
 
 name: Sync docs to Wiki
 
@@ -25,6 +35,7 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/sync-docs-to-wiki.yml'
+      - '.github/scripts/rewrite-wiki-links.py'
   workflow_dispatch:
 
 permissions:
@@ -37,8 +48,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Push docs/ to wiki
+      - name: Rewrite docs/ links → /wiki/ URLs (build .wiki-build/)
+        run: python3 .github/scripts/rewrite-wiki-links.py docs .wiki-build
+
+      - name: Smoke test — rewrite produced expected output
+        run: |
+          # Home.md must have at least one rewritten cross-dir link.
+          if ! grep -qE 'https://github\.com/MobileByteLabs/worker-kmp/wiki/installation\b' .wiki-build/Home.md; then
+            echo "::error::link rewrite failed — Home.md still has stale relative links"
+            echo "First few raw links remaining in .wiki-build/Home.md:"
+            grep -nE '\]\([^)]*\.md\)' .wiki-build/Home.md | head -5
+            exit 1
+          fi
+          # Out-of-tree refs MUST be preserved verbatim (we don't ship them to wiki).
+          if ! grep -qE '\(\.\./\.\./\.\./\.\./plan-layer/.*GOAL\.md\)' .wiki-build/getting-started/coverage.md; then
+            echo "::error::link rewrite over-reach — out-of-tree GOAL.md ref was rewritten"
+            exit 1
+          fi
+          echo "Link rewrite verified ✓"
+
+      - name: Push .wiki-build/ to wiki
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
-          path: docs
+          path: .wiki-build
           token: ${{ secrets.GITHUB_TOKEN }}
