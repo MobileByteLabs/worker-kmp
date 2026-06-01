@@ -298,14 +298,15 @@ class DesktopWorkManagerTest {
         val wm = workManager(sharedPersistence)
         val request = OneTimeWorkRequestBuilder<SuccessWorker>(SuccessWorker::class.qualifiedName!!).build()
         val id = wm.enqueue(request)
-        // CI runners (especially under load) can take >2s for the worker to transition
-        // to SUCCEEDED + the post-success persistence cleanup to settle. Bumped from
-        // the default 2s to 10s after a flake on a shared GitHub Actions runner
-        // (a7cf360 commit's first run). Local + warm CI typically clears in <500ms.
-        eventually(timeoutMs = 10_000, description = "work $id reaches SUCCEEDED") {
+        // CI runners (especially under load) can take significant wall-clock time for
+        // the worker to transition to SUCCEEDED + the post-success persistence cleanup
+        // to settle. History: 2s → 10s (a7cf360) → 20s (this commit, kover-100-coverage
+        // PR #31 first run flake at the 10s ceiling). Local + warm CI typically clears
+        // in <500ms.
+        eventually(timeoutMs = 20_000, description = "work $id reaches SUCCEEDED") {
             wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED
         }
-        eventually(timeoutMs = 10_000, description = "persistence cleared of succeeded work $id") {
+        eventually(timeoutMs = 20_000, description = "persistence cleared of succeeded work $id") {
             sharedPersistence.loadAll().none { it.id == id }
         }
         wm.shutdown()
