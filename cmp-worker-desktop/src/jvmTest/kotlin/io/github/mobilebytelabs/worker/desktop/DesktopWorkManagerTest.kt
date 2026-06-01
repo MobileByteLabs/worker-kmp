@@ -300,13 +300,14 @@ class DesktopWorkManagerTest {
         val id = wm.enqueue(request)
         // CI runners (especially under load) can take significant wall-clock time for
         // the worker to transition to SUCCEEDED + the post-success persistence cleanup
-        // to settle. History: 2s → 10s (a7cf360) → 20s (this commit, kover-100-coverage
-        // PR #31 first run flake at the 10s ceiling). Local + warm CI typically clears
-        // in <500ms.
-        eventually(timeoutMs = 20_000, description = "work $id reaches SUCCEEDED") {
+        // to settle. History: 2s → 10s (a7cf360) → 20s (kover-100-coverage PR #31 first
+        // run flake) → 60s (cross-platform-worker-parity-audit PR #36 second-run flake
+        // at the 20s ceiling). `eventually` polls with backoff so a higher ceiling
+        // doesn't slow the happy path — local + warm CI clears in <500ms.
+        eventually(timeoutMs = 60_000, description = "work $id reaches SUCCEEDED") {
             wm.getWorkInfoById(id)?.state == WorkInfo.State.SUCCEEDED
         }
-        eventually(timeoutMs = 20_000, description = "persistence cleared of succeeded work $id") {
+        eventually(timeoutMs = 60_000, description = "persistence cleared of succeeded work $id") {
             sharedPersistence.loadAll().none { it.id == id }
         }
         wm.shutdown()
