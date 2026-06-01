@@ -41,8 +41,4 @@ jobs:
         uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
           path: docs
-          # Default branch of the wiki repo is `master`; keep that to avoid
-          # creating a second branch.
-          default-branch: master
-          # Commit message author for the wiki commits.
           token: ${{ secrets.GITHUB_TOKEN }}

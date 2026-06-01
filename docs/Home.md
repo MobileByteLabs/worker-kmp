@@ -31,9 +31,11 @@ See [True Background Matrix](platform-support/true-background-matrix.md) for ful
 
 ### 1. Add the dependency
 
+> 📦 **Latest version:** see the [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=worker-kmp)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp) badge above. Replace `LATEST` in the snippets below with that string.
+
 ```kotlin
 // gradle/libs.versions.toml
-worker-kmp = "3.0.0"
+worker-kmp = "LATEST"  // ← put the current published version here
 
 // commonMain build.gradle.kts
 dependencies {
@@ -110,20 +112,22 @@ fun WorkDashboard() {
 
 ## Library modules
 
+All modules ship under the same version. Use the [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=latest)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp) version in your `libs.versions.toml`.
+
 | Module | Coordinates | Purpose |
 |---|---|---|
-| `cmp-worker-kmp` | `io.github.mobilebytelabs:worker-kmp:3.0.0` | Core API — `WorkManager`, `CoroutineWorker`, types |
-| `cmp-worker-koin` | `:worker-koin:3.0.0` | Koin DI module — `workKoinModule(...)` |
-| `cmp-worker-compose` | `:worker-compose:3.0.0` | Compose Multiplatform UI |
-| `cmp-worker-test` | `:worker-test:3.0.0` | Test utilities — `TestWorkManager` |
-| `cmp-worker-android` | `:worker-android:3.0.0` | Android actual (auto-wired) |
-| `cmp-worker-ios` | `:worker-ios:3.0.0` | iOS actual (auto-wired) |
-| `cmp-worker-desktop` | `:worker-desktop:3.0.0` | Desktop actual (auto-wired) |
-| `cmp-worker-web` | `:worker-web:3.0.0` | Web actual (auto-wired) |
-| `cmp-worker-store5` | `:worker-store5:3.0.0` | Store5 bridge (optional) |
-| `cmp-worker-storeflow` | `:worker-storeflow:3.0.0` | Offline-first patterns (optional) |
-| `cmp-worker-desktop-daemon` | `:worker-desktop-daemon:3.0.0` | Desktop OS-scheduler daemon (optional) |
-| `cmp-worker-web-push` | `:worker-web-push:3.0.0` | Web Push universal background (optional) |
+| `cmp-worker-kmp` | `io.github.mobilebytelabs:worker-kmp` | Core API — `WorkManager`, `CoroutineWorker`, types |
+| `cmp-worker-koin` | `io.github.mobilebytelabs:worker-koin` | Koin DI module — `workKoinModule(...)` |
+| `cmp-worker-compose` | `io.github.mobilebytelabs:worker-compose` | Compose Multiplatform UI |
+| `cmp-worker-test` | `io.github.mobilebytelabs:worker-test` | Test utilities — `TestWorkManager` |
+| `cmp-worker-android` | `io.github.mobilebytelabs:worker-android` | Android actual (auto-wired) |
+| `cmp-worker-ios` | `io.github.mobilebytelabs:worker-ios` | iOS actual (auto-wired) |
+| `cmp-worker-desktop` | `io.github.mobilebytelabs:worker-desktop` | Desktop actual (auto-wired) |
+| `cmp-worker-web` | `io.github.mobilebytelabs:worker-web` | Web actual (auto-wired) |
+| `cmp-worker-store5` | `io.github.mobilebytelabs:worker-store5` | Store5 bridge (optional) |
+| `cmp-worker-storeflow` | `io.github.mobilebytelabs:worker-storeflow` | Offline-first patterns (optional) |
+| `cmp-worker-desktop-daemon` | `io.github.mobilebytelabs:worker-desktop-daemon` | Desktop OS-scheduler daemon (optional) |
+| `cmp-worker-web-push` | `io.github.mobilebytelabs:worker-web-push` | Web Push universal background (optional) |
 
 ## Where next
 
