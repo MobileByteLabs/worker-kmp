@@ -15,6 +15,7 @@ dokka = "2.0.0"
 koin = "4.0.4"
 spotless = "8.5.1"
 detekt = "1.23.8"
+kover = "0.9.1"
 ktlint = "1.8.0"
 vanniktech-publish = "0.36.0"
 # Store5 — Mobile Native Foundation's KMP store/cache library.
@@ -52,6 +53,7 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 dokka-gradle = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 spotless-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+kover-gradlePlugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 # Convention plugins (samples/build-logic) use the kotlin-gradle-plugin extension types.
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 store5 = { module = "org.mobilenativefoundation.store:store5", version.ref = "store5" }
@@ -78,6 +80,8 @@ binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibil
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+kover-convention = { id = "io.github.mobilebytelabs.kover" }
 vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-publish" }
 # worker-kmp-app-plugin
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -18,6 +18,12 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
+    // NOTE: NOT opting into kover here. cmp-worker-app-annotations contains only
+    // @Retention(SOURCE) annotation declarations — zero runtime bytecode — so
+    // any coverage report would be 0/0. The Kover.kt root filter already excludes
+    // the annotation FQNs defensively. Skipping the convention avoids a Kover
+    // 0.9.1 limitation where it can't find the `android` extension on modules
+    // that use the new `android.kotlin.multiplatform.library` AGP 9+ plugin.
 }
 
 group = "io.github.mobilebytelabs"

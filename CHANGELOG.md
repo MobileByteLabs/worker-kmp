@@ -5,6 +5,45 @@ All notable changes to worker-kmp will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3] - 2026-06-01
+
+### Added
+
+- **Kover 0.9.1 + 100% line coverage on 8 commonMain modules.** Self-registering
+  `KoverConventionPlugin` ported from `mifos-x/kmp-project-template`; root
+  `koverVerify` task enforces `minBound(100)` per opted-in module. New
+  `.github/workflows/test-coverage.yml` runs `koverHtmlReport koverXmlReport
+  koverVerify` on every PR + push to `main` / `development`; uploads the HTML
+  artifact + emits aggregate `%` in PR Step Summary.
+
+- **~70 net-new `@Tests`** bringing 8 modules to 100% line coverage on
+  commonMain (excluding platform actuals + KSP-generated + annotation-only):
+
+  | Module | Status |
+  |---|---|
+  | `cmp-worker-kmp` | 100% commonMain |
+  | `cmp-worker-scheduler` | 100% commonMain |
+  | `cmp-worker-store5` | 100% commonMain |
+  | `cmp-worker-storeflow` | 100% commonMain |
+  | `cmp-worker-koin` | 100% commonMain |
+  | `cmp-worker-compose` | 100% commonMain |
+  | `cmp-worker-test` | 100% commonMain |
+  | `cmp-worker-app-annotations` | excluded (annotation-only) |
+
+### Documentation
+
+- New [`docs/getting-started/coverage.md`](docs/getting-started/coverage.md) —
+  Kover setup, exclusion rationale, how to add a new module, escape hatches,
+  CI workflow reference.
+
+### Deferred (Tier-2 follow-up)
+
+Platform-engine integration tests (`AndroidWorkManager`, `IosWorkManager`,
+`DesktopWorkManager`, `WebWorkManager`, `WebPushService`) tracked separately as
+[`worker-kmp-platform-engine-tests`](../../plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-platform-engine-tests/GOAL.md).
+Kover fundamentally can't measure these (JVM-only); the follow-up adds
+Robolectric (Android) + Xcode-sim (iOS) + browser-test (Web) harnesses.
+
 ## [3.1.1] - 2026-05-31 (WIP)
 
 ### ⚠ Breaking changes (pre-release — no consumers yet)

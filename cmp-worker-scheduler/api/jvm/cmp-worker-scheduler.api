@@ -1,0 +1,185 @@
+public class io/github/mobilebytelabs/worker/scheduler/DefaultWorkScheduler : io/github/mobilebytelabs/worker/scheduler/WorkScheduler {
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkManager;Lio/github/mobilebytelabs/worker/scheduler/sync/SyncStatePersister;Lkotlinx/coroutines/CoroutineScope;)V
+	public synthetic fun <init> (Lio/github/mobilebytelabs/worker/WorkManager;Lio/github/mobilebytelabs/worker/scheduler/sync/SyncStatePersister;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun cancelWork (Ljava/lang/String;)V
+	public fun enqueueDataSync (Lkotlin/reflect/KClass;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public fun observeWork (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun scheduleDailyDataSync (Lkotlin/reflect/KClass;Lkotlinx/datetime/LocalTime;Lkotlinx/datetime/TimeZone;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public fun scheduleDataSyncAt (Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public fun scheduleDataSyncAtExact (Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public fun schedulePeriodicDataSync-jKevqZI (Lkotlin/reflect/KClass;JJLio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/ExactAlarmScheduler {
+	public fun <init> (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;)V
+	public final fun scheduleExact (Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public final fun shutdown ()V
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/Sync {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/scheduler/Sync;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/SyncWorkHelpersKt {
+	public static final field FOREGROUND_NOTIFICATION_ID_SYNC I
+	public static final field SYNC_WORK_NAME Ljava/lang/String;
+	public static final fun getSyncConstraints ()Lio/github/mobilebytelabs/worker/Constraints;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/WorkHandle {
+	public fun <init> (Ljava/lang/String;)V
+	public fun <init> (Lkotlin/uuid/Uuid;Ljava/lang/String;)V
+	public synthetic fun <init> (Lkotlin/uuid/Uuid;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/uuid/Uuid;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Lkotlin/uuid/Uuid;Ljava/lang/String;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;Lkotlin/uuid/Uuid;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Lkotlin/uuid/Uuid;
+	public final fun getUniqueName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/WorkMode : java/lang/Enum {
+	public static final field Background Lio/github/mobilebytelabs/worker/scheduler/WorkMode;
+	public static final field Foreground Lio/github/mobilebytelabs/worker/scheduler/WorkMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/scheduler/WorkMode;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/scheduler/WorkMode;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/scheduler/WorkScheduler {
+	public abstract fun cancelWork (Ljava/lang/String;)V
+	public abstract fun enqueueDataSync (Lkotlin/reflect/KClass;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun enqueueDataSync$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public abstract fun observeWork (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun scheduleDailyDataSync (Lkotlin/reflect/KClass;Lkotlinx/datetime/LocalTime;Lkotlinx/datetime/TimeZone;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun scheduleDailyDataSync$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lkotlinx/datetime/LocalTime;Lkotlinx/datetime/TimeZone;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public abstract fun scheduleDataSyncAt (Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun scheduleDataSyncAt$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public abstract fun scheduleDataSyncAtExact (Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun scheduleDataSyncAtExact$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public abstract fun schedulePeriodicDataSync-jKevqZI (Lkotlin/reflect/KClass;JJLio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun schedulePeriodicDataSync-jKevqZI$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;JJLio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/WorkScheduler$DefaultImpls {
+	public static synthetic fun enqueueDataSync$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun scheduleDailyDataSync$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lkotlinx/datetime/LocalTime;Lkotlinx/datetime/TimeZone;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun scheduleDataSyncAt$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun scheduleDataSyncAtExact$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;Lkotlin/time/Instant;Lio/github/mobilebytelabs/worker/scheduler/WorkMode;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+	public static synthetic fun schedulePeriodicDataSync-jKevqZI$default (Lio/github/mobilebytelabs/worker/scheduler/WorkScheduler;Lkotlin/reflect/KClass;JJLio/github/mobilebytelabs/worker/WorkData;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/WorkHandle;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/WorkSchedulerKt {
+	public static final field DAILY_SYNC_WORK_NAME Ljava/lang/String;
+	public static final field PERIODIC_SYNC_WORK_NAME Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/WorkStatus : java/lang/Enum {
+	public static final field Cancelled Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+	public static final field Failed Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+	public static final field Pending Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+	public static final field Running Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+	public static final field Succeeded Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/scheduler/WorkStatus;
+}
+
+public abstract class io/github/mobilebytelabs/worker/scheduler/sync/AbstractDataSyncWorker : io/github/mobilebytelabs/worker/CoroutineWorker, io/github/mobilebytelabs/worker/scheduler/sync/Synchronizer {
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkerContext;Ljava/util/List;Lio/github/mobilebytelabs/worker/scheduler/sync/SyncStatePersister;)V
+	public fun doWork (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getChangeListVersions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sync (Lio/github/mobilebytelabs/worker/scheduler/sync/Syncable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun updateChangeListVersions (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions {
+	public static final field Companion Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/Map;
+	public final fun copy (Ljava/util/Map;)Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;Ljava/util/Map;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getVersions ()Ljava/util/Map;
+	public fun hashCode ()I
+	public final fun set (Ljava/lang/String;J)Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class io/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;)V
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/CompositeSyncable : io/github/mobilebytelabs/worker/scheduler/sync/Syncable {
+	public fun <init> (Ljava/util/List;)V
+	public fun <init> ([Lio/github/mobilebytelabs/worker/scheduler/sync/Syncable;)V
+	public fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/FetcherSyncable : io/github/mobilebytelabs/worker/scheduler/sync/Syncable {
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function2;)V
+	public fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/scheduler/sync/NetworkChange {
+	public abstract fun getChangeListVersion ()I
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun isDelete ()Z
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/scheduler/sync/SyncManager {
+	public abstract fun isSyncing ()Lkotlinx/coroutines/flow/Flow;
+	public abstract fun requestSync ()V
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/SyncStatePersister {
+	public fun <init> ()V
+	public fun <init> (Lkotlinx/serialization/json/Json;)V
+	public synthetic fun <init> (Lkotlinx/serialization/json/Json;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun read (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun write (Lio/github/mobilebytelabs/worker/scheduler/sync/ChangeListVersions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/scheduler/sync/Syncable {
+	public fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/Syncable$DefaultImpls {
+	public static fun syncWith (Lio/github/mobilebytelabs/worker/scheduler/sync/Syncable;Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lio/github/mobilebytelabs/worker/WorkData;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/scheduler/sync/Synchronizer {
+	public abstract fun getChangeListVersions (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sync (Lio/github/mobilebytelabs/worker/scheduler/sync/Syncable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun updateChangeListVersions (Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/Synchronizer$DefaultImpls {
+	public static fun sync (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lio/github/mobilebytelabs/worker/scheduler/sync/Syncable;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class io/github/mobilebytelabs/worker/scheduler/sync/SynchronizerKt {
+	public static final fun changeListSync (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun snapshotSync (Lio/github/mobilebytelabs/worker/scheduler/sync/Synchronizer;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+

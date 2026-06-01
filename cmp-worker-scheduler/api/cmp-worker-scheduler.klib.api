@@ -1,0 +1,196 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Alias: ios => [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-scheduler>
+final enum class io.github.mobilebytelabs.worker.scheduler/WorkMode : kotlin/Enum<io.github.mobilebytelabs.worker.scheduler/WorkMode> { // io.github.mobilebytelabs.worker.scheduler/WorkMode|null[0]
+    enum entry Background // io.github.mobilebytelabs.worker.scheduler/WorkMode.Background|null[0]
+    enum entry Foreground // io.github.mobilebytelabs.worker.scheduler/WorkMode.Foreground|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker.scheduler/WorkMode.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker.scheduler/WorkMode> // io.github.mobilebytelabs.worker.scheduler/WorkMode.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker.scheduler/WorkMode // io.github.mobilebytelabs.worker.scheduler/WorkMode.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker.scheduler/WorkMode> // io.github.mobilebytelabs.worker.scheduler/WorkMode.values|values#static(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker.scheduler/WorkStatus : kotlin/Enum<io.github.mobilebytelabs.worker.scheduler/WorkStatus> { // io.github.mobilebytelabs.worker.scheduler/WorkStatus|null[0]
+    enum entry Cancelled // io.github.mobilebytelabs.worker.scheduler/WorkStatus.Cancelled|null[0]
+    enum entry Failed // io.github.mobilebytelabs.worker.scheduler/WorkStatus.Failed|null[0]
+    enum entry Pending // io.github.mobilebytelabs.worker.scheduler/WorkStatus.Pending|null[0]
+    enum entry Running // io.github.mobilebytelabs.worker.scheduler/WorkStatus.Running|null[0]
+    enum entry Succeeded // io.github.mobilebytelabs.worker.scheduler/WorkStatus.Succeeded|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker.scheduler/WorkStatus.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker.scheduler/WorkStatus> // io.github.mobilebytelabs.worker.scheduler/WorkStatus.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker.scheduler/WorkStatus // io.github.mobilebytelabs.worker.scheduler/WorkStatus.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker.scheduler/WorkStatus> // io.github.mobilebytelabs.worker.scheduler/WorkStatus.values|values#static(){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange { // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange|null[0]
+    abstract val changeListVersion // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange.changeListVersion|{}changeListVersion[0]
+        abstract fun <get-changeListVersion>(): kotlin/Int // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange.changeListVersion.<get-changeListVersion>|<get-changeListVersion>(){}[0]
+    abstract val id // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange.id|{}id[0]
+        abstract fun <get-id>(): kotlin/String // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange.id.<get-id>|<get-id>(){}[0]
+    abstract val isDelete // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange.isDelete|{}isDelete[0]
+        abstract fun <get-isDelete>(): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange.isDelete.<get-isDelete>|<get-isDelete>(){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker.scheduler.sync/SyncManager { // io.github.mobilebytelabs.worker.scheduler.sync/SyncManager|null[0]
+    abstract val isSyncing // io.github.mobilebytelabs.worker.scheduler.sync/SyncManager.isSyncing|{}isSyncing[0]
+        abstract fun <get-isSyncing>(): kotlinx.coroutines.flow/Flow<kotlin/Boolean> // io.github.mobilebytelabs.worker.scheduler.sync/SyncManager.isSyncing.<get-isSyncing>|<get-isSyncing>(){}[0]
+
+    abstract fun requestSync() // io.github.mobilebytelabs.worker.scheduler.sync/SyncManager.requestSync|requestSync(){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker.scheduler.sync/Syncable { // io.github.mobilebytelabs.worker.scheduler.sync/Syncable|null[0]
+    abstract suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/Syncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer){}[0]
+    open suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer, io.github.mobilebytelabs.worker/WorkData): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/Syncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer;io.github.mobilebytelabs.worker.WorkData){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer { // io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer|null[0]
+    abstract suspend fun getChangeListVersions(): io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions // io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer.getChangeListVersions|getChangeListVersions(){}[0]
+    abstract suspend fun updateChangeListVersions(kotlin/Function1<io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions, io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions>) // io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer.updateChangeListVersions|updateChangeListVersions(kotlin.Function1<io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions,io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions>){}[0]
+    open suspend fun (io.github.mobilebytelabs.worker.scheduler.sync/Syncable).sync(): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer.sync|sync@io.github.mobilebytelabs.worker.scheduler.sync.Syncable(){}[0]
+}
+
+abstract interface io.github.mobilebytelabs.worker.scheduler/WorkScheduler { // io.github.mobilebytelabs.worker.scheduler/WorkScheduler|null[0]
+    abstract fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> enqueueDataSync(kotlin.reflect/KClass<#A1>, io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A1>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.enqueueDataSync|enqueueDataSync(kotlin.reflect.KClass<0:0>;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    abstract fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleDailyDataSync(kotlin.reflect/KClass<#A1>, kotlinx.datetime/LocalTime, kotlinx.datetime/TimeZone = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A1>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.scheduleDailyDataSync|scheduleDailyDataSync(kotlin.reflect.KClass<0:0>;kotlinx.datetime.LocalTime;kotlinx.datetime.TimeZone;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    abstract fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleDataSyncAt(kotlin.reflect/KClass<#A1>, kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A1>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.scheduleDataSyncAt|scheduleDataSyncAt(kotlin.reflect.KClass<0:0>;kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    abstract fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleDataSyncAtExact(kotlin.reflect/KClass<#A1>, kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A1>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.scheduleDataSyncAtExact|scheduleDataSyncAtExact(kotlin.reflect.KClass<0:0>;kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    abstract fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> schedulePeriodicDataSync(kotlin.reflect/KClass<#A1>, kotlin.time/Duration, kotlin.time/Duration = ..., io.github.mobilebytelabs.worker/WorkData = ..., kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A1>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.schedulePeriodicDataSync|schedulePeriodicDataSync(kotlin.reflect.KClass<0:0>;kotlin.time.Duration;kotlin.time.Duration;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    abstract fun cancelWork(kotlin/String) // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.cancelWork|cancelWork(kotlin.String){}[0]
+    abstract fun observeWork(kotlin/String): kotlinx.coroutines.flow/Flow<io.github.mobilebytelabs.worker.scheduler/WorkStatus> // io.github.mobilebytelabs.worker.scheduler/WorkScheduler.observeWork|observeWork(kotlin.String){}[0]
+}
+
+abstract class io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker : io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer, io.github.mobilebytelabs.worker/CoroutineWorker { // io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkerContext, kotlin.collections/List<io.github.mobilebytelabs.worker.scheduler.sync/Syncable>, io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister) // io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker.<init>|<init>(io.github.mobilebytelabs.worker.WorkerContext;kotlin.collections.List<io.github.mobilebytelabs.worker.scheduler.sync.Syncable>;io.github.mobilebytelabs.worker.scheduler.sync.SyncStatePersister){}[0]
+
+    open suspend fun doWork(): io.github.mobilebytelabs.worker/WorkResult // io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker.doWork|doWork(){}[0]
+    open suspend fun getChangeListVersions(): io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions // io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker.getChangeListVersions|getChangeListVersions(){}[0]
+    open suspend fun updateChangeListVersions(kotlin/Function1<io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions, io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions>) // io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker.updateChangeListVersions|updateChangeListVersions(kotlin.Function1<io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions,io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions>){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions { // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions|null[0]
+    constructor <init>(kotlin.collections/Map<kotlin/String, kotlin/Long> = ...) // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.<init>|<init>(kotlin.collections.Map<kotlin.String,kotlin.Long>){}[0]
+
+    final val versions // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.versions|{}versions[0]
+        final fun <get-versions>(): kotlin.collections/Map<kotlin/String, kotlin/Long> // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.versions.<get-versions>|<get-versions>(){}[0]
+
+    final fun component1(): kotlin.collections/Map<kotlin/String, kotlin/Long> // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.component1|component1(){}[0]
+    final fun copy(kotlin.collections/Map<kotlin/String, kotlin/Long> = ...): io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.copy|copy(kotlin.collections.Map<kotlin.String,kotlin.Long>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.hashCode|hashCode(){}[0]
+    final fun set(kotlin/String, kotlin/Long): io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.set|set(kotlin.String;kotlin.Long){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions> { // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.$serializer|null[0]
+        final val descriptor // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions) // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions){}[0]
+    }
+
+    final object Companion { // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.Companion|null[0]
+        final val $childSerializers // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions> // io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions.Companion.serializer|serializer(){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker.scheduler.sync/CompositeSyncable : io.github.mobilebytelabs.worker.scheduler.sync/Syncable { // io.github.mobilebytelabs.worker.scheduler.sync/CompositeSyncable|null[0]
+    constructor <init>(kotlin.collections/List<io.github.mobilebytelabs.worker.scheduler.sync/Syncable>) // io.github.mobilebytelabs.worker.scheduler.sync/CompositeSyncable.<init>|<init>(kotlin.collections.List<io.github.mobilebytelabs.worker.scheduler.sync.Syncable>){}[0]
+    constructor <init>(kotlin/Array<out io.github.mobilebytelabs.worker.scheduler.sync/Syncable>...) // io.github.mobilebytelabs.worker.scheduler.sync/CompositeSyncable.<init>|<init>(kotlin.Array<out|io.github.mobilebytelabs.worker.scheduler.sync.Syncable>...){}[0]
+
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/CompositeSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer){}[0]
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer, io.github.mobilebytelabs.worker/WorkData): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/CompositeSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer;io.github.mobilebytelabs.worker.WorkData){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.scheduler.sync/FetcherSyncable : io.github.mobilebytelabs.worker.scheduler.sync/Syncable { // io.github.mobilebytelabs.worker.scheduler.sync/FetcherSyncable|null[0]
+    constructor <init>(kotlin/String, kotlin.coroutines/SuspendFunction0<kotlin/Unit>) // io.github.mobilebytelabs.worker.scheduler.sync/FetcherSyncable.<init>|<init>(kotlin.String;kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+    constructor <init>(kotlin/String, kotlin.coroutines/SuspendFunction1<io.github.mobilebytelabs.worker/WorkData, kotlin/Unit>) // io.github.mobilebytelabs.worker.scheduler.sync/FetcherSyncable.<init>|<init>(kotlin.String;kotlin.coroutines.SuspendFunction1<io.github.mobilebytelabs.worker.WorkData,kotlin.Unit>){}[0]
+
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/FetcherSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer){}[0]
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer, io.github.mobilebytelabs.worker/WorkData): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/FetcherSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer;io.github.mobilebytelabs.worker.WorkData){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister { // io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister|null[0]
+    constructor <init>(kotlinx.serialization.json/Json = ...) // io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister.<init>|<init>(kotlinx.serialization.json.Json){}[0]
+
+    final suspend fun read(): io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions // io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister.read|read(){}[0]
+    final suspend fun write(io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions) // io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister.write|write(io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler { // io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker.scheduler/WorkScheduler) // io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler.<init>|<init>(io.github.mobilebytelabs.worker.scheduler.WorkScheduler){}[0]
+
+    final fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleExact(kotlin.reflect/KClass<#A1>, kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode, io.github.mobilebytelabs.worker/WorkData): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler.scheduleExact|scheduleExact(kotlin.reflect.KClass<0:0>;kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+
+    // Targets: [ios]
+    final object Companion { // io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler.Companion|null[0]
+        final const val BG_TASK_ID // io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler.Companion.BG_TASK_ID|{}BG_TASK_ID[0]
+            final fun <get-BG_TASK_ID>(): kotlin/String // io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler.Companion.BG_TASK_ID.<get-BG_TASK_ID>|<get-BG_TASK_ID>(){}[0]
+    }
+}
+
+final class io.github.mobilebytelabs.worker.scheduler/WorkHandle { // io.github.mobilebytelabs.worker.scheduler/WorkHandle|null[0]
+    constructor <init>(kotlin.uuid/Uuid, kotlin/String? = ...) // io.github.mobilebytelabs.worker.scheduler/WorkHandle.<init>|<init>(kotlin.uuid.Uuid;kotlin.String?){}[0]
+    constructor <init>(kotlin/String?) // io.github.mobilebytelabs.worker.scheduler/WorkHandle.<init>|<init>(kotlin.String?){}[0]
+
+    final val id // io.github.mobilebytelabs.worker.scheduler/WorkHandle.id|{}id[0]
+        final fun <get-id>(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.scheduler/WorkHandle.id.<get-id>|<get-id>(){}[0]
+    final val uniqueName // io.github.mobilebytelabs.worker.scheduler/WorkHandle.uniqueName|{}uniqueName[0]
+        final fun <get-uniqueName>(): kotlin/String? // io.github.mobilebytelabs.worker.scheduler/WorkHandle.uniqueName.<get-uniqueName>|<get-uniqueName>(){}[0]
+
+    final fun component1(): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.scheduler/WorkHandle.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // io.github.mobilebytelabs.worker.scheduler/WorkHandle.component2|component2(){}[0]
+    final fun copy(kotlin.uuid/Uuid = ..., kotlin/String? = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/WorkHandle.copy|copy(kotlin.uuid.Uuid;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler/WorkHandle.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.scheduler/WorkHandle.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.scheduler/WorkHandle.toString|toString(){}[0]
+}
+
+open class io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler : io.github.mobilebytelabs.worker.scheduler/WorkScheduler { // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkManager, io.github.mobilebytelabs.worker.scheduler.sync/SyncStatePersister, kotlinx.coroutines/CoroutineScope = ...) // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.<init>|<init>(io.github.mobilebytelabs.worker.WorkManager;io.github.mobilebytelabs.worker.scheduler.sync.SyncStatePersister;kotlinx.coroutines.CoroutineScope){}[0]
+
+    open fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> enqueueDataSync(kotlin.reflect/KClass<#A1>, io.github.mobilebytelabs.worker.scheduler/WorkMode, io.github.mobilebytelabs.worker/WorkData, kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A1>, kotlin/Unit>): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.enqueueDataSync|enqueueDataSync(kotlin.reflect.KClass<0:0>;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    open fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleDailyDataSync(kotlin.reflect/KClass<#A1>, kotlinx.datetime/LocalTime, kotlinx.datetime/TimeZone, io.github.mobilebytelabs.worker/WorkData, kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A1>, kotlin/Unit>): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.scheduleDailyDataSync|scheduleDailyDataSync(kotlin.reflect.KClass<0:0>;kotlinx.datetime.LocalTime;kotlinx.datetime.TimeZone;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    open fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleDataSyncAt(kotlin.reflect/KClass<#A1>, kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode, io.github.mobilebytelabs.worker/WorkData, kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A1>, kotlin/Unit>): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.scheduleDataSyncAt|scheduleDataSyncAt(kotlin.reflect.KClass<0:0>;kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    open fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> scheduleDataSyncAtExact(kotlin.reflect/KClass<#A1>, kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode, io.github.mobilebytelabs.worker/WorkData, kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A1>, kotlin/Unit>): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.scheduleDataSyncAtExact|scheduleDataSyncAtExact(kotlin.reflect.KClass<0:0>;kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    open fun <#A1: io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> schedulePeriodicDataSync(kotlin.reflect/KClass<#A1>, kotlin.time/Duration, kotlin.time/Duration, io.github.mobilebytelabs.worker/WorkData, kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A1>, kotlin/Unit>): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.schedulePeriodicDataSync|schedulePeriodicDataSync(kotlin.reflect.KClass<0:0>;kotlin.time.Duration;kotlin.time.Duration;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+    open fun cancelWork(kotlin/String) // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.cancelWork|cancelWork(kotlin.String){}[0]
+    open fun observeWork(kotlin/String): kotlinx.coroutines.flow/Flow<io.github.mobilebytelabs.worker.scheduler/WorkStatus> // io.github.mobilebytelabs.worker.scheduler/DefaultWorkScheduler.observeWork|observeWork(kotlin.String){}[0]
+}
+
+final object io.github.mobilebytelabs.worker.scheduler/Sync { // io.github.mobilebytelabs.worker.scheduler/Sync|null[0]
+    final inline fun <#A1: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> initialize(io.github.mobilebytelabs.worker.scheduler/WorkScheduler) // io.github.mobilebytelabs.worker.scheduler/Sync.initialize|initialize(io.github.mobilebytelabs.worker.scheduler.WorkScheduler){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+}
+
+final const val io.github.mobilebytelabs.worker.scheduler/DAILY_SYNC_WORK_NAME // io.github.mobilebytelabs.worker.scheduler/DAILY_SYNC_WORK_NAME|{}DAILY_SYNC_WORK_NAME[0]
+    final fun <get-DAILY_SYNC_WORK_NAME>(): kotlin/String // io.github.mobilebytelabs.worker.scheduler/DAILY_SYNC_WORK_NAME.<get-DAILY_SYNC_WORK_NAME>|<get-DAILY_SYNC_WORK_NAME>(){}[0]
+final const val io.github.mobilebytelabs.worker.scheduler/FOREGROUND_NOTIFICATION_ID_SYNC // io.github.mobilebytelabs.worker.scheduler/FOREGROUND_NOTIFICATION_ID_SYNC|{}FOREGROUND_NOTIFICATION_ID_SYNC[0]
+    final fun <get-FOREGROUND_NOTIFICATION_ID_SYNC>(): kotlin/Int // io.github.mobilebytelabs.worker.scheduler/FOREGROUND_NOTIFICATION_ID_SYNC.<get-FOREGROUND_NOTIFICATION_ID_SYNC>|<get-FOREGROUND_NOTIFICATION_ID_SYNC>(){}[0]
+final const val io.github.mobilebytelabs.worker.scheduler/PERIODIC_SYNC_WORK_NAME // io.github.mobilebytelabs.worker.scheduler/PERIODIC_SYNC_WORK_NAME|{}PERIODIC_SYNC_WORK_NAME[0]
+    final fun <get-PERIODIC_SYNC_WORK_NAME>(): kotlin/String // io.github.mobilebytelabs.worker.scheduler/PERIODIC_SYNC_WORK_NAME.<get-PERIODIC_SYNC_WORK_NAME>|<get-PERIODIC_SYNC_WORK_NAME>(){}[0]
+final const val io.github.mobilebytelabs.worker.scheduler/SYNC_WORK_NAME // io.github.mobilebytelabs.worker.scheduler/SYNC_WORK_NAME|{}SYNC_WORK_NAME[0]
+    final fun <get-SYNC_WORK_NAME>(): kotlin/String // io.github.mobilebytelabs.worker.scheduler/SYNC_WORK_NAME.<get-SYNC_WORK_NAME>|<get-SYNC_WORK_NAME>(){}[0]
+
+final val io.github.mobilebytelabs.worker.scheduler/SyncConstraints // io.github.mobilebytelabs.worker.scheduler/SyncConstraints|{}SyncConstraints[0]
+    final fun <get-SyncConstraints>(): io.github.mobilebytelabs.worker/Constraints // io.github.mobilebytelabs.worker.scheduler/SyncConstraints.<get-SyncConstraints>|<get-SyncConstraints>(){}[0]
+
+final inline fun <#A: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> (io.github.mobilebytelabs.worker.scheduler/ExactAlarmScheduler).io.github.mobilebytelabs.worker.scheduler/scheduleExact(kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/scheduleExact|scheduleExact@io.github.mobilebytelabs.worker.scheduler.ExactAlarmScheduler(kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> (io.github.mobilebytelabs.worker.scheduler/WorkScheduler).io.github.mobilebytelabs.worker.scheduler/enqueueDataSync(io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ..., noinline kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/enqueueDataSync|enqueueDataSync@io.github.mobilebytelabs.worker.scheduler.WorkScheduler(io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> (io.github.mobilebytelabs.worker.scheduler/WorkScheduler).io.github.mobilebytelabs.worker.scheduler/scheduleDailyDataSync(kotlinx.datetime/LocalTime, kotlinx.datetime/TimeZone = ..., io.github.mobilebytelabs.worker/WorkData = ..., noinline kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/scheduleDailyDataSync|scheduleDailyDataSync@io.github.mobilebytelabs.worker.scheduler.WorkScheduler(kotlinx.datetime.LocalTime;kotlinx.datetime.TimeZone;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> (io.github.mobilebytelabs.worker.scheduler/WorkScheduler).io.github.mobilebytelabs.worker.scheduler/scheduleDataSyncAt(kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ..., noinline kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/scheduleDataSyncAt|scheduleDataSyncAt@io.github.mobilebytelabs.worker.scheduler.WorkScheduler(kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> (io.github.mobilebytelabs.worker.scheduler/WorkScheduler).io.github.mobilebytelabs.worker.scheduler/scheduleDataSyncAtExact(kotlin.time/Instant, io.github.mobilebytelabs.worker.scheduler/WorkMode = ..., io.github.mobilebytelabs.worker/WorkData = ..., noinline kotlin/Function1<io.github.mobilebytelabs.worker/OneTimeWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/scheduleDataSyncAtExact|scheduleDataSyncAtExact@io.github.mobilebytelabs.worker.scheduler.WorkScheduler(kotlin.time.Instant;io.github.mobilebytelabs.worker.scheduler.WorkMode;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.OneTimeWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+final inline fun <#A: reified io.github.mobilebytelabs.worker.scheduler.sync/AbstractDataSyncWorker> (io.github.mobilebytelabs.worker.scheduler/WorkScheduler).io.github.mobilebytelabs.worker.scheduler/schedulePeriodicDataSync(kotlin.time/Duration, kotlin.time/Duration = ..., io.github.mobilebytelabs.worker/WorkData = ..., noinline kotlin/Function1<io.github.mobilebytelabs.worker/PeriodicWorkRequestBuilder<#A>, kotlin/Unit> = ...): io.github.mobilebytelabs.worker.scheduler/WorkHandle // io.github.mobilebytelabs.worker.scheduler/schedulePeriodicDataSync|schedulePeriodicDataSync@io.github.mobilebytelabs.worker.scheduler.WorkScheduler(kotlin.time.Duration;kotlin.time.Duration;io.github.mobilebytelabs.worker.WorkData;kotlin.Function1<io.github.mobilebytelabs.worker.PeriodicWorkRequestBuilder<0:0>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.AbstractDataSyncWorker>}[0]
+final suspend fun (io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer).io.github.mobilebytelabs.worker.scheduler.sync/snapshotSync(kotlin/String, kotlin.coroutines/SuspendFunction0<kotlin/Unit>): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/snapshotSync|snapshotSync@io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer(kotlin.String;kotlin.coroutines.SuspendFunction0<kotlin.Unit>){}[0]
+final suspend fun <#A: io.github.mobilebytelabs.worker.scheduler.sync/NetworkChange> (io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer).io.github.mobilebytelabs.worker.scheduler.sync/changeListSync(kotlin/Function1<io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions, kotlin/Int>, kotlin.coroutines/SuspendFunction1<kotlin/Int, kotlin.collections/List<#A>>, kotlin/Function2<io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions, kotlin/Int, io.github.mobilebytelabs.worker.scheduler.sync/ChangeListVersions>, kotlin.coroutines/SuspendFunction1<kotlin.collections/List<kotlin/String>, kotlin/Unit>, kotlin.coroutines/SuspendFunction1<kotlin.collections/List<kotlin/String>, kotlin/Unit>): kotlin/Boolean // io.github.mobilebytelabs.worker.scheduler.sync/changeListSync|changeListSync@io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer(kotlin.Function1<io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions,kotlin.Int>;kotlin.coroutines.SuspendFunction1<kotlin.Int,kotlin.collections.List<0:0>>;kotlin.Function2<io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions,kotlin.Int,io.github.mobilebytelabs.worker.scheduler.sync.ChangeListVersions>;kotlin.coroutines.SuspendFunction1<kotlin.collections.List<kotlin.String>,kotlin.Unit>;kotlin.coroutines.SuspendFunction1<kotlin.collections.List<kotlin.String>,kotlin.Unit>){0§<io.github.mobilebytelabs.worker.scheduler.sync.NetworkChange>}[0]

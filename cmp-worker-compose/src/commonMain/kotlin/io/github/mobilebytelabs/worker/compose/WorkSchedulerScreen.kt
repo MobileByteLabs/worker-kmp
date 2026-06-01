@@ -224,13 +224,16 @@ private fun ConstraintCheckbox(
     }
 }
 
-private fun buildOneTimeRequest(workerClass: String, tag: String, constraints: Constraints): OneTimeWorkRequest {
+// Visibility raised from `private` → `internal` so commonTest can verify the
+// builder branches directly. The enclosing `WorkSchedulerScreen` Composable
+// remains the only public-API user. Per kover-100-coverage Phase 6.
+internal fun buildOneTimeRequest(workerClass: String, tag: String, constraints: Constraints): OneTimeWorkRequest {
     val builder = OneTimeWorkRequestBuilder<Nothing>(workerClass).setConstraints(constraints)
     if (tag.isNotEmpty()) builder.addTag(tag)
     return builder.build()
 }
 
-private fun buildPeriodicRequest(
+internal fun buildPeriodicRequest(
     workerClass: String,
     tag: String,
     constraints: Constraints,

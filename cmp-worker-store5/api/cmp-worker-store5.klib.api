@@ -36,6 +36,20 @@ abstract class <#A: kotlin/Any, #B: kotlin/Any> io.github.mobilebytelabs.worker.
     }
 }
 
+final class <#A: kotlin/Any, #B: kotlin/Any> io.github.mobilebytelabs.worker.store5.scheduler/MutableStoreSyncable : io.github.mobilebytelabs.worker.scheduler.sync/Syncable { // io.github.mobilebytelabs.worker.store5.scheduler/MutableStoreSyncable|null[0]
+    constructor <init>(kotlin/String, #A, #B, org.mobilenativefoundation.store.store5/MutableStore<#A, #B>) // io.github.mobilebytelabs.worker.store5.scheduler/MutableStoreSyncable.<init>|<init>(kotlin.String;1:0;1:1;org.mobilenativefoundation.store.store5.MutableStore<1:0,1:1>){}[0]
+
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer): kotlin/Boolean // io.github.mobilebytelabs.worker.store5.scheduler/MutableStoreSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer){}[0]
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer, io.github.mobilebytelabs.worker/WorkData): kotlin/Boolean // io.github.mobilebytelabs.worker.store5.scheduler/MutableStoreSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer;io.github.mobilebytelabs.worker.WorkData){}[0]
+}
+
+final class <#A: kotlin/Any, #B: kotlin/Any> io.github.mobilebytelabs.worker.store5.scheduler/StoreSyncable : io.github.mobilebytelabs.worker.scheduler.sync/Syncable { // io.github.mobilebytelabs.worker.store5.scheduler/StoreSyncable|null[0]
+    constructor <init>(kotlin/String, #A, org.mobilenativefoundation.store.store5/Store<#A, #B>) // io.github.mobilebytelabs.worker.store5.scheduler/StoreSyncable.<init>|<init>(kotlin.String;1:0;org.mobilenativefoundation.store.store5.Store<1:0,1:1>){}[0]
+
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer): kotlin/Boolean // io.github.mobilebytelabs.worker.store5.scheduler/StoreSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer){}[0]
+    final suspend fun syncWith(io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer, io.github.mobilebytelabs.worker/WorkData): kotlin/Boolean // io.github.mobilebytelabs.worker.store5.scheduler/StoreSyncable.syncWith|syncWith(io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer;io.github.mobilebytelabs.worker.WorkData){}[0]
+}
+
 final class io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler { // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler|null[0]
     constructor <init>(io.github.mobilebytelabs.worker/WorkManager) // io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler.<init>|<init>(io.github.mobilebytelabs.worker.WorkManager){}[0]
 
@@ -54,3 +68,6 @@ final class io.github.mobilebytelabs.worker.store5/StoreRefreshScheduler { // io
 
 final val io.github.mobilebytelabs.worker.store5.koin/workStore5KoinModule // io.github.mobilebytelabs.worker.store5.koin/workStore5KoinModule|{}workStore5KoinModule[0]
     final fun <get-workStore5KoinModule>(): org.koin.core.module/Module // io.github.mobilebytelabs.worker.store5.koin/workStore5KoinModule.<get-workStore5KoinModule>|<get-workStore5KoinModule>(){}[0]
+
+final suspend fun <#A: kotlin/Any, #B: kotlin/Any> (io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer).io.github.mobilebytelabs.worker.store5.scheduler/mutableStoreSync(kotlin/String, #A, #B, org.mobilenativefoundation.store.store5/MutableStore<#A, #B>): kotlin/Boolean // io.github.mobilebytelabs.worker.store5.scheduler/mutableStoreSync|mutableStoreSync@io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer(kotlin.String;0:0;0:1;org.mobilenativefoundation.store.store5.MutableStore<0:0,0:1>){0§<kotlin.Any>;1§<kotlin.Any>}[0]
+final suspend fun <#A: kotlin/Any, #B: kotlin/Any> (io.github.mobilebytelabs.worker.scheduler.sync/Synchronizer).io.github.mobilebytelabs.worker.store5.scheduler/storeSync(kotlin/String, #A, org.mobilenativefoundation.store.store5/Store<#A, #B>): kotlin/Boolean // io.github.mobilebytelabs.worker.store5.scheduler/storeSync|storeSync@io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer(kotlin.String;0:0;org.mobilenativefoundation.store.store5.Store<0:0,0:1>){0§<kotlin.Any>;1§<kotlin.Any>}[0]

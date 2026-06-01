@@ -6,6 +6,8 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Kotlin](https://img.shields.io/badge/Kotlin-Multiplatform-7f52ff.svg)](https://kotlinlang.org/docs/multiplatform.html)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose-Multiplatform-4285f4.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](docs/getting-started/coverage.md)
+[![Test Coverage CI](https://github.com/MobileByteLabs/worker-kmp/actions/workflows/test-coverage.yml/badge.svg?branch=development)](https://github.com/MobileByteLabs/worker-kmp/actions/workflows/test-coverage.yml)
 
 ## Out-of-box platform support
 

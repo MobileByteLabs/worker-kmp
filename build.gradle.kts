@@ -9,12 +9,14 @@ plugins {
     alias(libs.plugins.kotlinx.serialization) apply false
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.kover) apply false
     alias(libs.plugins.vanniktech.publish) apply false
     alias(libs.plugins.binary.compatibility.validator)
     alias(libs.plugins.dokka)
     id("io.github.mobilebytelabs.spotless")
     id("io.github.mobilebytelabs.dokka")
     id("io.github.mobilebytelabs.detekt")
+    alias(libs.plugins.kover.convention)
     // Phase 10 (security threat model) — CycloneDX SBOM generation for supply-chain transparency.
     // Applied at root to aggregate a full-project SBOM via the `cyclonedxBom` task.
     // CI consumed by .github/workflows/security-scan.yml (sbom-cyclonedx job).
@@ -44,7 +46,7 @@ apiValidation {
 }
 
 tasks.named("check") {
-    dependsOn("detekt", "spotlessCheck")
+    dependsOn("detekt", "spotlessCheck", "koverVerify")
 }
 
 tasks.register("fix") {
