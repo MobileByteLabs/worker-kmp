@@ -1,5 +1,6 @@
 package io.github.mobilebytelabs.worker.ios
 
+import io.github.mobilebytelabs.worker.BgContinuedProcessing
 import io.github.mobilebytelabs.worker.CoroutineWorker
 import io.github.mobilebytelabs.worker.ExperimentalWorkerApi
 import io.github.mobilebytelabs.worker.WorkManagerFactory
@@ -46,6 +47,11 @@ public fun iosWorkManagerFactory(): WorkManagerFactory = WorkManagerFactory { co
         appRefreshTaskIdentifier = config.iosConfig.appRefreshTaskIdentifier,
     )
     validateInfoPlist(iosConfig)
+    // Plumb the iOS 17+ ContinuedProcessing identifier through the module-level holder so
+    // the commonMain runAsForeground() actual (which doesn't have IosWorkerConfig in scope)
+    // can route foreground work through the ContinuedProcessing path when set.
+    // Added by cross-platform-worker-parity-audit sub-plan 02.
+    BgContinuedProcessing.setIdentifier(config.iosConfig.continuedProcessingTaskIdentifier)
     IosWorkManager(
         workerFactory = WorkerRegistryIosAdapter(workers),
         config = iosConfig,

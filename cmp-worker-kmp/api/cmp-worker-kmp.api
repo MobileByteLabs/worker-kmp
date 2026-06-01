@@ -91,6 +91,16 @@ public final class io/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy : 
 	public static fun values ()[Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;
 }
 
+public final class io/github/mobilebytelabs/worker/ExistingWorkPolicy : java/lang/Enum {
+	public static final field APPEND Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;
+	public static final field APPEND_OR_REPLACE Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;
+	public static final field KEEP Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;
+	public static final field REPLACE Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;
+}
+
 public abstract interface annotation class io/github/mobilebytelabs/worker/ExperimentalForegroundApi : java/lang/annotation/Annotation {
 }
 
@@ -428,6 +438,7 @@ public abstract interface class io/github/mobilebytelabs/worker/WorkManager {
 	public abstract fun cancelWorkById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun enqueue (Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun enqueueUniquePeriodicWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingPeriodicWorkPolicy;Lio/github/mobilebytelabs/worker/PeriodicWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun enqueueUniqueWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
 }
@@ -605,18 +616,20 @@ public final class io/github/mobilebytelabs/worker/config/DesktopWorkerConfig {
 
 public final class io/github/mobilebytelabs/worker/config/IosWorkerConfig {
 	public fun <init> ()V
-	public fun <init> (ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Z
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;)Lio/github/mobilebytelabs/worker/config/IosWorkerConfig;
-	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/config/IosWorkerConfig;ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/config/IosWorkerConfig;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lio/github/mobilebytelabs/worker/config/IosWorkerConfig;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/config/IosWorkerConfig;ZLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/config/IosWorkerConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAppRefreshTaskIdentifier ()Ljava/lang/String;
 	public final fun getBgProcessingTaskIdentifier ()Ljava/lang/String;
+	public final fun getContinuedProcessingTaskIdentifier ()Ljava/lang/String;
 	public final fun getEnableBackgroundTasks ()Z
 	public final fun getEnablePersistence ()Z
 	public final fun getPersistenceKey ()Ljava/lang/String;

@@ -8,6 +8,7 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import co.touchlab.kermit.Logger
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
+import io.github.mobilebytelabs.worker.ExistingWorkPolicy
 import io.github.mobilebytelabs.worker.WorkInfo
 import io.github.mobilebytelabs.worker.WorkManager
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +36,20 @@ class AndroidWorkManager(context: Context) : WorkManager {
             uniqueWorkName,
             existingPeriodicWorkPolicy.toAndroid(),
             request.toAndroidPeriodic(),
+        ).result.await()
+        return request.id
+    }
+
+    // cross-platform-worker-parity-audit sub-plan 03 (closes G2)
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: ExistingWorkPolicy,
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest,
+    ): Uuid {
+        wm.enqueueUniqueWork(
+            uniqueWorkName,
+            existingWorkPolicy.toAndroid(),
+            request.toAndroidOneTime(),
         ).result.await()
         return request.id
     }

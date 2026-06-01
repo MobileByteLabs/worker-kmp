@@ -1,0 +1,63 @@
+# Refresh the cross-platform parity audit matrix.
+#
+# What it does
+#   1. Runs `bash scripts/run-parity-audit.sh` to regenerate
+#      scripts/parity-audit-matrix.json + the "Last audited" timestamp in
+#      docs/operations/cross-platform-parity-audit.md.
+#   2. If anything changed, opens a PR titled "chore(audit): refresh parity matrix".
+#
+# Triggers
+#   - schedule: nightly at 06:00 UTC
+#   - workflow_dispatch: manual run from the Actions tab
+#   - push: when cmp-worker-* sources, the report, or the harness itself change
+#     on development (so a feature merge that closes/opens a gap doesn't sit
+#     stale on the published matrix until the nightly refresh)
+
+name: Parity audit
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [development]
+    paths:
+      - "cmp-worker-*/**"
+      - "docs/operations/cross-platform-parity-audit.md"
+      - "scripts/run-parity-audit.sh"
+      - ".github/workflows/parity-audit.yml"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit:
+    name: Refresh parity matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up jq (used by --verify)
+        run: sudo apt-get install -y jq
+
+      - name: Refresh matrix + report
+        run: bash scripts/run-parity-audit.sh
+
+      - name: Verify idempotence + cross-doc consistency
+        run: bash scripts/run-parity-audit.sh --verify
+
+      - name: Open PR if matrix changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore(audit): refresh parity matrix"
+          body: |
+            Automated parity audit refresh.
+
+            See [the published audit report](../blob/development/docs/operations/cross-platform-parity-audit.md)
+            for the per-platform × per-feature matrix this refresh updated.
+          branch: chore/parity-audit-refresh
+          commit-message: "chore(audit): refresh parity matrix"
+          delete-branch: true

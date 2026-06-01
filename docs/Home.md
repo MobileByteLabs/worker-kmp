@@ -18,14 +18,14 @@
 
 ## Out-of-box platform support
 
-| Platform | Mechanism | True background? |
-|---|---|---|
-| **Android** (API 21+) | `androidx.work.WorkManager` + `JobScheduler` | ✓ OS-scheduled, persistent |
-| **iOS** (13+) | `BGTaskScheduler` (Processing + AppRefresh + ContinuedProcessing 17+) | ✓ OS-managed, opaque cadence |
-| **Desktop** (JVM 11+) | OS-scheduler daemon (Windows Task Scheduler / macOS launchd / Linux systemd-user) | ✓ Survives app close + reboot |
-| **Web** (browsers) | Service Worker + Web Push (Chrome/Firefox/Safari 16.4+/Edge) | ✓ Server-cron-driven |
+| Platform | Mechanism | True background? | Foreground? |
+|---|---|:---:|:---:|
+| **Android** (API 21+) | `androidx.work.WorkManager` + `JobScheduler` · `ForegroundService` for foreground | ✓ OS-scheduled, persistent | ✓ |
+| **iOS** (13+) | `BGTaskScheduler` (Processing + AppRefresh + 17+: ContinuedProcessing · ≤16: BGProcessing + UNNotification shim) | ✓ OS-managed, opaque cadence | ✓ |
+| **Desktop** (JVM 11+) | OS-scheduler daemon (Windows Task Scheduler · macOS launchd · Linux systemd-user) · in-process tray for foreground | ✓ Survives app close + reboot | ✓ |
+| **Web** (browsers) | Service Worker + Web Push (Chrome/Firefox/Safari 16.4+/Edge) | ✓ Server-cron-driven | ⚠ SW `showNotification` analog |
 
-See [True Background Matrix](platform-support/true-background-matrix.md) for full per-platform-variant detail.
+See [True Background Matrix](platform-support/true-background-matrix.md) for full per-platform-variant detail. See [Cross-platform parity audit](operations/cross-platform-parity-audit.md) for the file:line evidence ledger behind every cell.
 
 ## Quick start
 
@@ -136,7 +136,7 @@ All modules ship under the same version. Use the [![Maven Central](https://img.s
 - 🧩 [Convention Plugin (build-logic)](getting-started/convention-plugin.md) — copy-and-adopt Kotlin source for projects that share worker-kmp wiring across modules via a build-logic convention plugin (worker-kmp does not ship one — see the page for why)
 - 📱 Platform setup: [Android](platform-support/android.md) · [iOS](platform-support/ios.md) · [Desktop](platform-support/desktop.md) · [Web](platform-support/web.md)
 - 🛠️ Features: [Foreground Tasks](features/foreground-tasks.md) · [Telemetry / Observers](features/observers.md) · [Web Push Server](features/web-push-server.md)
-- 🔒 [Security](operations/security.md) · [Performance](operations/performance.md)
+- 🔒 [Security](operations/security.md) · [Performance](operations/performance.md) · [Cross-platform parity audit](operations/cross-platform-parity-audit.md) — per-feature evidence ledger, refreshed nightly
 - 📦 [Release process](release/release-process.md)
 
 ## License

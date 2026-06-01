@@ -69,6 +69,24 @@ class TestWorkManager : WorkManager {
         return request.id
     }
 
+    // cross-platform-worker-parity-audit sub-plan 03 (closes G2) — minimal test impl,
+    // delegates to enqueue with name tracking for assertion convenience.
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: OneTimeWorkRequest,
+    ): Uuid {
+        if (existingWorkPolicy == io.github.mobilebytelabs.worker.ExistingWorkPolicy.REPLACE) {
+            store.value.values
+                .filter { uniqueWorkName in it.tags && !it.isFinished }
+                .forEach { cancelWorkById(it.id) }
+        }
+        _enqueuedRequests.add(request)
+        _uniqueWorkNames.add(uniqueWorkName)
+        putInfo(WorkInfo(id = request.id, state = WorkInfo.State.ENQUEUED, tags = request.tags + uniqueWorkName))
+        return request.id
+    }
+
     override suspend fun cancelWorkById(id: Uuid) {
         update(id) { if (!isFinished) copy(state = WorkInfo.State.CANCELLED) else this }
     }

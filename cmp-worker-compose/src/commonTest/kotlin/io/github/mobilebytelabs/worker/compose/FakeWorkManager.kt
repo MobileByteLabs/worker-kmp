@@ -36,6 +36,11 @@ class FakeWorkManager : WorkManager {
         periodicRequests += uniqueWorkName to request
         return request.id
     }
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest,
+    ): kotlin.uuid.Uuid = enqueue(request)
 
     override suspend fun cancelWorkById(id: Uuid) {
         cancelledIds += id

@@ -9,12 +9,14 @@
 final class io.github.mobilebytelabs.worker.ios/IosWorkManager : io.github.mobilebytelabs.worker/WorkManager { // io.github.mobilebytelabs.worker.ios/IosWorkManager|null[0]
     constructor <init>(io.github.mobilebytelabs.worker.ios/IosWorkerFactory, io.github.mobilebytelabs.worker.ios/IosWorkManagerConfig = ...) // io.github.mobilebytelabs.worker.ios/IosWorkManager.<init>|<init>(io.github.mobilebytelabs.worker.ios.IosWorkerFactory;io.github.mobilebytelabs.worker.ios.IosWorkManagerConfig){}[0]
 
+    final fun cancelTask(kotlin/String) // io.github.mobilebytelabs.worker.ios/IosWorkManager.cancelTask|cancelTask(kotlin.String){}[0]
     final fun getWorkInfosByTag(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.ios/IosWorkManager.getWorkInfosByTag|getWorkInfosByTag(kotlin.String){}[0]
     final fun shutdown() // io.github.mobilebytelabs.worker.ios/IosWorkManager.shutdown|shutdown(){}[0]
     final suspend fun cancelAllWorkByTag(kotlin/String) // io.github.mobilebytelabs.worker.ios/IosWorkManager.cancelAllWorkByTag|cancelAllWorkByTag(kotlin.String){}[0]
     final suspend fun cancelWorkById(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.ios/IosWorkManager.cancelWorkById|cancelWorkById(kotlin.uuid.Uuid){}[0]
     final suspend fun enqueue(io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.ios/IosWorkManager.enqueue|enqueue(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
     final suspend fun enqueueUniquePeriodicWork(kotlin/String, io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy, io.github.mobilebytelabs.worker/PeriodicWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.ios/IosWorkManager.enqueueUniquePeriodicWork|enqueueUniquePeriodicWork(kotlin.String;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy;io.github.mobilebytelabs.worker.PeriodicWorkRequest){}[0]
+    final suspend fun enqueueUniqueWork(kotlin/String, io.github.mobilebytelabs.worker/ExistingWorkPolicy, io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.ios/IosWorkManager.enqueueUniqueWork|enqueueUniqueWork(kotlin.String;io.github.mobilebytelabs.worker.ExistingWorkPolicy;io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
     final suspend fun getWorkInfoById(kotlin.uuid/Uuid): io.github.mobilebytelabs.worker/WorkInfo? // io.github.mobilebytelabs.worker.ios/IosWorkManager.getWorkInfoById|getWorkInfoById(kotlin.uuid.Uuid){}[0]
 }
 

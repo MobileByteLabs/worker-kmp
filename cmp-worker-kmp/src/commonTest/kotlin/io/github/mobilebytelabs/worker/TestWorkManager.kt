@@ -52,6 +52,12 @@ class TestWorkManager : WorkManager {
         return request.id
     }
 
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: ExistingWorkPolicy,
+        request: OneTimeWorkRequest,
+    ): Uuid = enqueue(request)
+
     override suspend fun cancelWorkById(id: Uuid) {
         _cancelledIds.add(id)
         stateStore.value[id]?.let { updateState(id, it.copy(state = WorkInfo.State.CANCELLED)) }

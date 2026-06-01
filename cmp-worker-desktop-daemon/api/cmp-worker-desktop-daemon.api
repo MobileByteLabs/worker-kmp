@@ -1,3 +1,36 @@
+public abstract class io/github/mobilebytelabs/worker/daemon/DaemonWorkResult {
+}
+
+public final class io/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Failure : io/github/mobilebytelabs/worker/daemon/DaemonWorkResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Failure;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Failure;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Failure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Retry : io/github/mobilebytelabs/worker/daemon/DaemonWorkResult {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Retry;
+	public static synthetic fun copy$default (Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Retry;Ljava/lang/String;ILjava/lang/Object;)Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Retry;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class io/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Success : io/github/mobilebytelabs/worker/daemon/DaemonWorkResult {
+	public static final field INSTANCE Lio/github/mobilebytelabs/worker/daemon/DaemonWorkResult$Success;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/daemon/DaemonWorkerFactory {
+	public abstract fun create (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class io/github/mobilebytelabs/worker/daemon/DesktopBackgroundDaemonKt {
 	public static final fun main ([Ljava/lang/String;)V
 }

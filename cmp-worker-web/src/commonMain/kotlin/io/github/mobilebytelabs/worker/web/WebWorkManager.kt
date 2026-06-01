@@ -126,6 +126,15 @@ class WebWorkManager internal constructor(
             .forEach { cancelWorkById(it.id) }
     }
 
+    // cross-platform-worker-parity-audit sub-plan 03 (closes G2) — Web delegates to plain
+    // enqueue. Full name-keyed REPLACE/KEEP/APPEND semantics deferred (browser tabs have
+    // ephemeral state — full impl needs IndexedDB name→uuid map).
+    override suspend fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: io.github.mobilebytelabs.worker.ExistingWorkPolicy,
+        request: io.github.mobilebytelabs.worker.OneTimeWorkRequest,
+    ): Uuid = enqueue(request)
+
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = stateStore.observeByTag(tag)
 
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.getById(id)

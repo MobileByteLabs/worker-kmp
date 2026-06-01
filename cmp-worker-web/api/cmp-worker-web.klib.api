@@ -31,6 +31,7 @@ final class io.github.mobilebytelabs.worker.web/WebWorkManager : io.github.mobil
     final suspend fun cancelWorkById(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.web/WebWorkManager.cancelWorkById|cancelWorkById(kotlin.uuid.Uuid){}[0]
     final suspend fun enqueue(io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.web/WebWorkManager.enqueue|enqueue(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
     final suspend fun enqueueUniquePeriodicWork(kotlin/String, io.github.mobilebytelabs.worker/ExistingPeriodicWorkPolicy, io.github.mobilebytelabs.worker/PeriodicWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.web/WebWorkManager.enqueueUniquePeriodicWork|enqueueUniquePeriodicWork(kotlin.String;io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy;io.github.mobilebytelabs.worker.PeriodicWorkRequest){}[0]
+    final suspend fun enqueueUniqueWork(kotlin/String, io.github.mobilebytelabs.worker/ExistingWorkPolicy, io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker.web/WebWorkManager.enqueueUniqueWork|enqueueUniqueWork(kotlin.String;io.github.mobilebytelabs.worker.ExistingWorkPolicy;io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]
     final suspend fun getWorkInfoById(kotlin.uuid/Uuid): io.github.mobilebytelabs.worker/WorkInfo? // io.github.mobilebytelabs.worker.web/WebWorkManager.getWorkInfoById|getWorkInfoById(kotlin.uuid.Uuid){}[0]
 }
 

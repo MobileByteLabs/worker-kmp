@@ -94,6 +94,19 @@ public data class IosWorkerConfig(
      * Added in v3.0.0-alpha04.X (Phase 7 alpha04.X).
      */
     public val appRefreshTaskIdentifier: String = "",
+    /**
+     * iOS 17+ foreground equivalent: `BGContinuedProcessingTaskRequest` identifier.
+     *
+     * When non-empty AND the runtime is iOS 17+, `runAsForeground()` schedules a
+     * `BGContinuedProcessingTaskRequest` (work continues with user-visible progress
+     * even when the user navigates away from the work UI). When empty OR runtime
+     * is iOS ≤16, falls back to the `BGProcessingTaskRequest + UNNotification` shim.
+     *
+     * Must match an entry in `Info.plist → BGTaskSchedulerPermittedIdentifiers`.
+     *
+     * Added by cross-platform-worker-parity-audit sub-plan 02 (closes G1).
+     */
+    public val continuedProcessingTaskIdentifier: String = "",
 )
 
 /**

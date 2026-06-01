@@ -8,6 +8,7 @@
 [![Compose Multiplatform](https://img.shields.io/badge/Compose-Multiplatform-4285f4.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](docs/getting-started/coverage.md)
 [![Test Coverage CI](https://github.com/MobileByteLabs/worker-kmp/actions/workflows/test-coverage.yml/badge.svg?branch=development)](https://github.com/MobileByteLabs/worker-kmp/actions/workflows/test-coverage.yml)
+[![Parity audit](https://github.com/MobileByteLabs/worker-kmp/actions/workflows/parity-audit.yml/badge.svg?branch=development)](docs/operations/cross-platform-parity-audit.md)
 
 ## Out-of-box platform support
 

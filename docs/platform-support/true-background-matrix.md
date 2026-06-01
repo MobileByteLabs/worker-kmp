@@ -3,9 +3,11 @@
 > Per-platform background-execution capability levels for worker-kmp. The "true
 > background" question: does work continue when the user closes the app?
 >
-> Phase 8 (Desktop daemon) makes this matrix accurate for Desktop. Phase 9
-> (Web Push) makes it accurate for non-Chrome browsers. Until those land, this
-> file is a SCAFFOLD documenting the target shape.
+> Verified against `development` HEAD on 2026-06-01 by the
+> [cross-platform parity audit](../operations/cross-platform-parity-audit.md).
+> Refreshed nightly by `scripts/run-parity-audit.sh`. Phase 8 (Desktop daemon)
+> and Phase 9 (Web Push for non-Chrome browsers) both landed — this matrix is
+> the authoritative current state, not a scaffold.
 
 ## TrueBackgroundLevel enum (lands in BackgroundCapabilities alpha05)
 
