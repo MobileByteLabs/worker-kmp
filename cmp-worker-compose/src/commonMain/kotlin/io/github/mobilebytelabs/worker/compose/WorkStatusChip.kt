@@ -86,7 +86,9 @@ private fun WorkInfo.State.labelColor(): Color = when (this) {
     -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
-private fun WorkInfo.State.label(): String = when (this) {
+// Visibility raised `private` → `internal` so commonTest can exercise every enum
+// branch directly. Per kover-100-coverage Phase 6.
+internal fun WorkInfo.State.label(): String = when (this) {
     WorkInfo.State.ENQUEUED -> "Enqueued"
     WorkInfo.State.RUNNING -> "Running"
     WorkInfo.State.SUCCEEDED -> "Succeeded"
@@ -95,4 +97,4 @@ private fun WorkInfo.State.label(): String = when (this) {
     WorkInfo.State.BLOCKED -> "Blocked"
 }
 
-private fun WorkInfo.State.icon(): ImageVector? = null
+internal fun WorkInfo.State.icon(): ImageVector? = null

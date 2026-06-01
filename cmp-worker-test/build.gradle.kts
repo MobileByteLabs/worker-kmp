@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.vanniktech.publish)
+    id("io.github.mobilebytelabs.kover")
 }
 
 group = "io.github.mobilebytelabs"

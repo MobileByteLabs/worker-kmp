@@ -8,6 +8,12 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
+    // NOTE: NOT opting into kover here. Kover 0.9.1 doesn't recognize the new
+    // AGP 9+ `android.kotlin.multiplatform.library` extension shape. The Compose
+    // surface is the bulk of this module and @Composable bodies are filter-
+    // excluded anyway; the testable non-@Composable utilities (state-mapping,
+    // request builders) are covered by NonComposableSurfacesTest. Revisit
+    // opt-in once Kover ships AGP 9 KMP-Android library support.
 }
 
 group = "io.github.mobilebytelabs"

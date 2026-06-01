@@ -1,6 +1,5 @@
 // Klib ABI Dump
 // Targets: [iosArm64, iosSimulatorArm64, wasmJs]
-// Alias: ios => [iosArm64, iosSimulatorArm64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -44,9 +43,3 @@ final fun io.github.mobilebytelabs.worker.sample.composestore.store/buildArticle
 final fun io.github.mobilebytelabs.worker.sample.composestore.ui/ArticlesScreen(org.mobilenativefoundation.store.store5/Store<kotlin/String, io.github.mobilebytelabs.worker.sample.composestore.domain/Article>, androidx.compose.runtime/Composer?, kotlin/Int) // io.github.mobilebytelabs.worker.sample.composestore.ui/ArticlesScreen|ArticlesScreen(org.mobilenativefoundation.store.store5.Store<kotlin.String,io.github.mobilebytelabs.worker.sample.composestore.domain.Article>;androidx.compose.runtime.Composer?;kotlin.Int){}[0]
 final fun io.github.mobilebytelabs.worker.sample.composestore.ui/SampleApp(androidx.compose.runtime/Composer?, kotlin/Int) // io.github.mobilebytelabs.worker.sample.composestore.ui/SampleApp|SampleApp(androidx.compose.runtime.Composer?;kotlin.Int){}[0]
 final fun io.github.mobilebytelabs.worker.sample.composestore.workers/io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop_getter(): kotlin/Int // io.github.mobilebytelabs.worker.sample.composestore.workers/io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop_getter|io_github_mobilebytelabs_worker_sample_composestore_workers_ArticleSyncWorker$stableprop_getter(){}[0]
-
-// Targets: [ios]
-final fun io.github.mobilebytelabs.worker.sample.composestore/MainViewController(): platform.UIKit/UIViewController // io.github.mobilebytelabs.worker.sample.composestore/MainViewController|MainViewController(){}[0]
-
-// Targets: [wasmJs]
-final fun io.github.mobilebytelabs.worker.sample.composestore/main() // io.github.mobilebytelabs.worker.sample.composestore/main|main(){}[0]

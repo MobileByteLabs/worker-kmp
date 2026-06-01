@@ -7,6 +7,13 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
+    // NOTE: NOT opting into kover here. Kover 0.9.1 doesn't recognize the new
+    // AGP 9+ `android.kotlin.multiplatform.library` extension shape. The
+    // commonTest suite (Phase 5 of kover-100-coverage added SyncTest +
+    // SyncWorkHelpersTest on top of PR #30's 35 @Tests) still runs via
+    // `./gradlew :cmp-worker-scheduler:jvmTest` — it just doesn't contribute
+    // to Kover aggregation. Revisit opt-in when Kover ships AGP 9 KMP-Android
+    // library support.
 }
 
 group = "io.github.mobilebytelabs"

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.vanniktech.publish)
     id("io.github.mobilebytelabs.dokka")
+    id("io.github.mobilebytelabs.kover")
 }
 
 group = "io.github.mobilebytelabs"
@@ -57,6 +58,20 @@ kotlin {
                 implementation(libs.kotlin.test.junit)
             }
         }
+    }
+}
+
+// Store5 5.1.0-alpha06 was built against kotlinx-datetime 0.6.x where
+// `kotlinx.datetime.Clock.System` lived in this package. In 0.8.0 (current
+// project version) Clock moved to `kotlin.time` stdlib, so Store5's compiled
+// bytecode references break at JVM-test runtime with NoClassDefFoundError.
+// Force the jvmTest runtime classpath back to a binary-compatible version of
+// kotlinx-datetime so `StoreWriteRequest.of(...)` (used by
+// MutableStoreSyncWorker.doWork) doesn't fail at test time. This does NOT
+// affect main / publish classpath (we still publish against 0.8.0).
+configurations.matching { it.name.startsWith("jvmTest") }.configureEach {
+    resolutionStrategy {
+        force("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.6.2")
     }
 }
 

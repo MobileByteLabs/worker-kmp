@@ -1,14 +1,3 @@
-public final class io/github/mobilebytelabs/worker/sample/composestore/ComposableSingletons$MainKt {
-	public static final field INSTANCE Lio/github/mobilebytelabs/worker/sample/composestore/ComposableSingletons$MainKt;
-	public fun <init> ()V
-	public final fun getLambda$-601626485$cmp_worker_sample_compose_store ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class io/github/mobilebytelabs/worker/sample/composestore/MainKt {
-	public static final fun main ()V
-	public static synthetic fun main ([Ljava/lang/String;)V
-}
-
 public final class io/github/mobilebytelabs/worker/sample/composestore/di/AppModuleKt {
 	public static final fun appModule (Lorg/mobilenativefoundation/store/store5/Store;)Lorg/koin/core/module/Module;
 	public static final fun articleWorkerKoinModule (Lorg/mobilenativefoundation/store/store5/Store;Lio/github/mobilebytelabs/worker/WorkManagerFactory;)Lorg/koin/core/module/Module;

@@ -21,6 +21,7 @@ dependencies {
     compileOnly(libs.detekt.gradlePlugin)
     compileOnly(libs.spotless.gradle)
     compileOnly(libs.dokka.gradle)
+    compileOnly(libs.kover.gradlePlugin)
 }
 
 tasks {
@@ -46,6 +47,11 @@ gradlePlugin {
             id = "io.github.mobilebytelabs.dokka"
             implementationClass = "DokkaConventionPlugin"
             description = "Configures Dokka HTML documentation for worker-kmp modules"
+        }
+        register("kover") {
+            id = "io.github.mobilebytelabs.kover"
+            implementationClass = "KoverConventionPlugin"
+            description = "Configures Kover code coverage for worker-kmp modules — self-registers into root's aggregation"
         }
     }
 }
