@@ -1,6 +1,6 @@
 # Cross-platform worker parity — Audit report
 
-> **Last audited:** 2026-06-01 against commit `f6038d9` on `development`.
+> **Last audited:** 2026-06-01 against commit `c5a122e` on `development`.
 > **Method:** 6-subagent parallel-Explore probe + local-grep harness.
 > **Re-audit:** nightly via `.github/workflows/parity-audit.yml`.
 > **Harness:** `scripts/run-parity-audit.sh` — `--verify` mode for CI consistency check.
