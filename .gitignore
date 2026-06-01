@@ -94,3 +94,6 @@ package-lock.json
 # Documentation build
 docs/_build/
 site/
+
+# Wiki sync workflow artifact — produced by .github/scripts/rewrite-wiki-links.py
+.wiki-build/
