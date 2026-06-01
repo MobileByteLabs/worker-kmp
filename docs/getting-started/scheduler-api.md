@@ -1,5 +1,7 @@
 # Scheduler API (cmp-worker-scheduler)
 
+> 📦 **Latest version:** [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-scheduler.svg?label=worker-scheduler)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-scheduler) — replace `LATEST` in the snippet below with that string.
+
 High-level Koin-injectable `WorkScheduler` façade. Schedule daily syncs, periodic syncs, one-time-at-instant syncs, and exact-time syncs from any commonMain module without touching `WorkManager` directly.
 
 Available since **3.1.1**. Bundled into `cmp-worker-compose-all`, so any consumer already depending on the umbrella gets the scheduler "for free."
@@ -24,10 +26,10 @@ The library bundles `cmp-worker-kmp.WorkManager` via `api()`, so consumers get b
 If you already use `cmp-worker-compose-all`, you're done — scheduler + Store5 (with adapters) are re-exported via `api()`. Otherwise:
 
 ```kotlin
-// build.gradle.kts (commonMain)
-implementation("io.github.mobilebytelabs:worker-scheduler:3.1.1")
+// build.gradle.kts (commonMain) — replace LATEST with the version from the badge above
+implementation("io.github.mobilebytelabs:worker-scheduler:LATEST")
 // Optional, only if you sync from Store5 instances — bundles the adapters:
-implementation("io.github.mobilebytelabs:worker-store5:3.1.1")
+implementation("io.github.mobilebytelabs:worker-store5:LATEST")
 ```
 
 ## 3. Five-minute setup

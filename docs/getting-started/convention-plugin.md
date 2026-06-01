@@ -1,5 +1,7 @@
 # Convention Plugin (build-logic)
 
+> 📦 **Latest version:** [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=worker-kmp)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp) — replace `LATEST` in the snippet below with that string.
+
 If your project uses a `build-logic` composite build to share Gradle convention plugins across modules, you can wrap worker-kmp's library wiring into a single convention plugin instead of repeating the same `plugins { … }` + `dependencies { … }` block in every module that schedules work.
 
 worker-kmp does **not** ship a convention plugin — convention plugins encode each team's preferences (Compose Multiplatform version, dep BOM, opt-ins, target matrix), so a one-size-fits-all artifact ends up fitting nobody. Instead, this page hands you the canonical shape you can drop into your own `build-logic` and tweak.
@@ -31,7 +33,7 @@ It does **not** decide your KMP target matrix, your Compose Multiplatform versio
 
 ```toml
 [versions]
-worker-version = "3.0.0"
+worker-version = "LATEST"  # ← see the badge above for the current published version
 
 [libraries]
 worker-compose-all = { module = "io.github.mobilebytelabs:worker-compose-all", version.ref = "worker-version" }

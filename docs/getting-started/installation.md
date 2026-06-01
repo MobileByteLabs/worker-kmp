@@ -1,5 +1,7 @@
 # Installation
 
+> 📦 **Latest version:** [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=worker-kmp)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp) — replace `LATEST` in the snippets below with that string.
+
 worker-kmp targets Kotlin Multiplatform projects with Android, iOS, Desktop, and Web targets. Compose Multiplatform is supported but optional.
 
 ## Requirements
@@ -18,7 +20,7 @@ worker-kmp targets Kotlin Multiplatform projects with Android, iOS, Desktop, and
 ```toml
 # gradle/libs.versions.toml
 [versions]
-worker-kmp = "3.0.0"
+worker-kmp = "LATEST"  # ← see the badge above for the current published version
 
 [libraries]
 worker-kmp = { module = "io.github.mobilebytelabs:worker-kmp", version.ref = "worker-kmp" }
