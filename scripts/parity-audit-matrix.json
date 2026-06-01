@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-01T13:23:36Z",
-  "commit": "f6038d970bdeb2a5373515389bd0129a3db023f3",
-  "branch": "feat/cross-platform-worker-parity-audit",
+  "generated_at": "2026-06-01T14:16:52Z",
+  "commit": "c95af7b3736b12e5d65ce5b215c7dc1ffad5a32c",
+  "branch": "development",
   "features": [
     {"platform":"android","feature":"OneTimeWorkRequest","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
     {"platform":"android","feature":"PeriodicWorkRequest","status":"wired","probed_path":"cmp-worker-android/src/androidMain/kotlin"},
