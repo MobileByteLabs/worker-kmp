@@ -1,0 +1,19 @@
+/* MobileByteLabs brand polish for mkdocs-material — minimal overrides on top
+   of the indigo + amber palette declared in mkdocs.yml. */
+
+:root {
+  --md-primary-fg-color: #3949AB; /* indigo 600 */
+  --md-accent-fg-color: #FFC107;  /* amber 500 */
+}
+
+/* Slightly tighter section headings — the default Material theme spacing
+   wastes vertical real estate on technical reference docs. */
+.md-typeset h2 { margin-top: 1.5em; }
+.md-typeset h3 { margin-top: 1.2em; }
+
+/* Subtle inline-code styling so APIs are scannable in prose. */
+.md-typeset code {
+  background-color: rgba(57, 73, 171, 0.08);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}

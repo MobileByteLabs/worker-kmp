@@ -1,0 +1,24 @@
+name: Publish docs (mkdocs → GitHub Pages)
+
+# Delegates to the reusable workflow in mbl-actionhub. The mkdocs build
+# + Pages deploy logic lives there as a single source of truth across
+# every MobileByteLabs KMP library that publishes documentation.
+# Repo Pages source must be set to "GitHub Actions" (build_type=workflow).
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    uses: MobileByteLabs/mbl-actionhub/.github/workflows/docs-publish-mkdocs.yml@v1.9.0
