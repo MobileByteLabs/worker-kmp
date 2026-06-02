@@ -41,6 +41,7 @@ extra_css:
 # the canonical surface here.
 exclude_docs: |
   _Sidebar.md
+  Home.md
 
 markdown_extensions:
   - admonition
@@ -68,7 +69,7 @@ validation:
     unrecognized_links: info
 
 nav:
-  - Home: Home.md
+  - Home: index.md
   - Getting started:
       - Installation: getting-started/installation.md
       - Quick start: getting-started/quick-start.md

@@ -21,4 +21,4 @@ permissions:
 
 jobs:
   publish:
-    uses: MobileByteLabs/mbl-actionhub/.github/workflows/docs-publish-mkdocs.yml@v1.9.0
+    uses: MobileByteLabs/mbl-actionhub/.github/workflows/docs-publish-mkdocs.yml@v1.9.1
