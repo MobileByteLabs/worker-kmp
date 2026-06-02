@@ -1,0 +1,98 @@
+site_name: worker-kmp
+site_description: WorkManager for Kotlin Multiplatform — one commonMain API across Android, iOS, Desktop, Web
+site_url: https://mobilebytelabs.github.io/worker-kmp/
+repo_url: https://github.com/MobileByteLabs/worker-kmp
+repo_name: MobileByteLabs/worker-kmp
+edit_uri: edit/development/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+extra_css:
+  - stylesheets/mbs-brand.css
+
+# The docs/ tree was originally authored for GitHub Wiki consumption
+# (sync-docs-to-wiki.yml mirrors it to /wiki/{basename}). _Sidebar.md is a
+# wiki-only construct; exclude from the mkdocs site since the nav below is
+# the canonical surface here.
+exclude_docs: |
+  _Sidebar.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+# Embedded markdown contains some relative links that resolve from the
+# GitHub source view but not from the mkdocs docs/ tree. Downgrade the
+# strict-mode warning to info so the site still builds.
+validation:
+  links:
+    not_found: info
+    absolute_links: ignore
+    unrecognized_links: info
+
+nav:
+  - Home: Home.md
+  - Getting started:
+      - Installation: getting-started/installation.md
+      - Quick start: getting-started/quick-start.md
+      - Convention plugin: getting-started/convention-plugin.md
+      - Scheduler API: getting-started/scheduler-api.md
+      - Coverage: getting-started/coverage.md
+      - Migrating from v2: getting-started/migrating-from-v2.md
+  - Features:
+      - Foreground tasks: features/foreground-tasks.md
+      - Observers: features/observers.md
+      - Web push server: features/web-push-server.md
+  - Platform support:
+      - Android: platform-support/android.md
+      - iOS: platform-support/ios.md
+      - Desktop: platform-support/desktop.md
+      - Web: platform-support/web.md
+      - Platform API matrix: platform-support/platform-api-matrix.md
+      - True-background matrix: platform-support/true-background-matrix.md
+  - Operations:
+      - Performance: operations/performance.md
+      - Security: operations/security.md
+      - Security assumptions: operations/security-assumptions.md
+      - Cross-platform parity audit: operations/cross-platform-parity-audit.md
+      - Threat model template: operations/threat-model-template.md
+  - Release:
+      - Release process: release/release-process.md
+      - Postmortem template: release/postmortem-template.md
