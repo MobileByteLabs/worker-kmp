@@ -183,9 +183,11 @@ or a relative link points outside `docs/`.
   in `.github/workflows/docs-publish.yml` to upgrade.
 - **Don't add a `docs/CNAME` file** to set a custom domain — configure it
   via the repo's Pages settings (UI or `gh api ... -f cname=...`).
-- **Don't author Liquid `{% ... %}` syntax** in markdown. The mkdocs site
-  doesn't process Liquid, but if Pages is ever misconfigured back to legacy
-  Jekyll it will fail to render those files.
+- **Don't author Liquid templating** in markdown. The mkdocs site doesn't
+  process Liquid, but if Pages is ever misconfigured back to legacy Jekyll
+  it will fail to render those files. (The `mkdocs-macros-plugin` —
+  enabled in some consumer libraries — will also reject stray Liquid-style
+  brace syntax with "Macro Syntax Error" at build time.)
 
 ## Adding a new section to the nav
 
