@@ -1,3 +1,8 @@
+---
+title: "Convention plugin"
+description: "Apply the worker-kmp convention plugin in your build-logic to bootstrap multi-platform worker config consistently across modules."
+---
+
 # Convention Plugin (build-logic)
 
 > 📦 **Latest version:** [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=worker-kmp)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp) — replace `LATEST` in the snippet below with that string.

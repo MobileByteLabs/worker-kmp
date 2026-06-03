@@ -1,3 +1,8 @@
+---
+title: "worker-kmp"
+description: "WorkManager for Kotlin Multiplatform — one commonMain API across Android, iOS, Desktop, and Web. Maven Central, Apache 2.0."
+---
+
 # worker-kmp
 
 > **WorkManager for Kotlin Multiplatform.** One commonMain API. Out-of-box support for Android, iOS, Desktop, and Web.

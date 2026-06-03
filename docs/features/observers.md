@@ -1,3 +1,8 @@
+---
+title: "Observers"
+description: "Observe worker lifecycle events across platforms — StateFlow + SharedFlow integration in worker-kmp v3."
+---
+
 # Observers
 
 > Production telemetry hooks for worker-kmp. v2.2.0 introduces the `WorkObserver`

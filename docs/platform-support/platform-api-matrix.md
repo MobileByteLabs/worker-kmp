@@ -1,3 +1,8 @@
+---
+title: "Platform API matrix"
+description: "Side-by-side table of which worker-kmp APIs are supported / partially supported / not available per platform."
+---
+
 # Platform API Matrix
 
 > Every native background-execution API × every platform that worker-kmp targets.

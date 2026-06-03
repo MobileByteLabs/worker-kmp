@@ -1,3 +1,8 @@
+---
+title: "iOS"
+description: "worker-kmp on iOS via BGTaskScheduler + URLSession — what works, what doesn't, foreground vs background time constraints."
+---
+
 # iOS
 
 worker-kmp on iOS is built on `BGTaskScheduler` (iOS 13+) — the OS-managed background

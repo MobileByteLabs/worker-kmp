@@ -1,3 +1,8 @@
+---
+title: "Threat model template"
+description: "STRIDE template for libraries adopting worker-kmp — copy + fill in for your integration."
+---
+
 # Threat Model Template
 
 > Consumer-extension template — copy to your fork's THREAT_MODEL.md and extend with

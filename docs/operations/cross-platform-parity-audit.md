@@ -1,3 +1,8 @@
+---
+title: "Cross-platform parity audit"
+description: "How to verify worker-kmp behaves consistently across Android, iOS, Desktop, and Web targets."
+---
+
 # Cross-platform worker parity — Audit report
 
 > **Last audited:** 2026-06-01 against commit `c5a122e` on `development`.

@@ -1,3 +1,8 @@
+---
+title: "Scheduler API"
+description: "The commonMain scheduling surface — enqueue, periodic, replace-existing semantics, constraints (network, charging, idle)."
+---
+
 # Scheduler API (cmp-worker-scheduler)
 
 > 📦 **Latest version:** [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-scheduler.svg?label=worker-scheduler)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-scheduler) — replace `LATEST` in the snippet below with that string.

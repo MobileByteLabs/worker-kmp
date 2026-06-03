@@ -1,3 +1,8 @@
+---
+title: "Desktop"
+description: "worker-kmp on JVM Desktop — coroutine-based scheduler; no OS-level persistence, runs while process is alive."
+---
+
 # Desktop (JVM)
 
 worker-kmp on Desktop runs in two modes:
