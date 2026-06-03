@@ -97,3 +97,6 @@ nav:
   - Release:
       - Release process: release/release-process.md
       - Postmortem template: release/postmortem-template.md
+  - Contributing:
+      - Docs guide (template): DEVELOPMENT-TEMPLATE.md
+      - Docs guide (project): DEVELOPMENT.md

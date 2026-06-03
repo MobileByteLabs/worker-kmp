@@ -1,3 +1,8 @@
+---
+title: "Release process"
+description: "Cutting a worker-kmp release — versioning, CHANGELOG, Maven Central staging, tag, post-release verification."
+---
+
 # Release Process
 
 > Pre-GA stabilization for worker-kmp v3.0.0. Replaces the alpha → GA jump with a

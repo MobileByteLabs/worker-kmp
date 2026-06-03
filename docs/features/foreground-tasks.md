@@ -1,8 +1,16 @@
+---
+title: "Foreground tasks"
+description: "Long-running, user-visible work in worker-kmp v3 — opt-in via @ExperimentalForegroundApi; mirrors Android foreground services with cross-platform fallbacks."
+---
+
 # Foreground Tasks
 
-> Long-running, user-visible work for worker-kmp v3. Added in v3.0.0-alpha01
-> (Phase 1 of the v3.0.0 epic). API marked `@RequiresOptIn(ExperimentalForegroundApi)`
-> until v3.0.0 GA.
+!!! warning "Experimental API (v3.0.0-alpha01+)"
+    Marked `@RequiresOptIn(ExperimentalForegroundApi)` until v3.0.0 GA.
+    Surface may change without backward-compat guarantee until then.
+
+Long-running, user-visible work for worker-kmp v3 — Phase 1 of the v3.0.0
+epic.
 
 ## When to use
 

@@ -1,3 +1,8 @@
+---
+title: "Web"
+description: "worker-kmp on JS / wasmJs — Web Workers + Service Workers for offline / background; Push API integration."
+---
+
 # Web
 
 worker-kmp on Web runs in two modes:

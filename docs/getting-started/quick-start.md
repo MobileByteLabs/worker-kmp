@@ -1,3 +1,8 @@
+---
+title: "Quick start"
+description: "Smallest end-to-end worker-kmp example — define a CoroutineWorker, wire DI, enqueue."
+---
+
 # Quick Start — first worker in 60 seconds
 
 This walk-through gets a background sync worker running on **all four platforms** (Android, iOS, Desktop, Web) with the same commonMain code. We assume you already have a Kotlin Multiplatform project skeleton — if not, see [Installation](installation.md) first.

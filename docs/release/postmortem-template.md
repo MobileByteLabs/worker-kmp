@@ -1,3 +1,8 @@
+---
+title: "Postmortem template"
+description: "Template for documenting release incidents — what happened, impact, root cause, action items."
+---
+
 # Post-Mortem Template
 
 > For use after each major release (v3.0.0 GA and beyond). Replace placeholders in <angle brackets>.

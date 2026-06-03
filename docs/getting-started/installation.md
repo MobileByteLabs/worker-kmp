@@ -1,6 +1,13 @@
+---
+title: "Installation"
+description: "Install worker-kmp from Maven Central — Gradle catalog snippet + per-platform setup for Android, iOS, Desktop, and Web."
+---
+
 # Installation
 
-> 📦 **Latest version:** [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=worker-kmp)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp) — replace `LATEST` in the snippets below with that string.
+!!! info "Latest version"
+    [![Maven Central](https://img.shields.io/maven-central/v/io.github.mobilebytelabs/worker-kmp.svg?label=worker-kmp)](https://central.sonatype.com/artifact/io.github.mobilebytelabs/worker-kmp)
+    Replace `LATEST` in the snippets below with the version shown on the badge.
 
 worker-kmp targets Kotlin Multiplatform projects with Android, iOS, Desktop, and Web targets. Compose Multiplatform is supported but optional.
 

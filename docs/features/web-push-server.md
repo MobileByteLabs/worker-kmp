@@ -1,3 +1,8 @@
+---
+title: "Web push server"
+description: "Server-side push delivery integration for worker-kmp jobs that need to trigger off browser-side events."
+---
+
 # Web Push Server Guide
 
 > Documentation for consumer push servers that work with cmp-worker-web-push.

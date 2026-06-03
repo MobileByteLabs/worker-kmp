@@ -1,3 +1,8 @@
+---
+title: "True-background matrix"
+description: "Per-platform breakdown of what 'background execution' actually means — OS limits, time budgets, persistence guarantees."
+---
+
 # True Background Matrix
 
 > Per-platform background-execution capability levels for worker-kmp. The "true

@@ -1,3 +1,8 @@
+---
+title: "Coverage"
+description: "Kover-based test coverage setup + the worker-kmp 100%-coverage gate for cmp-worker-* modules."
+---
+
 # Code Coverage (Kover)
 
 worker-kmp uses [kotlinx-kover](https://github.com/Kotlin/kotlinx-kover) for line-coverage

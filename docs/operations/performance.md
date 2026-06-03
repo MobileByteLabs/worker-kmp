@@ -1,3 +1,8 @@
+---
+title: "Performance"
+description: "Benchmarking worker-kmp with JMH — local baselines, perf-check CI gate, regression policy."
+---
+
 # Performance
 
 > Measurable baselines for every hot path in worker-kmp. CI fails on >20% regression

@@ -1,3 +1,8 @@
+---
+title: "Security assumptions"
+description: "Trust boundaries, attacker model, and assumptions worker-kmp's design relies on — read before threat-modeling your usage."
+---
+
 # Security Assumptions
 
 > Explicit trust assumptions worker-kmp v3 makes. If any of these is invalid in your

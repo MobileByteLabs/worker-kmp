@@ -1,3 +1,8 @@
+---
+title: "Migrating from v2"
+description: "Step-by-step migration guide from worker-kmp v2 to v3 — API surface changes, deprecated symbols, replacement patterns."
+---
+
 # Migrating from worker-kmp 2.x to 3.0.0
 
 This document covers the source-incompatible API changes between worker-kmp **2.1.0** and

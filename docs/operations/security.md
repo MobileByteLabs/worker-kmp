@@ -1,16 +1,23 @@
+---
+title: "Security"
+description: "Threat model + mitigations for worker-kmp v3+. STRIDE audit summary. How to report a vulnerability."
+---
+
 # Security
 
-> Threat model + mitigations for worker-kmp v3+. Per RULE-SECRETS-VAULT-001 + the
-> worker-kmp v3.0.0 epic Phase 10 (security threat model).
-
-Internal STRIDE audit: 2026-05-27.
+!!! abstract "Scope"
+    Threat model + mitigations for worker-kmp v3+. Per RULE-SECRETS-VAULT-001
+    + the worker-kmp v3.0.0 epic Phase 10 (security threat model).
+    **Internal STRIDE audit:** 2026-05-27.
 
 ---
 
 ## Reporting a vulnerability
 
-Use GitHub Security Advisories (https://github.com/MobileByteLabs/worker-kmp/security/advisories/new)
-for private disclosure. We respond within 7 days.
+!!! danger "Use GitHub Security Advisories for private disclosure"
+    [Open a private advisory →](https://github.com/MobileByteLabs/worker-kmp/security/advisories/new)
+    We respond within 7 days. Please do not file public issues for
+    security vulnerabilities.
 
 ---
 

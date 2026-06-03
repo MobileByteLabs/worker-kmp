@@ -1,3 +1,8 @@
+---
+title: "Android"
+description: "worker-kmp on Android is a thin adapter over androidx.work.WorkManager + JobScheduler — OS-scheduled, reboot-persistent, survives process death."
+---
+
 # Android
 
 worker-kmp on Android is a thin adapter over `androidx.work.WorkManager` (+ `JobScheduler`).
