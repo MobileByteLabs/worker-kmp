@@ -1,7 +1,47 @@
 # Docs authoring guide
 
 How to write, structure, and ship the documentation that lives under `docs/`.
-This guide is itself an example of the conventions it documents.
+This guide is itself an example of the conventions it documents. It serves
+two audiences: human contributors (read top to bottom) and AI agents
+(grep for the structured sections below — Agent quick reference,
+Invariants, Scaling rubric, Validation commands).
+
+## Agent quick reference
+
+Common operations as copy-paste recipes. Each row is the *complete* action;
+follow every step.
+
+| Want to… | Recipe |
+|----------|--------|
+| Add a narrative page | (1) Write `docs/<slug>.md` (2) Add `- <Title>: <slug>.md` under the right section in `mkdocs.yml` → `nav:` (3) `git add` both → commit |
+| Add a section | (1) `mkdir docs/<section>` (2) Author `docs/<section>/<first-page>.md` (3) Add `- <Section>:\n  - <Page>: <section>/<first-page>.md` block to `mkdocs.yml` → `nav:` |
+| Add an image / asset | (1) Drop into `docs/images/` (create if needed) (2) Reference as `![Alt](images/<file>)` from any page |
+| Override brand color | Edit `docs/stylesheets/mbs-brand.css` → `--md-primary-fg-color` (header/links) + `--md-accent-fg-color` (highlights, copy button) |
+| Test build locally | `pip install -r docs/requirements.txt && mkdocs build --strict` |
+| Live preview | `mkdocs serve` → open `http://127.0.0.1:8000` |
+| Upgrade docs pipeline | Bump `@vX.Y.Z` pin in `.github/workflows/docs-publish.yml` → next push redeploys via new version |
+| Trigger deploy manually | `gh workflow run docs-publish.yml --ref development` |
+| Investigate `/` 404 | Verify `docs/index.md` exists (mkdocs requires it for the root URL) |
+| Investigate site shows old content | Cmd-Shift-R (CDN); wait 1-2 min; if persistent, check Pages config: `gh api repos/<org>/<repo>/pages` |
+| Edit Home/index content | **Edit both** `docs/Home.md` and `docs/index.md` — they MUST stay in sync (see Invariants below) |
+| Disable Jekyll on Pages site | (Already done — `actions/configure-pages@v5` with `enablement: true` in reusable workflow at `v1.9.1+` handles this) |
+
+## Invariants
+
+When you touch the file in the first column, you MUST also update the
+files in the second column in the same commit (or the next push will break
+something).
+
+| If you change… | Also update… | Why |
+|----------------|--------------|-----|
+| `docs/Home.md` content | `docs/index.md` (mirror) | Wiki uses Home.md; mkdocs uses index.md. Divergence = surfaces show different content. |
+| `docs/index.md` content | `docs/Home.md` (mirror) | Same reason, reversed. |
+| Added a new `docs/<page>.md` (user-facing) | `mkdocs.yml` → `nav:` | Page exists on disk but no nav entry = invisible on site. |
+| New section directory | `mkdocs.yml` → `nav:` (new section block) | Same — directory contents don't appear without nav registration. |
+| Renamed a page | (1) Update all inbound `[link](old.md)` references (2) Optionally add a redirect via `mkdocs-redirects` plugin | Otherwise old URLs 404 and inbound links break. |
+| Deleted a page | (1) Remove from `mkdocs.yml` nav (2) Grep for inbound links + fix or delete them | Strict-mode build fails on dangling nav entries. |
+| Bumped `mkdocs-material` in `docs/requirements.txt` | Run `mkdocs build --strict` locally — Material can introduce theme breaks across minors | CI catches this, but you waste a deploy cycle if you skip local verification. |
+| Bumped caller pin (`@v1.9.1` → `@v1.10.x`) in `.github/workflows/docs-publish.yml` | Verify the new tag actually exists at `MobileByteLabs/mbl-actionhub` | Pinning a non-existent tag fails at workflow-resolution time. |
 
 ## Two surfaces, one source
 
@@ -196,3 +236,65 @@ The build + deploy logic lives **once** in
 This repo's `.github/workflows/docs-publish.yml` is a 5-line caller that
 pins to a specific version (`@v1.9.1` at time of writing). Upgrades happen
 in one place; consumers bump the pin to opt in.
+
+## Scaling rubric
+
+The starter `mkdocs.yml` ships with a 5-section nav (Home / Getting started
+/ Features / Platform support / Operations / Release). That's intentionally
+optimistic — most early-stage libraries shouldn't pre-create all of those.
+
+Start flat. Split a section only when it has **≥ 4 pages**. Use this rubric
+to choose the right structure for your library's current size:
+
+| Library shape | docs/ structure |
+|---------------|-----------------|
+| **1 module, < 5 pages** | Flat: `index.md`, `Home.md`, `getting-started.md`, `api.md`. No subdirs. `mkdocs.yml` nav = 4 entries. |
+| **1-2 modules, 5-15 pages** | Add `getting-started/` + `features/` subdirs. Keep operations + release inline as single pages until each grows to ≥ 4 pages. |
+| **2-5 modules, 15-30 pages** | Adopt the full starter nav (6 sections). Each section has its own subdir. Add a `platform-support/` matrix page. |
+| **5+ modules** | Introduce `docs/modules/<module>.md` per-module landing pages. Use `mkdocs-include-markdown-plugin` to mirror each module's source-tree README. Add a Modules section to nav. |
+| **Heavy how-to content** (≥ 10 task-oriented pages) | Introduce a `docs/cookbook/<topic>/<recipe>.md` structure. One page per task, named as a user question ("How do I X?"). See KmpToolkit for the live pattern. |
+| **Heavy API reference** | Don't try to render API ref in mkdocs. Bundle Dokka HTML inside `-javadoc.jar` (per-module `dokkaGeneratePublicationHtml` + `vanniktech.mavenPublish.JavadocJar.Dokka` config) and link to Maven Central from the mkdocs site. |
+
+Anti-pattern: pre-structuring for hypothetical growth. Empty sections
+(headings with one stub page) look unprofessional and add nav clutter.
+Three nav entries with content > seven nav entries half-filled.
+
+## Validation commands
+
+Exact CLI snippets agents can run without modification.
+
+```bash
+# Strict build (what CI runs)
+pip install -r docs/requirements.txt
+mkdocs build --strict
+
+# Live preview
+mkdocs serve  # → http://127.0.0.1:8000
+
+# List every WARNING / ERROR from a strict build (filter out INFO noise)
+mkdocs build --strict 2>&1 | grep -E "^(WARNING|ERROR)"
+
+# Count pages
+find docs -name "*.md" -not -path "*/stylesheets/*" | wc -l
+
+# Confirm Home.md and index.md are in sync (zero diff = OK)
+diff docs/Home.md docs/index.md && echo "OK: in sync"
+
+# Show current caller pin
+grep "docs-publish-mkdocs.yml@" .github/workflows/docs-publish.yml
+
+# Trigger deploy manually (workflow_dispatch)
+gh workflow run docs-publish.yml --ref development
+
+# Inspect Pages config (build_type should be "workflow")
+gh api repos/<org>/<repo>/pages --jq '"build_type: \(.build_type)\nstatus: \(.status)"'
+
+# Watch the most recent deploy run to completion
+gh run watch $(gh run list --workflow=docs-publish.yml --limit 1 --json databaseId -q '.[0].databaseId') --exit-status
+
+# Verify the site is live (after CDN propagation)
+curl -sI https://<org>.github.io/<repo>/ | head -1   # expect HTTP/2 200
+```
+
+When any of these fail, the corresponding fix is in the troubleshooting
+table above ("When the site breaks").
