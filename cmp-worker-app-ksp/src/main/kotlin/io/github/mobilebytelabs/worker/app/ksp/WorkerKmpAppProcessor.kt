@@ -50,6 +50,7 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
         const val WORKER_FOR_PLATFORMS_FQN = "io.github.mobilebytelabs.worker.app.WorkerForPlatforms"
         const val WORKER_CONTEXT_FQN = "io.github.mobilebytelabs.worker.WorkerContext"
         const val COROUTINE_WORKER_FQN = "io.github.mobilebytelabs.worker.CoroutineWorker"
+        const val WORK_MANAGER_FACTORY_FQN = "io.github.mobilebytelabs.worker.WorkManagerFactory"
         const val MODEL_PACKAGE = ""
         const val MODEL_FILE_NAME = "codegen-model"
         const val MODEL_FILE_EXT = "json"
@@ -108,6 +109,23 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
             }
         }
 
+        // Detect whether the @WorkerKmpApp function takes the legacy `(WorkManagerFactory) -> List<Module>`
+        // signature, or the v4.0.0 no-arg shorthand. The codegen branches on this so per-platform launchers
+        // pass `platformWorkManagerFactory()` only when the consumer's function actually expects it.
+        val koinFnParams = appFn.parameters
+        val koinFnTakesFactory = when (koinFnParams.size) {
+            0 -> false
+            1 -> resolveTypeFqn(koinFnParams[0].type) == WORK_MANAGER_FACTORY_FQN
+            else -> {
+                logger.error(
+                    "worker-kmp-app: @WorkerKmpApp function `${appFn.qualifiedName?.asString()}` must " +
+                        "be either no-arg `() -> List<Module>` or take a single `WorkManagerFactory` " +
+                        "parameter — found ${koinFnParams.size} parameters.",
+                )
+                return emptyList()
+            }
+        }
+
         val model = CodegenModel(
             title = argString(ann, "title") ?: return errorMissing("title", appFn),
             iosBundleId = argString(ann, "iosBundleId") ?: return errorMissing("iosBundleId", appFn),
@@ -116,6 +134,7 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
             androidPermissions = argStringList(ann, "androidPermissions"),
             packageName = appFn.packageName.asString(),
             koinModulesFnFqn = appFn.qualifiedName?.asString() ?: return errorUnresolvable("@WorkerKmpApp function"),
+            koinModulesFnTakesFactory = koinFnTakesFactory,
             contentFnFqn =
             contentFn.qualifiedName?.asString() ?: return errorUnresolvable("@WorkerKmpAppContent function"),
             workers = sortedWorkers,

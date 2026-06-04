@@ -24,6 +24,14 @@ public data class CodegenModel(
     val packageName: String,
     /** Fully-qualified name of the @WorkerKmpApp function (e.g. `com.example.appKoinModules`). */
     val koinModulesFnFqn: String,
+    /**
+     * True when the `@WorkerKmpApp`-annotated function takes a single `WorkManagerFactory`
+     * parameter (the documented `(WorkManagerFactory) -> List<Module>` contract).
+     * False when the function is no-arg (`() -> List<Module>`, v4.0.0 simplified form).
+     * Codegen branches on this so per-platform launchers either call `koinFn()` or
+     * `koinFn(platformWorkManagerFactory())` to match the consumer's signature.
+     */
+    val koinModulesFnTakesFactory: Boolean = false,
     /** Fully-qualified name of the @WorkerKmpAppContent function (e.g. `com.example.AppContent`). */
     val contentFnFqn: String,
     /**

@@ -14,9 +14,14 @@ internal object DesktopLauncherGenerator {
 
     fun run(model: CodegenModel, outputDir: File) {
         val pkgPath = model.packageName.replace('.', '/')
+        val extras = factoryExtras(
+            takesFactory = model.koinModulesFnTakesFactory,
+            factoryFqn = "io.github.mobilebytelabs.worker.desktop.desktopWorkManagerFactory",
+            factoryCall = "desktopWorkManagerFactory()",
+        )
         outputDir.resolve("kotlin/$pkgPath/generated/Generated_Main.kt").apply {
             parentFile.mkdirs()
-            writeText(TemplateEngine.render(TemplateEngine.load("desktop-main.kt.template"), model))
+            writeText(TemplateEngine.render(TemplateEngine.load("desktop-main.kt.template"), model, extras))
         }
     }
 }

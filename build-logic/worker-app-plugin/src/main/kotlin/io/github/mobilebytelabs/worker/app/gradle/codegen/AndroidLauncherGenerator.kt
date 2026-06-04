@@ -16,10 +16,20 @@ internal object AndroidLauncherGenerator {
 
     fun run(model: CodegenModel, outputDir: File) {
         val pkgPath = model.packageName.replace('.', '/')
+        // Android special-case — the factory call is `androidWorkManagerFactory(this)` because
+        // we're inside the generated Application subclass.
+        val androidExtras = mapOf(
+            "platformFactoryImport" to if (model.koinModulesFnTakesFactory) {
+                "import io.github.mobilebytelabs.worker.android.androidWorkManagerFactory\n"
+            } else {
+                ""
+            },
+            "androidFactoryCall" to if (model.koinModulesFnTakesFactory) "androidWorkManagerFactory(this)" else "",
+        )
 
         outputDir.resolve("kotlin/$pkgPath/generated/Generated_App.kt").apply {
             parentFile.mkdirs()
-            writeText(TemplateEngine.render(TemplateEngine.load("android-app.kt.template"), model))
+            writeText(TemplateEngine.render(TemplateEngine.load("android-app.kt.template"), model, androidExtras))
         }
         outputDir.resolve("kotlin/$pkgPath/generated/Generated_MainActivity.kt").apply {
             parentFile.mkdirs()

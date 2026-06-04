@@ -20,6 +20,7 @@ internal data class CodegenModel(
     val androidPermissions: List<String>,
     val packageName: String,
     val koinModulesFnFqn: String,
+    val koinModulesFnTakesFactory: Boolean = false,
     val contentFnFqn: String,
     val workers: List<WorkerDef> = emptyList(),
 ) {
