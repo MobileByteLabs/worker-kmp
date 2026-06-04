@@ -46,9 +46,14 @@ import org.w3c.dom.HTMLElement
 public fun launchWebWorkerApp(
     canvasElementId: String,
     koinModules: () -> List<Module>,
+    onAfterKoinStart: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     startWorkerKoinIfAbsent(koinModules)
+    // worker-kmp v4.0.0 — single-API completion: codegen-emitted main passes
+    // `onAfterKoinStart = { WorkerKmpAuto.install() }` so worker registry +
+    // WorkManager binding land after Koin's default context is populated.
+    onAfterKoinStart()
     val container = document.getElementById(canvasElementId) as? HTMLElement
         ?: error("worker-kmp: viewport container '#$canvasElementId' not found in DOM")
     ComposeViewport(viewportContainer = container) { content() }

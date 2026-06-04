@@ -1,3 +1,5 @@
+@file:OptIn(WorkerKmpInternalApi::class)
+
 package io.github.mobilebytelabs.worker.koin
 
 import io.github.mobilebytelabs.worker.ExistingPeriodicWorkPolicy
@@ -47,7 +49,7 @@ class WorkKoinModuleTest {
         val stub = StubWorkManager()
         val factory = WorkManagerFactory { _, _ -> stub }
         val koin = startKoin {
-            modules(workKoinModule(factory = factory))
+            modules(workKoinModulePrivateApi(factory = factory))
         }.koin
         assertNotNull(koin.get<WorkManager>())
         assertSame(stub, koin.get<WorkManager>())
@@ -58,7 +60,7 @@ class WorkKoinModuleTest {
         val stub = StubWorkManager()
         val factory = WorkManagerFactory { _, _ -> stub }
         val koin = startKoin {
-            modules(workKoinModule(factory = factory))
+            modules(workKoinModulePrivateApi(factory = factory))
         }.koin
         assertSame(koin.get<WorkManager>(), koin.get<WorkManager>())
     }
@@ -76,7 +78,7 @@ class WorkKoinModuleTest {
         val cfg = WorkerConfig()
         val workers = workerRegistry { }
         val koin = startKoin {
-            modules(workKoinModule(config = cfg, workers = workers, factory = factory))
+            modules(workKoinModulePrivateApi(config = cfg, workers = workers, factory = factory))
         }.koin
         // Resolution triggers factory.create — assert it received our inputs.
         koin.get<WorkManager>()
@@ -91,7 +93,7 @@ class WorkKoinModuleTest {
         val cfg = WorkerConfig()
         val workers = workerRegistry { }
         val koin = startKoin {
-            modules(workKoinModule(config = cfg, workers = workers, factory = factory))
+            modules(workKoinModulePrivateApi(config = cfg, workers = workers, factory = factory))
         }.koin
         assertSame(cfg, koin.get<WorkerConfig>())
         assertSame(workers, koin.get<WorkerRegistry>())
@@ -111,6 +113,7 @@ internal class StubWorkManager : WorkManager {
         request: OneTimeWorkRequest,
     ): Uuid = Uuid.random()
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = flowOf(emptyList())
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> = flowOf(emptyList())
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = null
     override suspend fun cancelWorkById(id: Uuid) = Unit
     override suspend fun cancelAllWorkByTag(tag: String) = Unit

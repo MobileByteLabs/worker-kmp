@@ -232,5 +232,8 @@ private class RecordingWorkManager : WorkManager {
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
         state.map { it.values.filter { info -> tag in info.tags } }
 
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        getWorkInfosByTag(uniqueWorkName)
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = state.value[id]
 }

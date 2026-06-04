@@ -1,0 +1,37 @@
+/*
+ * GENERATED — DO NOT EDIT.
+ * Android actual for WorkerKmpAuto.install() — reads `Application` from Koin via the
+ * `androidContext()` binding that consumer's `startKoin { androidContext(this@App); ... }`
+ * established.
+ */
+package {{packageName}}.generated
+
+import android.app.Application
+import android.content.Context
+
+public actual object WorkerKmpAuto {
+    public actual fun install() {
+        val koin = try {
+            org.koin.core.context.GlobalContext.get()
+        } catch (e: IllegalStateException) {
+            throw IllegalStateException(
+                "WorkerKmpAuto.install() called before startKoin. " +
+                    "Call `startKoin { androidContext(this@App); ... }` first.",
+                e,
+            )
+        }
+        val context = koin.getOrNull<Context>()
+            ?: throw IllegalStateException(
+                "WorkerKmpAuto.install() — `androidContext(this@App)` not bound. " +
+                    "Inside your `startKoin { … }` block, call `androidContext(this@App)` " +
+                    "BEFORE WorkerKmpAuto.install().",
+            )
+        val app = context as? Application
+            ?: throw IllegalStateException(
+                "WorkerKmpAuto.install() — the bound `Context` is not an `Application`. " +
+                    "Ensure you call `androidContext(this@MyApp)` with the Application instance, " +
+                    "not a Service/Activity context.",
+            )
+        installWorkerKmpAndroid(app)
+    }
+}

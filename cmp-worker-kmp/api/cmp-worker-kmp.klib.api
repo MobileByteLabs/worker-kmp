@@ -129,6 +129,7 @@ abstract interface io.github.mobilebytelabs.worker/WorkContinuation { // io.gith
 
 abstract interface io.github.mobilebytelabs.worker/WorkManager { // io.github.mobilebytelabs.worker/WorkManager|null[0]
     abstract fun getWorkInfosByTag(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker/WorkManager.getWorkInfosByTag|getWorkInfosByTag(kotlin.String){}[0]
+    abstract fun getWorkInfosForUniqueWorkFlow(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker/WorkManager.getWorkInfosForUniqueWorkFlow|getWorkInfosForUniqueWorkFlow(kotlin.String){}[0]
     abstract suspend fun cancelAllWorkByTag(kotlin/String) // io.github.mobilebytelabs.worker/WorkManager.cancelAllWorkByTag|cancelAllWorkByTag(kotlin.String){}[0]
     abstract suspend fun cancelWorkById(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker/WorkManager.cancelWorkById|cancelWorkById(kotlin.uuid.Uuid){}[0]
     abstract suspend fun enqueue(io.github.mobilebytelabs.worker/OneTimeWorkRequest): kotlin.uuid/Uuid // io.github.mobilebytelabs.worker/WorkManager.enqueue|enqueue(io.github.mobilebytelabs.worker.OneTimeWorkRequest){}[0]

@@ -1,0 +1,31 @@
+/*
+ * GENERATED — DO NOT EDIT.
+ * Source: @WorkerKmpWorkers annotation sites in the consumer's commonMain.
+ */
+@file:OptIn(
+    io.github.mobilebytelabs.worker.ExperimentalWorkerApi::class,
+    io.github.mobilebytelabs.worker.koin.WorkerKmpInternalApi::class,
+)
+package {{packageName}}.generated
+
+import io.github.mobilebytelabs.worker.config.WorkerConfig
+import io.github.mobilebytelabs.worker.web.webWorkManagerFactory
+import io.github.mobilebytelabs.worker.koin.WorkerKmpHost
+import io.github.mobilebytelabs.worker.koin.WorkerKmpHostConfig
+import io.github.mobilebytelabs.worker.koin.workKoinModulePrivateApi
+import io.github.mobilebytelabs.worker.registry.workerRegistry
+import org.koin.core.context.loadKoinModules
+import org.koin.mp.KoinPlatformTools
+{{workerImports}}
+
+internal fun installWorkerKmpWeb() {
+    val factory = webWorkManagerFactory()
+    val registry = workerRegistry {
+{{workerRegistrationsForWeb}}
+    }
+    loadKoinModules(workKoinModulePrivateApi(WorkerConfig(), registry, factory))
+    val koin = KoinPlatformTools.defaultContext().getOrNull()
+    WorkerKmpHost.initialize(
+        koin?.getOrNull(WorkerKmpHostConfig::class) ?: WorkerKmpHostConfig(),
+    )
+}

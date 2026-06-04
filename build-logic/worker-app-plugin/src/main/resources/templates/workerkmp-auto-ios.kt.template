@@ -1,0 +1,11 @@
+/*
+ * GENERATED — DO NOT EDIT.
+ * iOS actual for WorkerKmpAuto.install() — no-arg, parameterless factory.
+ */
+package {{packageName}}.generated
+
+public actual object WorkerKmpAuto {
+    public actual fun install() {
+        installWorkerKmpIos()
+    }
+}

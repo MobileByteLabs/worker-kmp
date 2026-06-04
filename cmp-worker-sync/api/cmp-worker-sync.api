@@ -1,0 +1,15 @@
+public final class io/github/mobilebytelabs/worker/sync/DefaultUniqueWorkObserver : io/github/mobilebytelabs/worker/sync/UniqueWorkObserver {
+	public fun <init> (Lio/github/mobilebytelabs/worker/WorkManager;)V
+	public fun isRunning (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun work (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public abstract interface class io/github/mobilebytelabs/worker/sync/UniqueWorkObserver {
+	public abstract fun isRunning (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun work (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+}
+
+public final class io/github/mobilebytelabs/worker/sync/di/SyncObserverKoinModuleKt {
+	public static final fun getSyncObserverKoinModule ()Lorg/koin/core/module/Module;
+}
+

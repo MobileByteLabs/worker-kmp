@@ -34,8 +34,18 @@ import org.koin.core.module.Module
  *                    actually needs them.
  * @param content Compose UI composable to render inside the window.
  */
-public fun launchDesktopWorkerApp(title: String, koinModules: () -> List<Module>, content: @Composable () -> Unit) {
+public fun launchDesktopWorkerApp(
+    title: String,
+    koinModules: () -> List<Module>,
+    onAfterKoinStart: () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
     startWorkerKoinIfAbsent(koinModules)
+    // worker-kmp v4.0.0 — single-API completion: codegen-emitted main passes
+    // `onAfterKoinStart = { WorkerKmpAuto.install() }` so the worker registry +
+    // WorkManager binding land after Koin's GlobalContext is populated and before the
+    // composable body runs (avoids `get<WorkManager>()` lookup races).
+    onAfterKoinStart()
     application {
         Window(onCloseRequest = ::exitApplication, title = title) {
             content()

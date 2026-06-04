@@ -1,0 +1,13 @@
+/*
+ * GENERATED — DO NOT EDIT.
+ * Source: @WorkerKmpApp + @WorkerKmpWorkers annotation sites.
+ *
+ * The consumer-facing entry point — call `WorkerKmpAuto.install()` from your
+ * `App.onCreate` AFTER `startKoin { androidContext(this@App); ... }` (Android)
+ * or after `startKoin { ... }` (iOS/Desktop/Web).
+ */
+package {{packageName}}.generated
+
+public expect object WorkerKmpAuto {
+    public fun install()
+}

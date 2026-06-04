@@ -1,8 +1,10 @@
+@file:OptIn(io.github.mobilebytelabs.worker.koin.WorkerKmpInternalApi::class)
+
 package io.github.mobilebytelabs.worker.sample.composestore.di
 
 import io.github.mobilebytelabs.worker.WorkManagerFactory
 import io.github.mobilebytelabs.worker.config.WorkerConfig
-import io.github.mobilebytelabs.worker.koin.workKoinModule
+import io.github.mobilebytelabs.worker.koin.workKoinModulePrivateApi
 import io.github.mobilebytelabs.worker.registry.WorkerRegistry
 import io.github.mobilebytelabs.worker.registry.workerRegistry
 import io.github.mobilebytelabs.worker.sample.composestore.domain.Article
@@ -24,14 +26,21 @@ fun appModule(store: Store<String, Article>): Module = module {
 }
 
 /**
- * Worker module — wires the WorkManager backend (via [workKoinModule]) and registers
- * [ArticleSyncWorker] against the shared [store]. The article id is per-request
- * (read from `inputData`); the Store is shared across all firings.
+ * Worker module — wires the WorkManager backend and registers [ArticleSyncWorker]
+ * against the shared [store]. The article id is per-request (read from `inputData`);
+ * the Store is shared across all firings.
+ *
+ * v4.0.0 migration note: this sample's `ArticleSyncWorker` doesn't fit the simple
+ * `@WorkerKmpWorkers` pattern (Store5 is a generic type requiring `@Named` per D33/AC-63;
+ * `articleId: String` is per-request inputData, not Koin-resolved). Rather than rewriting
+ * the sample's worker contract, opt into `WorkerKmpInternalApi` and call the renamed
+ * `workKoinModulePrivateApi(...)` directly. This is the canonical "escape hatch" for
+ * consumers with worker constructors that aren't pure Koin-resolved deps.
  */
 fun articleWorkerKoinModule(
     store: Store<String, Article>,
     factory: WorkManagerFactory,
-): Module = workKoinModule(
+): Module = workKoinModulePrivateApi(
     config = WorkerConfig(),
     workers = articleWorkerRegistry(store),
     factory = factory,

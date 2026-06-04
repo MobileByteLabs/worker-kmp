@@ -104,6 +104,10 @@ class TestWorkManager : WorkManager {
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
         store.map { map -> map.values.filter { tag in it.tags } }
 
+    // v4.0.0 single-API completion — uniqueWorkName-as-tag delegation.
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        getWorkInfosByTag(uniqueWorkName)
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = store.value[id]
 
     // ── Test control ──────────────────────────────────────────────────────────

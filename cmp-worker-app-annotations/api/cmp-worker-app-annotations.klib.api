@@ -6,6 +6,13 @@
 // - Show declarations: true
 
 // Library unique name: <io.github.mobilebytelabs:cmp-worker-app-annotations>
+open annotation class io.github.mobilebytelabs.worker.app/WorkerForPlatforms : kotlin/Annotation { // io.github.mobilebytelabs.worker.app/WorkerForPlatforms|null[0]
+    constructor <init>(kotlin/Array<io.github.mobilebytelabs.worker.app/Platform>) // io.github.mobilebytelabs.worker.app/WorkerForPlatforms.<init>|<init>(kotlin.Array<io.github.mobilebytelabs.worker.app.Platform>){}[0]
+
+    final val platforms // io.github.mobilebytelabs.worker.app/WorkerForPlatforms.platforms|{}platforms[0]
+        final fun <get-platforms>(): kotlin/Array<io.github.mobilebytelabs.worker.app/Platform> // io.github.mobilebytelabs.worker.app/WorkerForPlatforms.platforms.<get-platforms>|<get-platforms>(){}[0]
+}
+
 open annotation class io.github.mobilebytelabs.worker.app/WorkerKmpApp : kotlin/Annotation { // io.github.mobilebytelabs.worker.app/WorkerKmpApp|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String = ..., kotlin/String = ..., kotlin/Array<kotlin/String> = ...) // io.github.mobilebytelabs.worker.app/WorkerKmpApp.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.Array<kotlin.String>){}[0]
 
@@ -23,4 +30,24 @@ open annotation class io.github.mobilebytelabs.worker.app/WorkerKmpApp : kotlin/
 
 open annotation class io.github.mobilebytelabs.worker.app/WorkerKmpAppContent : kotlin/Annotation { // io.github.mobilebytelabs.worker.app/WorkerKmpAppContent|null[0]
     constructor <init>() // io.github.mobilebytelabs.worker.app/WorkerKmpAppContent.<init>|<init>(){}[0]
+}
+
+open annotation class io.github.mobilebytelabs.worker.app/WorkerKmpWorkers : kotlin/Annotation { // io.github.mobilebytelabs.worker.app/WorkerKmpWorkers|null[0]
+    constructor <init>(kotlin/Array<kotlin.reflect/KClass<*>>) // io.github.mobilebytelabs.worker.app/WorkerKmpWorkers.<init>|<init>(kotlin.Array<kotlin.reflect.KClass<*>>){}[0]
+
+    final val workers // io.github.mobilebytelabs.worker.app/WorkerKmpWorkers.workers|{}workers[0]
+        final fun <get-workers>(): kotlin/Array<kotlin.reflect/KClass<*>> // io.github.mobilebytelabs.worker.app/WorkerKmpWorkers.workers.<get-workers>|<get-workers>(){}[0]
+}
+
+final enum class io.github.mobilebytelabs.worker.app/Platform : kotlin/Enum<io.github.mobilebytelabs.worker.app/Platform> { // io.github.mobilebytelabs.worker.app/Platform|null[0]
+    enum entry Android // io.github.mobilebytelabs.worker.app/Platform.Android|null[0]
+    enum entry Desktop // io.github.mobilebytelabs.worker.app/Platform.Desktop|null[0]
+    enum entry Ios // io.github.mobilebytelabs.worker.app/Platform.Ios|null[0]
+    enum entry Web // io.github.mobilebytelabs.worker.app/Platform.Web|null[0]
+
+    final val entries // io.github.mobilebytelabs.worker.app/Platform.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<io.github.mobilebytelabs.worker.app/Platform> // io.github.mobilebytelabs.worker.app/Platform.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): io.github.mobilebytelabs.worker.app/Platform // io.github.mobilebytelabs.worker.app/Platform.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<io.github.mobilebytelabs.worker.app/Platform> // io.github.mobilebytelabs.worker.app/Platform.values|values#static(){}[0]
 }

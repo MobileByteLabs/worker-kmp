@@ -11,57 +11,30 @@ import org.koin.dsl.module
 /**
  * Koin module factory that wires worker-kmp into the consumer's DI graph.
  *
- * Refactored in v3.0.0-alpha00.X (Phase 0 deep refactor). The new signature accepts an
- * explicit [WorkManagerFactory] supplied by the platform module the consumer added
- * (`cmp-worker-android` / `cmp-worker-ios` / `cmp-worker-desktop` / `cmp-worker-web`).
+ * Renamed from legacy `workKoinModule(config, workers, factory)` in v4.0.0 per the
+ * worker-kmp-single-api-completion epic (closes audit gap H1) — the function is preserved
+ * with identical body but tagged with the [WorkerKmpInternalApi] opt-in marker so direct
+ * consumer use fails at compile time with `@RequiresOptIn(level = ERROR)`.
  *
- * **Clean-break refactor**: the legacy `PlatformWorkManager.configure(...)` global slot
- * and `initializeWorkerXxx(...)` side-effecting init functions have been REMOVED outright.
- * Consumers wire the platform implementation via the factory parameter — there is no
- * pre-`startKoin` setup step anymore.
+ * **Codegen is the only intended caller.** Code emitted by `cmp-worker-app-plugin`'s
+ * `workerKmpAppCodegenInit{Android,Ios,Desktop,Web}` tasks annotates the file with
+ * `@file:OptIn(WorkerKmpInternalApi::class)` and calls this function. Consumer's commonMain
+ * code never sees this — they call `WorkerKmpAuto.install()` instead.
  *
- * Consumer usage (100% commonMain except the factory selection):
+ * Migration from v3.1.x:
+ * - **Old**: `modules(workKoinModule(WorkerConfig(), workerRegistry { … }, androidWorkManagerFactory(this)))`
+ * - **New**: `@WorkerKmpWorkers([…]) fun workerDeclarations() = Unit` + `modules(appKoinModules())` + `WorkerKmpAuto.install()`
  *
- * ```kotlin
- * // androidMain
- * startKoin {
- *     androidContext(this@App)
- *     modules(
- *         workKoinModule(
- *             config = WorkerConfig(),
- *             workers = workerRegistry {
- *                 register<SyncWorker> { ctx -> SyncWorker(ctx, get()) }
- *             },
- *             factory = androidWorkManagerFactory(this@App),
- *         ),
- *         appModule,
- *     )
- * }
+ * See https://github.com/MobileByteLabs/worker-kmp/wiki/single-api-guide for full migration.
  *
- * // iosMain
- * startKoin {
- *     modules(
- *         workKoinModule(
- *             config = WorkerConfig(),
- *             workers = workerRegistry {
- *                 register<SyncWorker> { ctx -> SyncWorker(ctx, get()) }
- *             },
- *             factory = iosWorkManagerFactory(),
- *         ),
- *     )
- * }
- * ```
- *
- * The factory parameter is mandatory — consumers cannot accidentally start Koin without a
- * platform backend (the previous footgun where `workKoinModule()` returned a
- * `WorkManager` that threw on first use is gone).
- *
- * **Source-compat break from v3.0.0-alpha00**: the previous default-everything signature
- * `workKoinModule(WorkerConfig, WorkerRegistry)` now requires a third positional
- * [WorkManagerFactory] arg. Migration is a per-platform 1-line edit at the consumer's
- * `startKoin` site — see docs/getting-started/migrating-from-v2.md §2.
+ * @param config worker-kmp runtime configuration.
+ * @param workers registered worker classes (immutable after this call — defends against T23).
+ * @param factory per-platform [WorkManagerFactory] selecting the runtime backing
+ *   (androidx.work on Android; IosWorkStateStore on iOS; etc.).
+ * @return Koin [Module] binding `single<WorkManager>`.
  */
-public fun workKoinModule(
+@WorkerKmpInternalApi
+public fun workKoinModulePrivateApi(
     config: WorkerConfig = WorkerConfig(),
     workers: WorkerRegistry = workerRegistry { },
     factory: WorkManagerFactory,

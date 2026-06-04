@@ -10,6 +10,7 @@ public final class io/github/mobilebytelabs/worker/test/TestWorkManager : io/git
 	public final fun getUniqueWorkNames ()Ljava/util/List;
 	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun getWorkInfosForUniqueWorkFlow (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
 	public final fun hasWorkWithTag (Ljava/lang/String;)Z
 	public final fun reset ()V
 	public final fun simulateWorkFailure (Lkotlin/uuid/Uuid;)V

@@ -70,6 +70,10 @@ internal class FakeWorkManager : WorkManager {
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
         state.map { it.values.filter { info -> tag in info.tags } }
 
+    // v4.0.0 single-API completion — uniqueWorkName-as-tag delegation.
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        getWorkInfosByTag(uniqueWorkName)
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = state.value[id]
 
     fun simulateRunning(id: Uuid) {

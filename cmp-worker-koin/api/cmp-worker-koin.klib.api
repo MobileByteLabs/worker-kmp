@@ -6,4 +6,29 @@
 // - Show declarations: true
 
 // Library unique name: <io.github.mobilebytelabs:cmp-worker-koin>
-final fun io.github.mobilebytelabs.worker.koin/workKoinModule(io.github.mobilebytelabs.worker.config/WorkerConfig = ..., io.github.mobilebytelabs.worker.registry/WorkerRegistry = ..., io.github.mobilebytelabs.worker/WorkManagerFactory): org.koin.core.module/Module // io.github.mobilebytelabs.worker.koin/workKoinModule|workKoinModule(io.github.mobilebytelabs.worker.config.WorkerConfig;io.github.mobilebytelabs.worker.registry.WorkerRegistry;io.github.mobilebytelabs.worker.WorkManagerFactory){}[0]
+open annotation class io.github.mobilebytelabs.worker.koin/WorkerKmpInternalApi : kotlin/Annotation { // io.github.mobilebytelabs.worker.koin/WorkerKmpInternalApi|null[0]
+    constructor <init>() // io.github.mobilebytelabs.worker.koin/WorkerKmpInternalApi.<init>|<init>(){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig { // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig|null[0]
+    constructor <init>(org.koin.core.qualifier/Qualifier? = ..., kotlin/String = ...) // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.<init>|<init>(org.koin.core.qualifier.Qualifier?;kotlin.String){}[0]
+
+    final val koinScopeQualifier // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.koinScopeQualifier|{}koinScopeQualifier[0]
+        final fun <get-koinScopeQualifier>(): org.koin.core.qualifier/Qualifier? // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.koinScopeQualifier.<get-koinScopeQualifier>|<get-koinScopeQualifier>(){}[0]
+    final val logTag // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.logTag|{}logTag[0]
+        final fun <get-logTag>(): kotlin/String // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.logTag.<get-logTag>|<get-logTag>(){}[0]
+
+    final fun component1(): org.koin.core.qualifier/Qualifier? // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/String // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.component2|component2(){}[0]
+    final fun copy(org.koin.core.qualifier/Qualifier? = ..., kotlin/String = ...): io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.copy|copy(org.koin.core.qualifier.Qualifier?;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig.toString|toString(){}[0]
+}
+
+final object io.github.mobilebytelabs.worker.koin/WorkerKmpHost { // io.github.mobilebytelabs.worker.koin/WorkerKmpHost|null[0]
+    final fun initialize(io.github.mobilebytelabs.worker.koin/WorkerKmpHostConfig = ...) // io.github.mobilebytelabs.worker.koin/WorkerKmpHost.initialize|initialize(io.github.mobilebytelabs.worker.koin.WorkerKmpHostConfig){}[0]
+}
+
+final fun io.github.mobilebytelabs.worker.koin/workKoinModule(io.github.mobilebytelabs.worker.config/WorkerConfig, io.github.mobilebytelabs.worker.registry/WorkerRegistry, io.github.mobilebytelabs.worker/WorkManagerFactory): kotlin/Nothing // io.github.mobilebytelabs.worker.koin/workKoinModule|workKoinModule(io.github.mobilebytelabs.worker.config.WorkerConfig;io.github.mobilebytelabs.worker.registry.WorkerRegistry;io.github.mobilebytelabs.worker.WorkManagerFactory){}[0]
+final fun io.github.mobilebytelabs.worker.koin/workKoinModulePrivateApi(io.github.mobilebytelabs.worker.config/WorkerConfig = ..., io.github.mobilebytelabs.worker.registry/WorkerRegistry = ..., io.github.mobilebytelabs.worker/WorkManagerFactory): org.koin.core.module/Module // io.github.mobilebytelabs.worker.koin/workKoinModulePrivateApi|workKoinModulePrivateApi(io.github.mobilebytelabs.worker.config.WorkerConfig;io.github.mobilebytelabs.worker.registry.WorkerRegistry;io.github.mobilebytelabs.worker.WorkManagerFactory){}[0]

@@ -140,6 +140,27 @@ interface WorkManager {
     fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>>
 
     /**
+     * Reactive observer of every [WorkInfo] enqueued under the given [uniqueWorkName].
+     *
+     * For unique-work enqueue patterns ([enqueueUniqueWork] / [enqueueUniquePeriodicWork]),
+     * this surfaces the same per-work observation as [getWorkInfosByTag] but keyed on
+     * the unique name rather than an arbitrary tag. Typical consumer: the `UniqueWorkObserver`
+     * abstraction in the `cmp-worker-sync` module, which maps the resulting flow to a single
+     * `Flow<Boolean>` for "is sync running" indicators.
+     *
+     * Platform notes:
+     * - **Android**: delegates to `androidx.work.WorkManager.getWorkInfosForUniqueWorkFlow`.
+     * - **iOS / Desktop / Web**: filters the internal state store by `uniqueWorkName`
+     *   (which is added to the work's tag set at enqueue time).
+     *
+     * @param uniqueWorkName the unique name passed to [enqueueUniqueWork] or
+     *   [enqueueUniquePeriodicWork].
+     * @return a hot [Flow] emitting the current list (possibly empty) of [WorkInfo] entries on
+     *   every state transition.
+     */
+    fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>>
+
+    /**
      * Returns a point-in-time snapshot of the [WorkInfo] for the given [id], or `null` if
      * no work with that ID is known to this manager.
      *

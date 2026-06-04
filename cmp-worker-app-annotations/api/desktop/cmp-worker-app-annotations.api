@@ -1,3 +1,17 @@
+public final class io/github/mobilebytelabs/worker/app/Platform : java/lang/Enum {
+	public static final field Android Lio/github/mobilebytelabs/worker/app/Platform;
+	public static final field Desktop Lio/github/mobilebytelabs/worker/app/Platform;
+	public static final field Ios Lio/github/mobilebytelabs/worker/app/Platform;
+	public static final field Web Lio/github/mobilebytelabs/worker/app/Platform;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lio/github/mobilebytelabs/worker/app/Platform;
+	public static fun values ()[Lio/github/mobilebytelabs/worker/app/Platform;
+}
+
+public abstract interface annotation class io/github/mobilebytelabs/worker/app/WorkerForPlatforms : java/lang/annotation/Annotation {
+	public abstract fun platforms ()[Lio/github/mobilebytelabs/worker/app/Platform;
+}
+
 public abstract interface annotation class io/github/mobilebytelabs/worker/app/WorkerKmpApp : java/lang/annotation/Annotation {
 	public abstract fun androidApplicationId ()Ljava/lang/String;
 	public abstract fun androidPermissions ()[Ljava/lang/String;
@@ -7,5 +21,9 @@ public abstract interface annotation class io/github/mobilebytelabs/worker/app/W
 }
 
 public abstract interface annotation class io/github/mobilebytelabs/worker/app/WorkerKmpAppContent : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class io/github/mobilebytelabs/worker/app/WorkerKmpWorkers : java/lang/annotation/Annotation {
+	public abstract fun workers ()[Ljava/lang/Class;
 }
 

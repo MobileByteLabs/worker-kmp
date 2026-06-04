@@ -50,6 +50,9 @@ class WorkScheduledOfflineSubmitSyncerTest {
             return flowOf(emptyList())
         }
 
+        override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+            getWorkInfosByTag(uniqueWorkName)
+
         override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = null
         override suspend fun cancelWorkById(id: Uuid) = Unit
         override suspend fun cancelAllWorkByTag(tag: String) {
