@@ -76,32 +76,40 @@ See [docs/wiki/single-api-guide.md](docs/wiki/single-api-guide.md) for full v3.1
 
 ### Added
 
-- **Kover 0.9.1 + 100% line coverage on 8 commonMain modules.** Self-registering
+- **Kover 0.9.1 + 100% line coverage on 6 commonMain modules.** Self-registering
   `KoverConventionPlugin` ported from `mifos-x/kmp-project-template`; root
   `koverVerify` task enforces `minBound(100)` per opted-in module. New
   `.github/workflows/test-coverage.yml` runs `koverHtmlReport koverXmlReport
   koverVerify` on every PR + push to `main` / `development`; uploads the HTML
   artifact + emits aggregate `%` in PR Step Summary.
 
-- **~70 net-new `@Tests`** bringing 8 modules to 100% line coverage on
+- **~70 net-new `@Tests`** bringing 6 modules to 100% line coverage on
   commonMain (excluding platform actuals + KSP-generated + annotation-only):
 
   | Module | Status |
   |---|---|
-  | `cmp-worker-kmp` | 100% commonMain |
-  | `cmp-worker-scheduler` | 100% commonMain |
-  | `cmp-worker-store5` | 100% commonMain |
-  | `cmp-worker-storeflow` | 100% commonMain |
-  | `cmp-worker-koin` | 100% commonMain |
-  | `cmp-worker-compose` | 100% commonMain |
-  | `cmp-worker-test` | 100% commonMain |
-  | `cmp-worker-app-annotations` | excluded (annotation-only) |
+  | `cmp-worker-kmp` | 100% commonMain (gated) |
+  | `cmp-worker-store5` | 100% commonMain (gated) |
+  | `cmp-worker-storeflow` | 100% commonMain (gated) |
+  | `cmp-worker-koin` | 100% commonMain (gated) |
+  | `cmp-worker-sync` | 100% commonMain (gated) |
+  | `cmp-worker-test` | 100% commonMain (gated) |
 
 ### Documentation
 
 - New [`docs/getting-started/coverage.md`](docs/getting-started/coverage.md) —
   Kover setup, exclusion rationale, how to add a new module, escape hatches,
   CI workflow reference.
+
+### Known limitations
+
+- **`cmp-worker-scheduler` and `cmp-worker-compose` are test-complete but cannot
+  opt into Kover yet.** Kover 0.9.1 doesn't recognize the new AGP 9+
+  `android.kotlin.multiplatform.library` extension shape; applying the plugin
+  fails at configuration time. Test suites (39 `@Test`s in scheduler,
+  21 in compose) run via `jvmTest` and pass, they just don't contribute to
+  Kover aggregation. Revisit when Kover ships AGP 9 KMP-Android library
+  support — tracked by [`kover-agp9-opt-in-followup`](../../plan-layer/project-plans/mbs/worker-kmp/active/kover-agp9-opt-in-followup/PLAN.md).
 
 ### Deferred (Tier-2 follow-up)
 
