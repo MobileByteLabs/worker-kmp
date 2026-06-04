@@ -23,6 +23,7 @@ internal class JvmFakeWorkManager : WorkManager {
         request: OneTimeWorkRequest,
     ): Uuid = Uuid.random()
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = flowOf(emptyList())
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> = flowOf(emptyList())
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = null
     override suspend fun cancelWorkById(id: Uuid) = Unit
     override suspend fun cancelAllWorkByTag(tag: String) = Unit

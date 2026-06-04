@@ -15,7 +15,11 @@ internal object WebLauncherGenerator {
 
     fun run(model: CodegenModel, outputDir: File, wasmJsBundleName: String) {
         val pkgPath = model.packageName.replace('.', '/')
-        val extras = mapOf("wasmJsBundleName" to wasmJsBundleName)
+        val extras = factoryExtras(
+            takesFactory = model.koinModulesFnTakesFactory,
+            factoryFqn = "io.github.mobilebytelabs.worker.web.webWorkManagerFactory",
+            factoryCall = "webWorkManagerFactory()",
+        ) + mapOf("wasmJsBundleName" to wasmJsBundleName)
 
         outputDir.resolve("kotlin/$pkgPath/generated/Generated_Main.kt").apply {
             parentFile.mkdirs()

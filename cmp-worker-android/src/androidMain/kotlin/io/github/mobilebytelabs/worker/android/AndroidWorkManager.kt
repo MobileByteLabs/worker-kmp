@@ -65,6 +65,11 @@ class AndroidWorkManager(context: Context) : WorkManager {
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
         wm.getWorkInfosByTagFlow(tag).map { list -> list.mapNotNull { it.toKmp() } }
 
+    // worker-kmp-single-api-completion sub-plan 01 — delegates to androidx.work native API.
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        wm.getWorkInfosForUniqueWorkFlow(uniqueWorkName)
+            .map { list -> list.mapNotNull { it.toKmp() } }
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? =
         wm.getWorkInfosByTagFlow(id.toTag()).first().firstOrNull()?.toKmp()
 

@@ -70,6 +70,12 @@ class TestWorkManager : WorkManager {
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> =
         stateStore.map { infos -> infos.values.filter { tag in it.tags } }
 
+    // v4.0.0 single-API completion — uniqueWorkName is added to the work's tag set at enqueue
+    // time, so unique-work observation reduces to tag observation. Matches the implementation
+    // strategy used by IosWorkManager / DesktopWorkManager / WebWorkManager.
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        getWorkInfosByTag(uniqueWorkName)
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.value[id]
 
     fun simulateSuccess(id: Uuid, outputData: WorkData = WorkData.EMPTY) {

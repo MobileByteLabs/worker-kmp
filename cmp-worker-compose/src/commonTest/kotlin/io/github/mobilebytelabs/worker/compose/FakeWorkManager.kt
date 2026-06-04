@@ -52,6 +52,10 @@ class FakeWorkManager : WorkManager {
 
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = _store.map { it[tag] ?: emptyList() }
 
+    // v4.0.0 — same delegation pattern as production iOS/Desktop/Web impls (uniqueWorkName-as-tag).
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        getWorkInfosByTag(uniqueWorkName)
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? =
         _store.value.values.flatten().firstOrNull { it.id == id }
 }

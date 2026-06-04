@@ -111,6 +111,12 @@ class DesktopWorkManager internal constructor(
 
     override fun getWorkInfosByTag(tag: String): Flow<List<WorkInfo>> = stateStore.observeByTag(tag)
 
+    // worker-kmp-single-api-completion sub-plan 01 — uniqueWorkName is added to the work's
+    // tag set at enqueue time (see line ~75), so unique-work observation reduces to tag
+    // observation with the uniqueWorkName as the tag.
+    override fun getWorkInfosForUniqueWorkFlow(uniqueWorkName: String): Flow<List<WorkInfo>> =
+        stateStore.observeByTag(uniqueWorkName)
+
     override suspend fun getWorkInfoById(id: Uuid): WorkInfo? = stateStore.getById(id)
 
     private suspend fun executeWorker(request: WorkRequest) {

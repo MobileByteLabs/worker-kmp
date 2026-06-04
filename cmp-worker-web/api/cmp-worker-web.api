@@ -32,6 +32,7 @@ public final class io/github/mobilebytelabs/worker/web/WebWorkManager : io/githu
 	public fun enqueueUniqueWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun getWorkInfosForUniqueWorkFlow (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
 	public final fun shutdown ()V
 }
 

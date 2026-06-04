@@ -1,3 +1,5 @@
+@file:OptIn(io.github.mobilebytelabs.worker.koin.WorkerKmpInternalApi::class)
+
 package io.github.mobilebytelabs.worker.sample
 
 import io.github.mobilebytelabs.worker.CoroutineWorker
@@ -6,7 +8,7 @@ import io.github.mobilebytelabs.worker.WorkResult
 import io.github.mobilebytelabs.worker.WorkerContext
 import io.github.mobilebytelabs.worker.config.WorkerConfig
 import io.github.mobilebytelabs.worker.desktop.desktopWorkManagerFactory
-import io.github.mobilebytelabs.worker.koin.workKoinModule
+import io.github.mobilebytelabs.worker.koin.workKoinModulePrivateApi
 import io.github.mobilebytelabs.worker.oneTimeWorkRequest
 import io.github.mobilebytelabs.worker.registry.workerRegistry
 import io.github.mobilebytelabs.worker.workDataOf
@@ -60,7 +62,7 @@ fun main() = runBlocking {
     // point + the PlatformWorkManager global slot have been removed outright.
     startKoin {
         modules(
-            workKoinModule(
+            workKoinModulePrivateApi(
                 config = WorkerConfig(),
                 workers = workerRegistry {
                     register<KoinGreetingWorker> { ctx ->

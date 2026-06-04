@@ -1,0 +1,22 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, js, wasmJs]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <io.github.mobilebytelabs:cmp-worker-sync>
+abstract interface io.github.mobilebytelabs.worker.sync/UniqueWorkObserver { // io.github.mobilebytelabs.worker.sync/UniqueWorkObserver|null[0]
+    abstract fun isRunning(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin/Boolean> // io.github.mobilebytelabs.worker.sync/UniqueWorkObserver.isRunning|isRunning(kotlin.String){}[0]
+    abstract fun work(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.sync/UniqueWorkObserver.work|work(kotlin.String){}[0]
+}
+
+final class io.github.mobilebytelabs.worker.sync/DefaultUniqueWorkObserver : io.github.mobilebytelabs.worker.sync/UniqueWorkObserver { // io.github.mobilebytelabs.worker.sync/DefaultUniqueWorkObserver|null[0]
+    constructor <init>(io.github.mobilebytelabs.worker/WorkManager) // io.github.mobilebytelabs.worker.sync/DefaultUniqueWorkObserver.<init>|<init>(io.github.mobilebytelabs.worker.WorkManager){}[0]
+
+    final fun isRunning(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin/Boolean> // io.github.mobilebytelabs.worker.sync/DefaultUniqueWorkObserver.isRunning|isRunning(kotlin.String){}[0]
+    final fun work(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.sync/DefaultUniqueWorkObserver.work|work(kotlin.String){}[0]
+}
+
+final val io.github.mobilebytelabs.worker.sync.di/SyncObserverKoinModule // io.github.mobilebytelabs.worker.sync.di/SyncObserverKoinModule|{}SyncObserverKoinModule[0]
+    final fun <get-SyncObserverKoinModule>(): org.koin.core.module/Module // io.github.mobilebytelabs.worker.sync.di/SyncObserverKoinModule.<get-SyncObserverKoinModule>|<get-SyncObserverKoinModule>(){}[0]

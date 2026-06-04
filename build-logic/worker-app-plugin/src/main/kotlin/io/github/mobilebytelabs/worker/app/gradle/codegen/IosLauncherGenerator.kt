@@ -22,10 +22,15 @@ internal object IosLauncherGenerator {
 
     fun run(model: CodegenModel, kotlinOutputDir: File, iosAppDir: File) {
         val pkgPath = model.packageName.replace('.', '/')
+        val extras = factoryExtras(
+            takesFactory = model.koinModulesFnTakesFactory,
+            factoryFqn = "io.github.mobilebytelabs.worker.ios.iosWorkManagerFactory",
+            factoryCall = "iosWorkManagerFactory()",
+        )
 
         kotlinOutputDir.resolve("kotlin/$pkgPath/generated/Generated_MainViewController.kt").apply {
             parentFile.mkdirs()
-            writeText(TemplateEngine.render(TemplateEngine.load("ios-mainviewcontroller.kt.template"), model))
+            writeText(TemplateEngine.render(TemplateEngine.load("ios-mainviewcontroller.kt.template"), model, extras))
         }
         iosAppDir.resolve("project.yml").apply {
             parentFile.mkdirs()

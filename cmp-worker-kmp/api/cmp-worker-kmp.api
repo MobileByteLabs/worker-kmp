@@ -441,6 +441,7 @@ public abstract interface class io/github/mobilebytelabs/worker/WorkManager {
 	public abstract fun enqueueUniqueWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public abstract fun getWorkInfosForUniqueWorkFlow (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public abstract interface class io/github/mobilebytelabs/worker/WorkManagerFactory {

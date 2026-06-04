@@ -17,6 +17,7 @@ final class io.github.mobilebytelabs.worker.test/TestWorkManager : io.github.mob
         final fun <get-uniqueWorkNames>(): kotlin.collections/List<kotlin/String> // io.github.mobilebytelabs.worker.test/TestWorkManager.uniqueWorkNames.<get-uniqueWorkNames>|<get-uniqueWorkNames>(){}[0]
 
     final fun getWorkInfosByTag(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.test/TestWorkManager.getWorkInfosByTag|getWorkInfosByTag(kotlin.String){}[0]
+    final fun getWorkInfosForUniqueWorkFlow(kotlin/String): kotlinx.coroutines.flow/Flow<kotlin.collections/List<io.github.mobilebytelabs.worker/WorkInfo>> // io.github.mobilebytelabs.worker.test/TestWorkManager.getWorkInfosForUniqueWorkFlow|getWorkInfosForUniqueWorkFlow(kotlin.String){}[0]
     final fun hasWorkWithTag(kotlin/String): kotlin/Boolean // io.github.mobilebytelabs.worker.test/TestWorkManager.hasWorkWithTag|hasWorkWithTag(kotlin.String){}[0]
     final fun reset() // io.github.mobilebytelabs.worker.test/TestWorkManager.reset|reset(){}[0]
     final fun simulateWorkFailure(kotlin.uuid/Uuid) // io.github.mobilebytelabs.worker.test/TestWorkManager.simulateWorkFailure|simulateWorkFailure(kotlin.uuid.Uuid){}[0]

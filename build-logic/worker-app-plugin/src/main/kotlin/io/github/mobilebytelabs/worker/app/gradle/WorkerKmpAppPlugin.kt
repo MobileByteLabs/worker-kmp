@@ -1,9 +1,11 @@
 package io.github.mobilebytelabs.worker.app.gradle
 
 import io.github.mobilebytelabs.worker.app.gradle.codegen.AndroidLauncherGenerator
+import io.github.mobilebytelabs.worker.app.gradle.codegen.AutoShimGenerator
 import io.github.mobilebytelabs.worker.app.gradle.codegen.DesktopLauncherGenerator
 import io.github.mobilebytelabs.worker.app.gradle.codegen.IosLauncherGenerator
 import io.github.mobilebytelabs.worker.app.gradle.codegen.WebLauncherGenerator
+import io.github.mobilebytelabs.worker.app.gradle.codegen.WorkerInitGenerator
 import io.github.mobilebytelabs.worker.app.gradle.codegen.XcodegenRunner
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Plugin
@@ -68,6 +70,8 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         val generatedRoot = layout.buildDirectory.dir("generated/worker-kmp-app")
 
         // Wire generated source dirs into KMP source sets (those that exist).
+        // commonMain wires the codegen-emitted WorkerKmpAuto.kt (expect) per AC-49.
+        wireKmpSourceSet("commonMain", generatedRoot.get().dir("commonMain/kotlin").asFile)
         wireKmpSourceSet("androidMain", generatedRoot.get().dir("androidMain/kotlin").asFile)
         wireKmpSourceSet("desktopMain", generatedRoot.get().dir("desktopMain/kotlin").asFile)
         wireKmpSourceSet("jvmMain", generatedRoot.get().dir("jvmMain/kotlin").asFile)
@@ -110,6 +114,18 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                     model = model,
                     outputDir = generatedRoot.get().dir("androidMain").asFile,
                 )
+                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
+                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into androidMain.
+                WorkerInitGenerator.run(
+                    model = model,
+                    platform = WorkerInitGenerator.Platform.Android,
+                    outputDir = generatedRoot.get().asFile,
+                )
+                AutoShimGenerator.runPlatformActual(
+                    model = model,
+                    platform = AutoShimGenerator.Platform.Android,
+                    outputDir = generatedRoot.get().asFile,
+                )
                 logger.lifecycle("worker-kmp-app: Android codegen done")
             }
         }
@@ -135,6 +151,18 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 DesktopLauncherGenerator.run(
                     model = model,
                     outputDir = generatedRoot.get().dir(sourceSet).asFile,
+                )
+                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
+                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into desktopMain.
+                WorkerInitGenerator.run(
+                    model = model,
+                    platform = WorkerInitGenerator.Platform.Desktop,
+                    outputDir = generatedRoot.get().asFile,
+                )
+                AutoShimGenerator.runPlatformActual(
+                    model = model,
+                    platform = AutoShimGenerator.Platform.Desktop,
+                    outputDir = generatedRoot.get().asFile,
                 )
                 logger.lifecycle("worker-kmp-app: Desktop codegen done (target=$sourceSet)")
             }
@@ -169,6 +197,18 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                     kotlinOutputDir = generatedRoot.get().dir("iosMain").asFile,
                     iosAppDir = layout.projectDirectory.dir("iosApp").asFile,
                 )
+                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
+                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into iosMain.
+                WorkerInitGenerator.run(
+                    model = model,
+                    platform = WorkerInitGenerator.Platform.Ios,
+                    outputDir = generatedRoot.get().asFile,
+                )
+                AutoShimGenerator.runPlatformActual(
+                    model = model,
+                    platform = AutoShimGenerator.Platform.Ios,
+                    outputDir = generatedRoot.get().asFile,
+                )
                 logger.lifecycle("worker-kmp-app: iOS codegen done")
             }
         }
@@ -195,14 +235,70 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                     outputDir = generatedRoot.get().dir("wasmJsMain").asFile,
                     wasmJsBundleName = ext.wasmJsBundleName.get(),
                 )
+                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
+                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into wasmJsMain.
+                WorkerInitGenerator.run(
+                    model = model,
+                    platform = WorkerInitGenerator.Platform.Web,
+                    outputDir = generatedRoot.get().asFile,
+                )
+                AutoShimGenerator.runPlatformActual(
+                    model = model,
+                    platform = AutoShimGenerator.Platform.Web,
+                    outputDir = generatedRoot.get().asFile,
+                )
                 logger.lifecycle("worker-kmp-app: Web (wasmJs) codegen done")
             }
         }
-        // Convenience aggregator — runs all 4 codegens.
+        // worker-kmp-single-api-completion sub-plan 04 — emit the commonMain WorkerKmpAuto.kt
+        // expect declaration + 4 platform actuals dispatching to `installWorkerKmp{Platform}`.
+        // Per AC-49 — emitted into the consumer app module `build/generated/...`, NOT into
+        // any published worker-kmp module. Per AC-21/D10 — no-arg `install()`.
+        tasks.register(TASK_AUTO_SHIM) {
+            group = TASK_GROUP
+            description = "Codegens commonMain WorkerKmpAuto.kt (expect) + 4 platform actuals"
+            dependsOn(kspTask)
+            notCompatibleWithConfigurationCache(
+                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
+            )
+            doLast {
+                val model = target.requireModel()
+                // commonMain expect only — the platform actuals are emitted by each
+                // per-platform codegen task (Android/Desktop/iOS/Web) to ensure the actual
+                // only exists when the matching installWorkerKmp{Platform} function exists.
+                AutoShimGenerator.runCommon(model = model, outputDir = generatedRoot.get().asFile)
+                logger.lifecycle("worker-kmp-app: WorkerKmpAuto.kt commonMain expect codegen done")
+            }
+        }
+        // The platform-init generators piggyback on the per-platform codegen tasks above
+        // (Android/Desktop/iOS/Web each call `WorkerInitGenerator.run` after the existing
+        // `*LauncherGenerator.run`). AutoShimGenerator is its own task because it emits to
+        // 5 source sets at once (commonMain expect + 4 actuals) and doesn't fit either of
+        // the existing per-platform task contracts.
+        // Auto-wire AutoShim into compile chain — emitted commonMain WorkerKmpAuto.kt
+        // is referenced by consumer's per-platform code, so it must exist before
+        // compileKotlinMetadata (which compiles commonMain).
+        tasks.matching { it.name == "compileKotlinMetadata" || it.name.startsWith("compileCommon") }
+            .configureEach { dependsOn(TASK_AUTO_SHIM) }
+        // Also depend on per-platform compile tasks so the platform-specific actuals
+        // (WorkerKmpAuto.android.kt etc.) exist before their compile.
+        tasks.matching { it.name.startsWith("compileKotlinJvm") || it.name.startsWith("compileKotlinDesktop") }
+            .configureEach { dependsOn(TASK_AUTO_SHIM) }
+        tasks.matching { it.name.startsWith("compileKotlinIos") }
+            .configureEach { dependsOn(TASK_AUTO_SHIM) }
+        tasks.matching { it.name.startsWith("compileKotlinWasmJs") || it.name.startsWith("compileKotlinJs") }
+            .configureEach { dependsOn(TASK_AUTO_SHIM) }
+        tasks.matching {
+            it.name.startsWith("compileKotlinAndroid") ||
+                it.name.matches(Regex("compile[A-Z].*KotlinAndroid"))
+        }
+            .configureEach { dependsOn(TASK_AUTO_SHIM) }
+
+        // Convenience aggregator — runs all 4 codegens + the auto-shim.
         tasks.register(TASK_ALL) {
             group = TASK_GROUP
-            description = "Runs all enabled per-platform codegen tasks"
-            dependsOn(TASK_ANDROID, TASK_DESKTOP, TASK_IOS, TASK_WEB)
+            description = "Runs all enabled per-platform codegen tasks + WorkerKmpAuto shim"
+            dependsOn(TASK_ANDROID, TASK_DESKTOP, TASK_IOS, TASK_WEB, TASK_AUTO_SHIM)
         }
         // Auto-wire compile tasks → codegen → KSP so the consumer never needs to
         // invoke codegen manually. Per-target matchers because the compile-task
@@ -254,20 +350,51 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         )
 
     /**
-     * Adds [generatedDir] as an extra src dir on `[sourceSetName].kotlin` if the
-     * source set exists. Uses reflection so we don't need a hard compile-time
-     * dep on kotlin-gradle-plugin's KotlinSourceSet type.
+     * Adds [generatedDir] as an extra src dir on `[sourceSetName].kotlin` REACTIVELY —
+     * registers a `matching { name == X }.configureEach { ... }` listener so the wiring
+     * fires whenever the source set is created, including LATER in the build lifecycle
+     * (e.g. after `applyDefaultHierarchyTemplate()` materializes `iosMain` between
+     * `iosArm64()` + `iosSimulatorArm64()` targets, which happens AFTER our plugin's
+     * apply phase). Without the reactive listener, eagerly looking up `iosMain` at
+     * apply time silently returns null + the generated `iosMain/WorkerKmpAuto.kt`
+     * actual never gets attached to its source set — surfacing as
+     * `Expected WorkerKmpAuto has no actual declaration for Native` on iOS compile.
+     *
+     * Uses reflection so we don't need a hard compile-time dep on kotlin-gradle-plugin's
+     * KotlinSourceSet type.
      */
     private fun Project.wireKmpSourceSet(sourceSetName: String, generatedDir: File) {
         val kotlinExt = extensions.findByName("kotlin") ?: return
         runCatching {
             @Suppress("UNCHECKED_CAST")
             val sourceSets = kotlinExt.javaClass.getMethod("getSourceSets")
-                .invoke(kotlinExt) as? NamedDomainObjectCollection<Any>
+                .invoke(kotlinExt) as? org.gradle.api.NamedDomainObjectCollection<Any>
                 ?: return@runCatching
-            val sourceSet = sourceSets.findByName(sourceSetName) ?: return@runCatching
-            val kotlin = sourceSet.javaClass.getMethod("getKotlin").invoke(sourceSet) ?: return@runCatching
-            kotlin.javaClass.getMethod("srcDir", Any::class.java).invoke(kotlin, generatedDir)
+            val attachSrcDir: (Any) -> Unit = attach@{ ss ->
+                runCatching {
+                    val kotlin = ss.javaClass.getMethod("getKotlin").invoke(ss) ?: return@attach
+                    kotlin.javaClass.getMethod("srcDir", Any::class.java).invoke(kotlin, generatedDir)
+                }
+            }
+            // 1) Wire now if the source set already exists.
+            sourceSets.findByName(sourceSetName)?.let(attachSrcDir)
+            // 2) Reactive: fires LATER when the source set is materialized by
+            // applyDefaultHierarchyTemplate() / iosArm64() / wasmJs() etc. (which run AFTER
+            // our plugin apply). Without this, generated `iosMain/WorkerKmpAuto.kt` actuals
+            // never attach to the source set → "Expected ... has no actual ... for Native".
+            //
+            // Use reflective Action.invoke to avoid statically referencing KotlinSourceSet's type
+            // (we'd otherwise need a hard dep on kotlin-gradle-plugin).
+            val addedAction = object : org.gradle.api.Action<Any> {
+                override fun execute(added: Any) {
+                    runCatching {
+                        val name = added.javaClass.getMethod("getName").invoke(added) as? String
+                        if (name == sourceSetName) attachSrcDir(added)
+                    }
+                }
+            }
+            sourceSets.javaClass.getMethod("whenObjectAdded", org.gradle.api.Action::class.java)
+                .invoke(sourceSets, addedAction)
         }
     }
 
@@ -289,6 +416,7 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         const val TASK_WEB = "workerKmpAppCodegenWeb"
         const val TASK_ALL = "workerKmpAppCodegenAll"
         const val TASK_XCODEGEN = "workerKmpAppXcodegenGenerate"
+        const val TASK_AUTO_SHIM = "workerKmpAppCodegenAutoShim"
 
         @Suppress("unused")
         private fun unusedSourceSetImport(): SourceSet? = null

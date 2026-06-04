@@ -47,10 +47,15 @@ import platform.UIKit.UIViewController
  */
 public fun workerKmpMainViewController(
     koinModules: () -> List<Module>,
+    onAfterKoinStart: () -> Unit = {},
     content: @Composable () -> Unit,
 ): UIViewController {
     if (KoinPlatformTools.defaultContext().getOrNull() == null) {
         startKoin { modules(koinModules()) }
     }
+    // worker-kmp v4.0.0 — single-API completion: codegen-emitted MainViewController
+    // passes `onAfterKoinStart = { WorkerKmpAuto.install() }` so worker registry +
+    // WorkManager binding land after Koin is started.
+    onAfterKoinStart()
     return ComposeUIViewController { content() }
 }

@@ -9,6 +9,7 @@ public final class io/github/mobilebytelabs/worker/desktop/DesktopWorkManager : 
 	public fun enqueueUniqueWork (Ljava/lang/String;Lio/github/mobilebytelabs/worker/ExistingWorkPolicy;Lio/github/mobilebytelabs/worker/OneTimeWorkRequest;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getWorkInfoById (Lkotlin/uuid/Uuid;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun getWorkInfosByTag (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
+	public fun getWorkInfosForUniqueWorkFlow (Ljava/lang/String;)Lkotlinx/coroutines/flow/Flow;
 	public final fun shutdown ()V
 }
 
@@ -47,7 +48,8 @@ public abstract interface class io/github/mobilebytelabs/worker/desktop/DesktopW
 }
 
 public final class io/github/mobilebytelabs/worker/desktop/LaunchDesktopWorkerAppKt {
-	public static final fun launchDesktopWorkerApp (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
+	public static final fun launchDesktopWorkerApp (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
+	public static synthetic fun launchDesktopWorkerApp$default (Ljava/lang/String;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public static final fun startWorkerKoinIfAbsent (Lkotlin/jvm/functions/Function0;)V
 }
 

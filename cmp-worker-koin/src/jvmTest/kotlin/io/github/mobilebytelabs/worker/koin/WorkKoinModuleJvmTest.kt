@@ -1,3 +1,5 @@
+@file:OptIn(WorkerKmpInternalApi::class)
+
 package io.github.mobilebytelabs.worker.koin
 
 import io.github.mobilebytelabs.worker.WorkManager
@@ -27,19 +29,19 @@ class WorkKoinModuleJvmTest {
 
     @Test
     fun workKoinModule_resolvesWorkManagerFromFactory() {
-        val koin = startKoin { modules(workKoinModule(factory = factory)) }.koin
+        val koin = startKoin { modules(workKoinModulePrivateApi(factory = factory)) }.koin
         assertNotNull(koin.get<WorkManager>())
     }
 
     @Test
     fun workKoinModule_returnsFactoryProducedInstance() {
-        val koin = startKoin { modules(workKoinModule(factory = factory)) }.koin
+        val koin = startKoin { modules(workKoinModulePrivateApi(factory = factory)) }.koin
         assertSame(fakeWm, koin.get<WorkManager>())
     }
 
     @Test
     fun workKoinModule_workManagerIsSingleton() {
-        val koin = startKoin { modules(workKoinModule(factory = factory)) }.koin
+        val koin = startKoin { modules(workKoinModulePrivateApi(factory = factory)) }.koin
         assertSame(koin.get<WorkManager>(), koin.get<WorkManager>())
     }
 }
