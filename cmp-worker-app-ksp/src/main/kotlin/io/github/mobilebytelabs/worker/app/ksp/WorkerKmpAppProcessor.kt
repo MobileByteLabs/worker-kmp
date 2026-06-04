@@ -115,7 +115,9 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
         val koinFnParams = appFn.parameters
         val koinFnTakesFactory = when (koinFnParams.size) {
             0 -> false
+
             1 -> resolveTypeFqn(koinFnParams[0].type) == WORK_MANAGER_FACTORY_FQN
+
             else -> {
                 logger.error(
                     "worker-kmp-app: @WorkerKmpApp function `${appFn.qualifiedName?.asString()}` must " +

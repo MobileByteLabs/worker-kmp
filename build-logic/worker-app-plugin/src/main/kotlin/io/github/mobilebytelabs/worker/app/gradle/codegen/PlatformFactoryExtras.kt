@@ -8,11 +8,7 @@ package io.github.mobilebytelabs.worker.app.gradle.codegen
  * call into the codegen-rendered launcher. When false: both extras resolve to the empty string,
  * so the rendered call becomes `koinFn()` (the v4.0.0 no-arg shorthand).
  */
-internal fun factoryExtras(
-    takesFactory: Boolean,
-    factoryFqn: String,
-    factoryCall: String,
-): Map<String, String> = mapOf(
+internal fun factoryExtras(takesFactory: Boolean, factoryFqn: String, factoryCall: String): Map<String, String> = mapOf(
     "platformFactoryImport" to if (takesFactory) "import $factoryFqn\n" else "",
     "platformFactoryCall" to if (takesFactory) factoryCall else "",
 )
