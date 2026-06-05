@@ -1,21 +1,20 @@
 # PR Check — comprehensive gate on every pull request.
 #
-# Covers: quality · all platform tests · Kover 100% · iOS samples.
+# Covers: quality · ubuntu platform tests · Kover 100% · wasmJs sample.
 #
-# Self-scaling: platform-ubuntu and platform-ios use Gradle aggregate tasks.
+# Self-scaling: platform-ubuntu uses Gradle aggregate tasks.
 # Adding a new module automatically includes its tests — no CI changes needed.
+#
+# iOS simulator tests, iOS framework builds, and xcodebuild are intentionally
+# excluded from the PR gate — they are heavy (~40min) and run on expensive
+# macOS runners. Run locally via ./scripts/ci-local.sh --ios before pushing.
 #
 # Job map:
 #   quality              fast: spotless + detekt (ubuntu)
 #   platform-ubuntu      all non-iOS tests: Android · Desktop · JS · WasmJS (ubuntu)
-#   platform-ios         all iosSimulatorArm64Test tasks (macos)
-#                        ↳ Xcode < 26: compose-dependent modules excluded (UIUtilities
-#                          only in iOS 18 SDK; macos-latest migrates 2026-06-15 → 07-15)
 #   coverage             Kover 100% gate + HTML artifact (ubuntu)
 #   ios-bcv-check        BCV snapshot asserts iOS targets in cmp-worker-compose (ubuntu)
 #   sample-wasmjs        cmp-worker-sample-compose-store wasmJs browser build (ubuntu)
-#   sample-ios-framework iOS framework compile + xcodegen project generation (macos)
-#   sample-ios-xcodebuild xcodebuild iosApp — hard gate once macos-latest → Xcode 26+
 
 name: PR Check
 
@@ -83,56 +82,6 @@ jobs:
           path: '**/build/reports/tests/'
           retention-days: 7
 
-  # ── Platform engine tests (macos / iOS) ───────────────────────────────────
-  #
-  # Runs iosSimulatorArm64Test across every subproject that declares the target.
-  # New iOS modules are picked up automatically — no CI changes required.
-  #
-  # Xcode < 26 exclusions: cmp-worker-ios and any module that transitively depends
-  # on it (scheduler · store5 · storeflow · compose) pull in Compose UI which
-  # references UIUtilities.framework — only present in the iOS 18 SDK shipped
-  # with Xcode 26. Once macos-latest migrates (2026-06-15 → 2026-07-15) these
-  # exclusions become dead code and can be removed.
-  platform-ios:
-    name: Platform tests — iOS simulator (macos)
-    runs-on: macos-latest
-    timeout-minutes: 40
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Detect Xcode major version
-        id: xcode
-        run: |
-          XCODE_VERSION="$(xcodebuild -version | head -1 | awk '{print $2}')"
-          XCODE_MAJOR="${XCODE_VERSION%%.*}"
-          echo "major=$XCODE_MAJOR" >> "$GITHUB_OUTPUT"
-          echo "::notice title=Xcode version::Detected Xcode $XCODE_VERSION (major=$XCODE_MAJOR)"
-      - name: Run iOS simulator tests
-        run: |
-          if [ "${{ steps.xcode.outputs.major }}" -ge 26 ]; then
-            ./gradlew iosSimulatorArm64Test \
-              --continue --no-daemon --console=plain
-          else
-            ./gradlew iosSimulatorArm64Test \
-              -x :cmp-worker-ios:iosSimulatorArm64Test \
-              -x :cmp-worker-scheduler:iosSimulatorArm64Test \
-              -x :cmp-worker-store5:iosSimulatorArm64Test \
-              -x :cmp-worker-storeflow:iosSimulatorArm64Test \
-              -x :cmp-worker-compose:iosSimulatorArm64Test \
-              --continue --no-daemon --console=plain
-          fi
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: platform-test-results-ios
-          path: '**/build/reports/tests/'
-          retention-days: 7
-
   # ── Kover 100% coverage gate ───────────────────────────────────────────────
   coverage:
     name: Kover 100% gate
@@ -197,94 +146,3 @@ jobs:
       - name: Build wasmJs distribution
         run: ./gradlew :samples:cmp-worker-sample-compose-store:wasmJsBrowserDistribution
 
-  # ── Sample: iOS framework + xcodegen (always-on, any Xcode) ───────────────
-  sample-ios-framework:
-    name: cmp-worker-sample-compose-store — iOS framework + xcodegen
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Install xcodegen
-        run: brew install xcodegen
-      - name: Show Xcode version (debug)
-        run: xcodebuild -version
-      - name: Build iOS framework binaries (linkDebugFrameworkIosSimulatorArm64)
-        run: ./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosSimulatorArm64
-      - name: Generate iosApp.xcodeproj from xcodegen project.yml
-        working-directory: samples/cmp-worker-sample-compose-store/iosApp
-        run: xcodegen generate
-      - name: Assert .xcodeproj structure
-        run: |
-          test -f samples/cmp-worker-sample-compose-store/iosApp/iosApp.xcodeproj/project.pbxproj
-          echo "OK: iosApp.xcodeproj generated and structurally valid"
-
-  # ── Sample: iOS xcodebuild (hard gate once macos-latest → Xcode 26+) ──────
-  #
-  # Compose Multiplatform 1.11.0 auto-links iOS-18 private frameworks that only
-  # exist in the Xcode 26 SDK. GitHub Actions migrates macos-latest between
-  # 2026-06-15 → 2026-07-15. Until then this job auto-skips on Xcode < 26
-  # without blocking CI; after migration it becomes a hard gate with no changes.
-  sample-ios-xcodebuild:
-    name: cmp-worker-sample-compose-store — iOS xcodebuild (Xcode 26+)
-    needs: sample-ios-framework
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Install xcodegen
-        run: brew install xcodegen
-      - name: Detect Xcode major version
-        id: xcode
-        run: |
-          XCODE_VERSION="$(xcodebuild -version | head -1 | awk '{print $2}')"
-          XCODE_MAJOR="${XCODE_VERSION%%.*}"
-          echo "version=$XCODE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "major=$XCODE_MAJOR"     >> "$GITHUB_OUTPUT"
-          echo "::notice title=Xcode version::Detected Xcode $XCODE_VERSION (major=$XCODE_MAJOR)"
-      - name: Skip xcodebuild — Xcode < 26 cannot link Compose Multiplatform iOS
-        if: ${{ steps.xcode.outputs.major < '26' }}
-        run: |
-          cat <<EOF
-          ━━━ xcodebuild SKIPPED — Xcode ${{ steps.xcode.outputs.version }} is too old ━━━
-
-          Compose Multiplatform 1.11.0's iOS framework auto-links iOS-18 private
-          frameworks (UIUtilities, SwiftUICore) that don't exist in the SDK
-          shipped with Xcode 16.x.
-
-          This gate becomes a hard CI check automatically once macos-latest
-          migrates to macOS 26 + Xcode 26.x (per GitHub announcement, between
-          2026-06-15 → 2026-07-15: https://github.com/actions/runner-images).
-
-          Until then, local validation via Xcode 26.x is authoritative:
-            ./scripts/ci-local.sh --all
-
-          (Part A — sample-ios-framework — IS hard-gating this PR and PASSED
-          above, so the iOS side of the launcher epic is still validated.)
-          EOF
-      - name: Build iOS framework binaries
-        if: ${{ steps.xcode.outputs.major >= '26' }}
-        run: ./gradlew :samples:cmp-worker-sample-compose-store:linkDebugFrameworkIosSimulatorArm64
-      - name: Generate iosApp.xcodeproj
-        if: ${{ steps.xcode.outputs.major >= '26' }}
-        working-directory: samples/cmp-worker-sample-compose-store/iosApp
-        run: xcodegen generate
-      - name: xcodebuild iosApp (iOS Simulator, arm64)
-        if: ${{ steps.xcode.outputs.major >= '26' }}
-        run: |
-          xcodebuild \
-            -project samples/cmp-worker-sample-compose-store/iosApp/iosApp.xcodeproj \
-            -scheme iosApp \
-            -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug \
-            ARCHS=arm64 \
-            ONLY_ACTIVE_ARCH=YES \
-            EXCLUDED_ARCHS= \
-            build
