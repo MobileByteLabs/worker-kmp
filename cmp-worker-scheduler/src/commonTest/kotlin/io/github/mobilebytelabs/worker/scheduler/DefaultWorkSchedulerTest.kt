@@ -210,4 +210,69 @@ class DefaultWorkSchedulerTest {
         scheduler.cancelWork(SYNC_WORK_NAME)
         assertTrue(SYNC_WORK_NAME in wm.cancelledTags)
     }
+
+    @Test
+    fun observeWork_emitsRunning_onSimulatedRunning() = runTest {
+        val (wm, scheduler) = newScheduler()
+        val handle = scheduler.enqueueDataSync<FakeSyncWorker>()
+        wm.simulateRunning(handle.id)
+        assertEquals(WorkStatus.Running, scheduler.observeWork(SYNC_WORK_NAME).first())
+    }
+
+    @Test
+    fun observeWork_emitsFailed_onSimulatedFailure() = runTest {
+        val (wm, scheduler) = newScheduler()
+        val handle = scheduler.enqueueDataSync<FakeSyncWorker>()
+        wm.simulateFailure(handle.id)
+        assertEquals(WorkStatus.Failed, scheduler.observeWork(SYNC_WORK_NAME).first())
+    }
+
+    @Test
+    fun observeWork_emitsCancelled_onCancelWork() = runTest {
+        val (wm, scheduler) = newScheduler()
+        val handle = scheduler.enqueueDataSync<FakeSyncWorker>()
+        wm.cancelWorkById(handle.id)
+        assertEquals(WorkStatus.Cancelled, scheduler.observeWork(SYNC_WORK_NAME).first())
+    }
+
+    @Test
+    fun scheduleDailyDataSync_nextOccurrenceOf_initialDelayWithinOnePeriod() = runTest {
+        val (wm, scheduler) = newScheduler()
+        // Schedule for 23:59 UTC to cover the if-branch (target still in the future most of the day)
+        // and for 00:01 UTC to cover the else-branch (target has already passed today).
+        // Both should produce a delay in [0, 24h].
+        for (time in listOf(LocalTime(23, 59), LocalTime(0, 1))) {
+            wm.clearRequests()
+            scheduler.scheduleDailyDataSync<FakeSyncWorker>(
+                timeOfDay = time,
+                timeZone = TimeZone.UTC,
+            )
+            val delay = (wm.enqueuedRequests.single() as PeriodicWorkRequest).initialDelay
+            assertTrue(delay >= 0.minutes && delay <= 24.hours,
+                "Expected delay in [0, 24h] for $time but was $delay")
+        }
+    }
+
+    @Test
+    fun observeWork_emitsPending_whenNothingEnqueued() = runTest {
+        val (_, scheduler) = newScheduler()
+        // No work tagged "nonexistent" → empty infos list → null state → Pending
+        assertEquals(WorkStatus.Pending, scheduler.observeWork("nonexistent").first())
+    }
+
+    @Test
+    fun observeWork_emitsPending_onSimulatedBlocked() = runTest {
+        val (wm, scheduler) = newScheduler()
+        val handle = scheduler.enqueueDataSync<FakeSyncWorker>()
+        wm.simulateBlocked(handle.id)
+        assertEquals(WorkStatus.Pending, scheduler.observeWork(SYNC_WORK_NAME).first())
+    }
+
+    @Test
+    fun workHandle_secondaryConstructor_generatesRandomId() {
+        val h1 = WorkHandle(uniqueName = "test-name")
+        val h2 = WorkHandle(uniqueName = "test-name")
+        assertEquals("test-name", h1.uniqueName)
+        assertTrue(h1.id != h2.id, "Each secondary-constructor call should produce a unique id")
+    }
 }

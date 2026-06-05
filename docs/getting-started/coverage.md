@@ -6,10 +6,8 @@ description: "Kover-based test coverage setup + the worker-kmp 100%-coverage gat
 # Code Coverage (Kover)
 
 worker-kmp uses [kotlinx-kover](https://github.com/Kotlin/kotlinx-kover) for line-coverage
-measurement + enforcement. Since v3.1.3, **6 testable commonMain modules carry a hard 100%
-line-coverage floor**; CI fails PRs that regress below it. Two additional modules
-(`cmp-worker-scheduler`, `cmp-worker-compose`) are test-complete but cannot opt in yet — see
-[Known limitation: AGP 9 + Kover 0.9.1](#known-limitation--agp-9--kover-091).
+measurement + enforcement. Since v3.1.3, **8 testable commonMain modules carry a hard 100%
+line-coverage floor**; CI fails PRs that regress below it.
 
 ## Quick start
 
@@ -41,36 +39,18 @@ below.
 | `cmp-worker-koin` | 100% commonMain (gated by `koverVerify`) |
 | `cmp-worker-sync` | 100% commonMain (gated by `koverVerify`) |
 | `cmp-worker-test` | 100% commonMain (gated by `koverVerify`) |
+| `cmp-worker-scheduler` | 100% commonMain (gated by `koverVerify`) |
+| `cmp-worker-compose` | 100% commonMain (gated by `koverVerify`; `@Composable` bodies filter-excluded per exclusion patterns) |
 
 ## Modules NOT in scope (with rationale)
 
 | Module | Why excluded |
 |---|---|
-| `cmp-worker-scheduler` | Test suite complete (39 `@Test`s across 8 commonTest files run via `jvmTest`) but Kover plugin NOT applied. **Blocked on upstream Kover support for AGP 9's `android.kotlin.multiplatform.library` extension shape.** Tracked by follow-up plan [`kover-agp9-opt-in-followup`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/kover-agp9-opt-in-followup/PLAN.md). |
-| `cmp-worker-compose` | Test suite complete (21 `@Test`s incl. `NonComposableSurfacesTest`) but Kover plugin NOT applied for the same AGP 9 reason. `@Composable` bodies would be filter-excluded anyway; the testable non-`@Composable` utilities (state-mapping, request builders) are covered. Tracked by the same follow-up plan. |
 | `cmp-worker-app-annotations` | Annotation-only module — no executable code to measure. |
 | `cmp-worker-android`, `cmp-worker-ios`, `cmp-worker-desktop`, `cmp-worker-desktop-daemon`, `cmp-worker-web`, `cmp-worker-web-push` | Platform actuals; Kover only measures JVM bytecode. Tracked separately by the Tier-2 follow-up epic [`worker-kmp-platform-engine-tests`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-platform-engine-tests/GOAL.md), which adds Robolectric (Android) + Xcode-sim (iOS) + browser-test (Web) harnesses. |
 | `cmp-worker-app-ksp`, `cmp-worker-app-plugin` | Build-tooling (KSP processor + Gradle plugin) — needs Gradle TestKit; deferred. |
 | `cmp-worker-bench`, `cmp-worker-migrate` | Non-production tooling. |
 | `samples/*` | Illustrative; not under coverage threshold. |
-
-## Known limitation — AGP 9 + Kover 0.9.1
-
-Kover 0.9.1 cannot introspect the new `android.kotlin.multiplatform.library` Gradle plugin
-extension shape that AGP 9+ uses for KMP-Android library modules. Applying
-`id("io.github.mobilebytelabs.kover")` to `cmp-worker-scheduler` or `cmp-worker-compose`
-fails at configuration time.
-
-**Workaround in place:** the convention plugin is intentionally NOT applied to those two
-modules. Their tests still run via `./gradlew :cmp-worker-scheduler:jvmTest` and
-`./gradlew :cmp-worker-compose:jvmTest`; they just don't contribute to Kover aggregation.
-
-**Revisit criteria:** when Kover ships a release that supports the AGP 9 KMP-Android
-library extension (track [Kover #649](https://github.com/Kotlin/kotlinx-kover/issues/649)
-or the equivalent), bump `kover` in `gradle/libs.versions.toml`, apply
-`id("io.github.mobilebytelabs.kover")` to both modules' `plugins {}` blocks, and remove the
-explanatory comment block. The follow-up plan [`kover-agp9-opt-in-followup`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/kover-agp9-opt-in-followup/PLAN.md)
-carries the full checklist.
 
 ## Exclusion patterns
 
@@ -107,7 +87,7 @@ verify {
 }
 ```
 
-This is `LINE` aggregation per the Kover 0.9.1 default; per-module — each opted-in module
+This is `LINE` aggregation per the Kover default; per-module — each opted-in module
 gates its own bytecode.
 
 ## Adding a new module
@@ -148,6 +128,6 @@ PR + push to `main` / `development`. It:
 
 ## Related
 
-- Coverage epic plan: [`plan-layer/project-plans/mbs/worker-kmp/active/kover-100-coverage/`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/kover-100-coverage/)
+- Coverage epic plan: [`plan-layer/project-plans/mbs/worker-kmp/archive/2026-06/kover-100-coverage/`](../../../../plan-layer/project-plans/mbs/worker-kmp/archive/2026-06/kover-100-coverage/)
 - Tier-2 platform-engine tests: [`worker-kmp-platform-engine-tests`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-platform-engine-tests/GOAL.md)
 - Convention plugin pattern: [`convention-plugin.md`](convention-plugin.md)

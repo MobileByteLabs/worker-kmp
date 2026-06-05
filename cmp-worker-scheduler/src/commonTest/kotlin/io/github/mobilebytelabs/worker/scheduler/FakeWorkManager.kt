@@ -33,6 +33,8 @@ internal class FakeWorkManager : WorkManager {
     val cancelledTags: Set<String> get() = _cancelledTags.toSet()
     val periodicPolicyByUniqueName: Map<String, ExistingPeriodicWorkPolicy> get() = _periodicPolicy.toMap()
 
+    fun clearRequests() { _enqueuedRequests.clear() }
+
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         _enqueuedRequests += request
         update(request.id, WorkInfo(id = request.id, state = WorkInfo.State.ENQUEUED, tags = request.tags))
@@ -86,6 +88,10 @@ internal class FakeWorkManager : WorkManager {
 
     fun simulateFailure(id: Uuid) {
         state.value[id]?.let { update(id, it.copy(state = WorkInfo.State.FAILED)) }
+    }
+
+    fun simulateBlocked(id: Uuid) {
+        state.value[id]?.let { update(id, it.copy(state = WorkInfo.State.BLOCKED)) }
     }
 
     private fun update(id: Uuid, info: WorkInfo) {
