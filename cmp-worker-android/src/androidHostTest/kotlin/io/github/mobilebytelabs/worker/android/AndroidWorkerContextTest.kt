@@ -31,14 +31,11 @@ class AndroidWorkerContextTest {
         assertEquals(tags, ctx.tags)
     }
 
-    private fun buildFakeContext(
-        id: Uuid,
-        inputData: WorkData,
-        tags: Set<String> = emptySet(),
-    ) = object : io.github.mobilebytelabs.worker.WorkerContext {
-        override val id = id
-        override val inputData = inputData
-        override val tags = tags
-        override suspend fun setProgress(progress: io.github.mobilebytelabs.worker.WorkProgress) = Unit
-    }
+    private fun buildFakeContext(id: Uuid, inputData: WorkData, tags: Set<String> = emptySet()) =
+        object : io.github.mobilebytelabs.worker.WorkerContext {
+            override val id = id
+            override val inputData = inputData
+            override val tags = tags
+            override suspend fun setProgress(progress: io.github.mobilebytelabs.worker.WorkProgress) = Unit
+        }
 }

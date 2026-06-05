@@ -44,6 +44,13 @@ class DesktopBackgroundDaemonTest {
 
     @Test
     fun main_persistenceDirMissing_doesNotThrow() {
-        main(arrayOf("--persistence-dir", "/tmp/worker-kmp-test-nonexistent-${System.currentTimeMillis()}", "--max-runtime-seconds", "1"))
+        main(
+            arrayOf(
+                "--persistence-dir",
+                "/tmp/worker-kmp-test-nonexistent-${System.currentTimeMillis()}",
+                "--max-runtime-seconds",
+                "1",
+            ),
+        )
     }
 }

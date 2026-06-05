@@ -12,7 +12,8 @@ class WebWorkerContextTest {
     @Test
     fun id_roundTrips() {
         val id = Uuid.random()
-        val ctx = WebWorkerContext(id = id, inputData = WorkData.EMPTY, tags = emptySet(), stateStore = WebWorkStateStore())
+        val ctx =
+            WebWorkerContext(id = id, inputData = WorkData.EMPTY, tags = emptySet(), stateStore = WebWorkStateStore())
         assertEquals(id, ctx.id)
     }
 

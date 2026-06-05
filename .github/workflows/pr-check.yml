@@ -60,9 +60,7 @@ jobs:
       - name: Run all non-iOS platform tests
         run: |
           ./gradlew allTests \
-            -x iosArm64Test \
             -x iosSimulatorArm64Test \
-            -x iosX64Test \
             --continue --no-daemon --console=plain
       - name: Upload test results
         if: always()

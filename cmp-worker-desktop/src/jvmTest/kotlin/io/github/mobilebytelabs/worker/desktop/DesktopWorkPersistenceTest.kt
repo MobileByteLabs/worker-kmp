@@ -1,6 +1,7 @@
 package io.github.mobilebytelabs.worker.desktop
 
 import io.github.mobilebytelabs.worker.WorkInfo
+import kotlinx.coroutines.test.runTest
 import java.io.File
 import java.nio.file.Files
 import kotlin.test.AfterTest
@@ -8,7 +9,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.test.runTest
 
 class DesktopWorkPersistenceTest {
     private val tempDir: File = Files.createTempDirectory("desktop-persistence-test").toFile()

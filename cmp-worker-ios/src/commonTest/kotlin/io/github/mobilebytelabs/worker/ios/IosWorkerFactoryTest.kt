@@ -16,8 +16,7 @@ class IosWorkerFactoryTest {
     }
 
     private val factory = object : IosWorkerFactory {
-        override fun create(workerClass: String, context: WorkerContext): CoroutineWorker =
-            StubWorker(context)
+        override fun create(workerClass: String, context: WorkerContext): CoroutineWorker = StubWorker(context)
     }
 
     @Test

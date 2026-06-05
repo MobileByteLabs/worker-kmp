@@ -3,6 +3,7 @@
 package io.github.mobilebytelabs.worker.web
 
 import io.github.mobilebytelabs.worker.CoroutineWorker
+import io.github.mobilebytelabs.worker.WorkData
 import io.github.mobilebytelabs.worker.WorkResult
 import io.github.mobilebytelabs.worker.WorkerContext
 import kotlin.test.Test
@@ -10,7 +11,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
-import io.github.mobilebytelabs.worker.WorkData
 
 class WebWorkerFactoryTest {
 
@@ -28,13 +28,11 @@ class WebWorkerFactoryTest {
     fun workerRegistryWebAdapter_unknownClass_throwsError() {
         var threw = false
         val factory = object : WebWorkerFactory {
-            override fun create(workerClass: String, context: WorkerContext): CoroutineWorker {
-                return try {
-                    error("Unknown: $workerClass")
-                } catch (e: IllegalStateException) {
-                    threw = true
-                    SuccessWebWorker(context)
-                }
+            override fun create(workerClass: String, context: WorkerContext): CoroutineWorker = try {
+                error("Unknown: $workerClass")
+            } catch (e: IllegalStateException) {
+                threw = true
+                SuccessWebWorker(context)
             }
         }
         factory.create("Unknown", fakeContext())

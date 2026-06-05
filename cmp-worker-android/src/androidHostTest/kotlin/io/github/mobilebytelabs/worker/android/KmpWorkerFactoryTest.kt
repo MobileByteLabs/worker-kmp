@@ -31,8 +31,7 @@ class KmpWorkerFactoryTest {
     @Test
     fun createWorker_forKmpAndroidWorker_returnsNonNull() {
         val factory = KmpWorkerFactory(object : KmpAndroidWorkerFactory {
-            override fun create(workerClass: String, ctx: WorkerContext): CoroutineWorker =
-                FakeKmpWorker(ctx)
+            override fun create(workerClass: String, ctx: WorkerContext): CoroutineWorker = FakeKmpWorker(ctx)
         })
         val worker = factory.createWorker(
             context,
@@ -55,13 +54,11 @@ class KmpWorkerFactoryTest {
         assertNull(worker, "factory must return null for unregistered class names")
     }
 
-    private fun buildWorkerParams(): androidx.work.WorkerParameters? {
-        return try {
-            val wm = androidx.work.WorkManager.getInstance(context)
-            // WorkerParameters can't be instantiated directly; skip if null
-            null
-        } catch (e: Exception) {
-            null
-        }
+    private fun buildWorkerParams(): androidx.work.WorkerParameters? = try {
+        val wm = androidx.work.WorkManager.getInstance(context)
+        // WorkerParameters can't be instantiated directly; skip if null
+        null
+    } catch (e: Exception) {
+        null
     }
 }

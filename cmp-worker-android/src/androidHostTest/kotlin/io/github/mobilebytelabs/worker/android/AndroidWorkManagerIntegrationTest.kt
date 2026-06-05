@@ -36,8 +36,7 @@ class AndroidWorkManagerIntegrationTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         val kmpFactory = KmpWorkerFactory(object : KmpAndroidWorkerFactory {
-            override fun create(workerClass: String, ctx: WorkerContext): CoroutineWorker =
-                SimpleSuccessWorker(ctx)
+            override fun create(workerClass: String, ctx: WorkerContext): CoroutineWorker = SimpleSuccessWorker(ctx)
         })
         val config = Configuration.Builder()
             .setWorkerFactory(kmpFactory)
