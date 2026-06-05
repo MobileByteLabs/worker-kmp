@@ -248,8 +248,10 @@ class DefaultWorkSchedulerTest {
                 timeZone = TimeZone.UTC,
             )
             val delay = (wm.enqueuedRequests.single() as PeriodicWorkRequest).initialDelay
-            assertTrue(delay >= 0.minutes && delay <= 24.hours,
-                "Expected delay in [0, 24h] for $time but was $delay")
+            assertTrue(
+                delay >= 0.minutes && delay <= 24.hours,
+                "Expected delay in [0, 24h] for $time but was $delay",
+            )
         }
     }
 

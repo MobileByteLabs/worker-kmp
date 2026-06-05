@@ -33,7 +33,9 @@ internal class FakeWorkManager : WorkManager {
     val cancelledTags: Set<String> get() = _cancelledTags.toSet()
     val periodicPolicyByUniqueName: Map<String, ExistingPeriodicWorkPolicy> get() = _periodicPolicy.toMap()
 
-    fun clearRequests() { _enqueuedRequests.clear() }
+    fun clearRequests() {
+        _enqueuedRequests.clear()
+    }
 
     override suspend fun enqueue(request: OneTimeWorkRequest): Uuid {
         _enqueuedRequests += request
