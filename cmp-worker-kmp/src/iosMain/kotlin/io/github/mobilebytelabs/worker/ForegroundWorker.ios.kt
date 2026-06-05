@@ -49,7 +49,7 @@ public actual suspend fun runAsForeground(worker: ForegroundWorker, info: Foregr
         postUserNotification(identifier = BgContinuedProcessing.getIdentifier(), info = info)
         return
     }
-    val majorVersion = parseMajorIosVersion(UIDevice.currentDevice.systemVersion)
+    val majorVersion = runCatching { parseMajorIosVersion(UIDevice.currentDevice.systemVersion) }.getOrDefault(0)
     if (majorVersion >= IOS_17 && BgContinuedProcessing.getIdentifier().isEmpty()) {
         Logger.withTag("worker-kmp.foreground.ios").d {
             "iOS $majorVersion — IosWorkerConfig.continuedProcessingTaskIdentifier is empty; " +

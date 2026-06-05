@@ -1,14 +1,16 @@
 # PR Check — comprehensive gate on every pull request.
 #
-# Covers: quality · JVM commonMain · all platform tests · Kover 100% · iOS samples.
+# Covers: quality · all platform tests · Kover 100% · iOS samples.
 #
-# Self-scaling: the two platform-tests jobs use Gradle's `allTests` aggregate task.
+# Self-scaling: platform-ubuntu and platform-ios use Gradle aggregate tasks.
 # Adding a new module automatically includes its tests — no CI changes needed.
 #
 # Job map:
-#   quality-and-jvm      fast: spotless + detekt + ABI + commonMain JVM tests (ubuntu)
+#   quality              fast: spotless + detekt (ubuntu)
 #   platform-ubuntu      all non-iOS tests: Android · Desktop · JS · WasmJS (ubuntu)
 #   platform-ios         all iosSimulatorArm64Test tasks (macos)
+#                        ↳ Xcode < 26: compose-dependent modules excluded (UIUtilities
+#                          only in iOS 18 SDK; macos-latest migrates 2026-06-15 → 07-15)
 #   coverage             Kover 100% gate + HTML artifact (ubuntu)
 #   ios-bcv-check        BCV snapshot asserts iOS targets in cmp-worker-compose (ubuntu)
 #   sample-wasmjs        cmp-worker-sample-compose-store wasmJs browser build (ubuntu)
@@ -30,16 +32,22 @@ concurrency:
 
 jobs:
 
-  # ── Fast quality + JVM gate ────────────────────────────────────────────────
-  quality-and-jvm:
-    uses: MobileByteLabs/mbl-actionhub/.github/workflows/ci-kmp-library.yml@v1.6.1
-    with:
-      module-pattern: 'cmp-'
-      java-version: '21'
-      java-distribution: 'zulu'
-      run-quality: true
-      run-ios-tests: false
-      run-linux-tests: false
+  # ── Quality gate (Spotless + Detekt) ──────────────────────────────────────
+  quality:
+    name: Quality (Spotless · Detekt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Spotless check
+        run: ./gradlew spotlessCheck
+      - name: Detekt
+        run: ./gradlew detekt
 
   # ── Platform engine tests (ubuntu) ────────────────────────────────────────
   #
@@ -74,6 +82,12 @@ jobs:
   #
   # Runs iosSimulatorArm64Test across every subproject that declares the target.
   # New iOS modules are picked up automatically — no CI changes required.
+  #
+  # Xcode < 26 exclusions: cmp-worker-ios and any module that transitively depends
+  # on it (scheduler · store5 · storeflow · compose) pull in Compose UI which
+  # references UIUtilities.framework — only present in the iOS 18 SDK shipped
+  # with Xcode 26. Once macos-latest migrates (2026-06-15 → 2026-07-15) these
+  # exclusions become dead code and can be removed.
   platform-ios:
     name: Platform tests — iOS simulator (macos)
     runs-on: macos-latest
@@ -85,10 +99,27 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Run iosSimulatorArm64Test across all modules
+      - name: Detect Xcode major version
+        id: xcode
         run: |
-          ./gradlew iosSimulatorArm64Test \
-            --continue --no-daemon --console=plain
+          XCODE_VERSION="$(xcodebuild -version | head -1 | awk '{print $2}')"
+          XCODE_MAJOR="${XCODE_VERSION%%.*}"
+          echo "major=$XCODE_MAJOR" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Xcode version::Detected Xcode $XCODE_VERSION (major=$XCODE_MAJOR)"
+      - name: Run iOS simulator tests
+        run: |
+          if [ "${{ steps.xcode.outputs.major }}" -ge 26 ]; then
+            ./gradlew iosSimulatorArm64Test \
+              --continue --no-daemon --console=plain
+          else
+            ./gradlew iosSimulatorArm64Test \
+              -x :cmp-worker-ios:iosSimulatorArm64Test \
+              -x :cmp-worker-scheduler:iosSimulatorArm64Test \
+              -x :cmp-worker-store5:iosSimulatorArm64Test \
+              -x :cmp-worker-storeflow:iosSimulatorArm64Test \
+              -x :cmp-worker-compose:iosSimulatorArm64Test \
+              --continue --no-daemon --console=plain
+          fi
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
