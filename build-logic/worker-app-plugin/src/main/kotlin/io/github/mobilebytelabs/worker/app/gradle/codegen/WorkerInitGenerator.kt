@@ -32,8 +32,11 @@ internal object WorkerInitGenerator {
 
     /**
      * Renders `Generated_WorkerKmpInit.kt` into `{outputDir}/{outputSourceSet}/kotlin/{pkg}/generated/`.
+     *
+     * [sourceSetOverride] lets the caller supply a runtime-detected source set name (e.g.
+     * `"jvmMain"` when the consumer declared `jvm { }` instead of `jvm("desktop") { }`).
      */
-    fun run(model: CodegenModel, platform: Platform, outputDir: File) {
+    fun run(model: CodegenModel, platform: Platform, outputDir: File, sourceSetOverride: String? = null) {
         val pkgPath = model.packageName.replace('.', '/')
 
         // Filter workers for this platform (per @WorkerForPlatforms / AC-25).
@@ -62,8 +65,9 @@ internal object WorkerInitGenerator {
             ),
         )
 
+        val effectiveSourceSet = sourceSetOverride ?: platform.outputSourceSet
         outputDir
-            .resolve("${platform.outputSourceSet}/kotlin/$pkgPath/generated/Generated_WorkerKmpInit.kt")
+            .resolve("$effectiveSourceSet/kotlin/$pkgPath/generated/Generated_WorkerKmpInit.kt")
             .apply { parentFile.mkdirs() }
             .writeText(rendered)
     }

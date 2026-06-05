@@ -153,16 +153,20 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                     outputDir = generatedRoot.get().dir(sourceSet).asFile,
                 )
                 // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
-                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into desktopMain.
+                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual.
+                // Use sourceSet (jvmMain or desktopMain) so actuals land in the correct
+                // source set regardless of whether the consumer uses jvm { } or jvm("desktop") { }.
                 WorkerInitGenerator.run(
                     model = model,
                     platform = WorkerInitGenerator.Platform.Desktop,
                     outputDir = generatedRoot.get().asFile,
+                    sourceSetOverride = sourceSet,
                 )
                 AutoShimGenerator.runPlatformActual(
                     model = model,
                     platform = AutoShimGenerator.Platform.Desktop,
                     outputDir = generatedRoot.get().asFile,
+                    sourceSetOverride = sourceSet,
                 )
                 logger.lifecycle("worker-kmp-app: Desktop codegen done (target=$sourceSet)")
             }
