@@ -199,3 +199,48 @@ private class VersionBumpingSyncable(private val name: String, private val final
         return true
     }
 }
+
+// ─── ChangeListVersions unit tests ───────────────────────────────────────────
+
+class ChangeListVersionsTest {
+
+    @Test
+    fun set_addsNewKey_returnsUpdatedCopy() {
+        val empty = ChangeListVersions()
+        val updated = empty.set("currency", 42L)
+        assertEquals(42L, updated.versions["currency"])
+        assertTrue(empty.versions.isEmpty(), "set() must not mutate the receiver")
+    }
+
+    @Test
+    fun set_updatesExistingKey_returnsUpdatedCopy() {
+        val initial = ChangeListVersions(mapOf("currency" to 1L))
+        val updated = initial.set("currency", 99L)
+        assertEquals(99L, updated.versions["currency"])
+        assertEquals(1L, initial.versions["currency"], "Original must be unchanged")
+    }
+}
+
+// ─── getChangeListVersions direct tests ──────────────────────────────────────
+
+class GetChangeListVersionsTest {
+
+    @OptIn(ExperimentalUuidApi::class)
+    @Test
+    fun getChangeListVersions_returnsCurrentWorkingVersions() = runTest {
+        val persister = SyncStatePersister()
+        val worker = TestSyncWorker(
+            ctx = object : WorkerContext {
+                override val id = Uuid.random()
+                override val inputData = workDataOf()
+                override val tags: Set<String> = emptySet()
+                override suspend fun setProgress(progress: io.github.mobilebytelabs.worker.WorkProgress) = Unit
+            },
+            syncables = emptyList(),
+            persister = persister,
+        )
+        // Initial versions are empty; getChangeListVersions() delegates to workingVersions
+        val versions = worker.getChangeListVersions()
+        assertEquals(emptyMap(), versions.versions)
+    }
+}

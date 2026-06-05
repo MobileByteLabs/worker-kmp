@@ -15,7 +15,7 @@ dokka = "2.0.0"
 koin = "4.0.4"
 spotless = "8.5.1"
 detekt = "1.23.8"
-kover = "0.9.1"
+kover = "0.9.8"
 ktlint = "1.8.0"
 vanniktech-publish = "0.36.0"
 # Store5 — Mobile Native Foundation's KMP store/cache library.
