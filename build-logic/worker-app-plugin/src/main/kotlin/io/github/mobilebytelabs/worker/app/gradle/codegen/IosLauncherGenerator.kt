@@ -7,7 +7,7 @@ import java.io.File
 /**
  * iOS codegen — emits 5 files:
  *   Kotlin side (into `kotlinOutputDir`):
- *     - `kotlin/{pkg}/generated/Generated_MainViewController.kt`
+ *     - `kotlin/{pkg}/generated/MainViewController.kt`
  *   iOS-app side (into `iosAppDir` — usually `samples/.../iosApp` or `iosApp/`):
  *     - `project.yml`                      (xcodegen spec)
  *     - `iosApp/iOSApp.swift`              (SwiftUI @main)
@@ -28,7 +28,7 @@ internal object IosLauncherGenerator {
             factoryCall = "iosWorkManagerFactory()",
         )
 
-        kotlinOutputDir.resolve("kotlin/$pkgPath/generated/Generated_MainViewController.kt").apply {
+        kotlinOutputDir.resolve("kotlin/$pkgPath/generated/MainViewController.kt").apply {
             parentFile.mkdirs()
             writeText(TemplateEngine.render(TemplateEngine.load("ios-mainviewcontroller.kt.template"), model, extras))
         }

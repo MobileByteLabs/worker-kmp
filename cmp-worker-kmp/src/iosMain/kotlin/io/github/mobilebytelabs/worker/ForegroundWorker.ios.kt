@@ -75,7 +75,7 @@ private const val IOS_17 = 17
 // Kotlin/Native test binaries always land under debugTest/ or releaseTest/ in the Gradle
 // output tree. NSProcessInfo.arguments is safe to call without a host app.
 private fun isInTestBinary(): Boolean {
-    val exec = NSProcessInfo.processInfo.arguments.firstOrNull() ?: return false
+    val exec = NSProcessInfo.processInfo.arguments.firstOrNull() as? String ?: return false
     return exec.contains("debugTest") || exec.contains("releaseTest")
 }
 
