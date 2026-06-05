@@ -90,6 +90,36 @@ verify {
 This is `LINE` aggregation per the Kover default; per-module — each opted-in module
 gates its own bytecode.
 
+## Tier-2 platform-engine tests
+
+Kover measures JVM bytecode line coverage only. The 6 platform-actual modules
+(`cmp-worker-android` / `cmp-worker-ios` / `cmp-worker-desktop` /
+`cmp-worker-desktop-daemon` / `cmp-worker-web` / `cmp-worker-web-push`)
+fundamentally cannot be measured this way for non-JVM targets, so a
+**structural** success criterion is used instead:
+
+- Every public actual class has ≥ 1 test class.
+- Every per-platform Gradle test task passes on its runner.
+
+These tests run via the
+[`.github/workflows/platform-engine-tests.yml`](../../.github/workflows/platform-engine-tests.yml)
+matrix (6 jobs: 5 ubuntu-latest + 1 macos-latest for iOS sim). The workflow
+is a required check on PRs to `development`.
+
+Per-module test tasks:
+
+| Module | Test task | CI runner |
+|---|---|---|
+| `cmp-worker-android` | `:cmp-worker-android:testAndroidHostTest` (Robolectric) | ubuntu-latest |
+| `cmp-worker-ios` | `:cmp-worker-ios:iosSimulatorArm64Test` | macos-latest |
+| `cmp-worker-desktop` | `:cmp-worker-desktop:jvmTest` | ubuntu-latest |
+| `cmp-worker-desktop-daemon` | `:cmp-worker-desktop-daemon:test` | ubuntu-latest |
+| `cmp-worker-web` | `:cmp-worker-web:jsNodeTest` + `wasmJsBrowserTest` | ubuntu-latest |
+| `cmp-worker-web-push` | `:cmp-worker-web-push:jsBrowserTest` + `wasmJsBrowserTest` | ubuntu-latest |
+
+Spec:
+[`worker-kmp-platform-engine-tests`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-platform-engine-tests/GOAL.md).
+
 ## Adding a new module
 
 1. Add `id("io.github.mobilebytelabs.kover")` to the new module's `build.gradle.kts` `plugins {}`
