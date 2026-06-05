@@ -145,4 +145,3 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Build wasmJs distribution
         run: ./gradlew :samples:cmp-worker-sample-compose-store:wasmJsBrowserDistribution
-
