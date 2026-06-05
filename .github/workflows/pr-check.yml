@@ -1,6 +1,19 @@
-# PR Check Workflow — fast gate on pull requests
-# Runs quality + JVM tests only (iOS/Linux skipped for speed).
-# Full build runs on push to main/development via gradle.yml.
+# PR Check — comprehensive gate on every pull request.
+#
+# Covers: quality · JVM commonMain · all platform tests · Kover 100% · iOS samples.
+#
+# Self-scaling: the two platform-tests jobs use Gradle's `allTests` aggregate task.
+# Adding a new module automatically includes its tests — no CI changes needed.
+#
+# Job map:
+#   quality-and-jvm      fast: spotless + detekt + ABI + commonMain JVM tests (ubuntu)
+#   platform-ubuntu      all non-iOS tests: Android · Desktop · JS · WasmJS (ubuntu)
+#   platform-ios         all iosSimulatorArm64Test tasks (macos)
+#   coverage             Kover 100% gate + HTML artifact (ubuntu)
+#   ios-bcv-check        BCV snapshot asserts iOS targets in cmp-worker-compose (ubuntu)
+#   sample-wasmjs        cmp-worker-sample-compose-store wasmJs browser build (ubuntu)
+#   sample-ios-framework iOS framework compile + xcodegen project generation (macos)
+#   sample-ios-xcodebuild xcodebuild iosApp — hard gate once macos-latest → Xcode 26+
 
 name: PR Check
 
@@ -16,7 +29,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  pr-check:
+
+  # ── Fast quality + JVM gate ────────────────────────────────────────────────
+  quality-and-jvm:
     uses: MobileByteLabs/mbl-actionhub/.github/workflows/ci-kmp-library.yml@v1.6.1
     with:
       module-pattern: 'cmp-'
@@ -26,8 +41,106 @@ jobs:
       run-ios-tests: false
       run-linux-tests: false
 
-  # worker-kmp-cmp-launchers-01: assert cmp-worker-compose publishes BCV
-  # snapshots covering iosArm64 + iosSimulatorArm64 (+ js + wasmJs).
+  # ── Platform engine tests (ubuntu) ────────────────────────────────────────
+  #
+  # Runs ALL non-iOS test tasks via Gradle's allTests aggregate.
+  # Covers: androidHostTest · jvmTest · jsNodeTest · wasmJsBrowserTest · test
+  # New modules are picked up automatically — no CI changes required.
+  platform-ubuntu:
+    name: Platform tests — Android · Desktop · JS · Wasm (ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run all non-iOS platform tests
+        run: |
+          ./gradlew allTests \
+            -x iosArm64Test \
+            -x iosSimulatorArm64Test \
+            -x iosX64Test \
+            --continue --no-daemon --console=plain
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-test-results-ubuntu
+          path: '**/build/reports/tests/'
+          retention-days: 7
+
+  # ── Platform engine tests (macos / iOS) ───────────────────────────────────
+  #
+  # Runs iosSimulatorArm64Test across every subproject that declares the target.
+  # New iOS modules are picked up automatically — no CI changes required.
+  platform-ios:
+    name: Platform tests — iOS simulator (macos)
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run iosSimulatorArm64Test across all modules
+        run: |
+          ./gradlew iosSimulatorArm64Test \
+            --continue --no-daemon --console=plain
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-test-results-ios
+          path: '**/build/reports/tests/'
+          retention-days: 7
+
+  # ── Kover 100% coverage gate ───────────────────────────────────────────────
+  coverage:
+    name: Kover 100% gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run Kover (report + verify)
+        run: ./gradlew koverHtmlReport koverXmlReport koverVerify --no-configuration-cache
+      - name: Upload HTML coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kover-html-report
+          path: build/reports/kover/html/
+          retention-days: 14
+      - name: Surface coverage % in PR Step Summary
+        if: always()
+        run: |
+          REPORT=build/reports/kover/report.xml
+          if [ ! -f "$REPORT" ]; then
+            echo "## ⚠ Coverage XML report missing" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          COVERED=$(grep -m1 'type="LINE"' "$REPORT" | sed -E 's/.*covered="([0-9]+)".*/\1/')
+          MISSED=$(grep -m1 'type="LINE"' "$REPORT" | sed -E 's/.*missed="([0-9]+)".*/\1/')
+          TOTAL=$((COVERED + MISSED))
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "## ⚠ No coverable lines reported" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          PCT=$((COVERED * 100 / TOTAL))
+          echo "## ☂ Aggregate line coverage: ${PCT}% (${COVERED}/${TOTAL})" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "HTML report uploaded as \`kover-html-report\` artifact." >> "$GITHUB_STEP_SUMMARY"
+
+  # ── iOS BCV snapshot ───────────────────────────────────────────────────────
   ios-bcv-check:
     name: cmp-worker-compose iOS BCV snapshot
     runs-on: ubuntu-latest
@@ -36,8 +149,7 @@ jobs:
       - name: Assert iOS BCV snapshot present + lists iOS targets
         run: bash scripts/check-ios-artifact.sh
 
-  # worker-kmp-cmp-launchers-03: build the cmp-worker-sample-compose-store
-  # sample for the Web (wasmJs browser) target.
+  # ── Sample: wasmJs browser build ──────────────────────────────────────────
   sample-wasmjs:
     name: cmp-worker-sample-compose-store — wasmJs build
     runs-on: ubuntu-latest
@@ -51,11 +163,7 @@ jobs:
       - name: Build wasmJs distribution
         run: ./gradlew :samples:cmp-worker-sample-compose-store:wasmJsBrowserDistribution
 
-  # worker-kmp-cmp-launchers-03 (Part A): the iOS framework + xcodegen project
-  # — these BOTH work on any Xcode version (16+ or 26+). This is the always-on
-  # iOS CI gate: validates the Kotlin/Native iosMain compiles, links into a
-  # Static Framework with the right exports, and that xcodegen can materialize
-  # a valid iosApp.xcodeproj from project.yml. Required check.
+  # ── Sample: iOS framework + xcodegen (always-on, any Xcode) ───────────────
   sample-ios-framework:
     name: cmp-worker-sample-compose-store — iOS framework + xcodegen
     runs-on: macos-latest
@@ -80,22 +188,12 @@ jobs:
           test -f samples/cmp-worker-sample-compose-store/iosApp/iosApp.xcodeproj/project.pbxproj
           echo "OK: iosApp.xcodeproj generated and structurally valid"
 
-  # worker-kmp-cmp-launchers-03 (Part B): the xcodebuild iosApp linker step.
-  # Compose Multiplatform 1.11.0's iOS framework auto-links iOS-18-only private
-  # frameworks (UIUtilities, SwiftUICore) which require Xcode 26.x at link time.
-  # GitHub Actions is migrating `macos-latest` from macOS 15 (Xcode 16.x) to
-  # macOS 26 (Xcode 26.x) between June 15 → July 15, 2026:
-  #   https://github.com/actions/runner-images
+  # ── Sample: iOS xcodebuild (hard gate once macos-latest → Xcode 26+) ──────
   #
-  # This job auto-detects the runner's Xcode major version and:
-  #   - Xcode major >= 26 → run xcodebuild (will pass; HARD gate going forward)
-  #   - Xcode major <  26 → skip with informative log (returns success, doesn't
-  #     block CI; matches the de-facto state until macos-latest migrates)
-  #
-  # Local validation via `scripts/ci-local.sh --all` is the source of truth
-  # for this gate today (requires local Xcode 26.x — script enforces).
-  # Post July 15, 2026 the runner gets Xcode 26 automatically + this gate
-  # turns into a real iOS regression catch with NO workflow change required.
+  # Compose Multiplatform 1.11.0 auto-links iOS-18 private frameworks that only
+  # exist in the Xcode 26 SDK. GitHub Actions migrates macos-latest between
+  # 2026-06-15 → 2026-07-15. Until then this job auto-skips on Xcode < 26
+  # without blocking CI; after migration it becomes a hard gate with no changes.
   sample-ios-xcodebuild:
     name: cmp-worker-sample-compose-store — iOS xcodebuild (Xcode 26+)
     needs: sample-ios-framework

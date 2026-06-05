@@ -101,21 +101,14 @@ fundamentally cannot be measured this way for non-JVM targets, so a
 - Every public actual class has ≥ 1 test class.
 - Every per-platform Gradle test task passes on its runner.
 
-These tests run via the
-[`.github/workflows/platform-engine-tests.yml`](../../.github/workflows/platform-engine-tests.yml)
-matrix (6 jobs: 5 ubuntu-latest + 1 macos-latest for iOS sim). The workflow
-is a required check on PRs to `development`.
+These tests are part of the standard PR gate at
+[`.github/workflows/pr-check.yml`](../../.github/workflows/pr-check.yml)
+via two self-scaling jobs — no CI changes needed when new modules are added:
 
-Per-module test tasks:
-
-| Module | Test task | CI runner |
+| Job | Runner | How tests are discovered |
 |---|---|---|
-| `cmp-worker-android` | `:cmp-worker-android:testAndroidHostTest` (Robolectric) | ubuntu-latest |
-| `cmp-worker-ios` | `:cmp-worker-ios:iosSimulatorArm64Test` | macos-latest |
-| `cmp-worker-desktop` | `:cmp-worker-desktop:jvmTest` | ubuntu-latest |
-| `cmp-worker-desktop-daemon` | `:cmp-worker-desktop-daemon:test` | ubuntu-latest |
-| `cmp-worker-web` | `:cmp-worker-web:jsNodeTest` + `wasmJsBrowserTest` | ubuntu-latest |
-| `cmp-worker-web-push` | `:cmp-worker-web-push:jsBrowserTest` + `wasmJsBrowserTest` | ubuntu-latest |
+| `platform-ubuntu` | ubuntu-latest | `./gradlew allTests -x ios*Test` — picks up every non-iOS test task across all subprojects |
+| `platform-ios` | macos-latest | `./gradlew iosSimulatorArm64Test` — picks up every iOS sim test task across all subprojects |
 
 Spec:
 [`worker-kmp-platform-engine-tests`](../../../../plan-layer/project-plans/mbs/worker-kmp/active/worker-kmp-platform-engine-tests/GOAL.md).
@@ -146,13 +139,15 @@ maintenance pass prunes stale exclusions.
 
 ## CI workflow
 
-The `Test Coverage / Kover 100% gate` job at
-[`.github/workflows/test-coverage.yml`](../../.github/workflows/test-coverage.yml) runs on every
-PR + push to `main` / `development`. It:
+The `coverage` job in
+[`.github/workflows/pr-check.yml`](../../.github/workflows/pr-check.yml) runs on every PR to
+`main` / `development`. The equivalent job in
+[`.github/workflows/gradle.yml`](../../.github/workflows/gradle.yml) runs on every push to
+`main` / `development`. Both:
 
-1. Runs `./gradlew koverHtmlReport koverXmlReport koverVerify`.
-2. Uploads the aggregate HTML report as `kover-html-report` (14-day retention).
-3. Posts the aggregate `%` to the PR Step Summary.
+1. Run `./gradlew koverHtmlReport koverXmlReport koverVerify`.
+2. Upload the aggregate HTML report as `kover-html-report` (14-day retention).
+3. Post the aggregate `%` to the PR Step Summary.
 
 `koverVerify` exit ≠ 0 fails the PR. There is no soft-warn mode.
 
