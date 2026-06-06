@@ -13,7 +13,6 @@
 #   quality              fast: spotless + detekt (ubuntu)
 #   tests-android        Android Robolectric tests (ubuntu) — parallel
 #   tests-js             JS Node tests (ubuntu) — parallel
-#   tests-wasmjs         WasmJS Node tests (ubuntu) — parallel
 #   coverage             Kover 100% gate — JVM tests only (~3min), runs in parallel
 #   ios-bcv-check        BCV snapshot asserts iOS targets in cmp-worker-compose (ubuntu)
 #   sample-wasmjs        cmp-worker-sample-compose-store wasmJs browser build (ubuntu)
@@ -52,9 +51,10 @@ jobs:
 
   # ── Platform engine tests (ubuntu) ────────────────────────────────────────
   #
-  # Split into 3 parallel jobs so each platform runs on its own runner.
+  # Split into 2 parallel jobs so each platform runs on its own runner.
   # JVM tests are already covered by the coverage job — excluded here.
   # Browser targets excluded: require Chrome, test identical code to Node variants.
+  # WasmJS Node tests don't exist in this project (wasmJs is browser-only).
   # New modules are picked up automatically — no CI changes required.
   tests-android:
     name: Platform tests — Android (ubuntu)
@@ -74,7 +74,6 @@ jobs:
             -x jsBrowserTest \
             -x wasmJsBrowserTest \
             -x jsNodeTest \
-            -x wasmJsNodeTest \
             -x jvmTest \
             --continue --console=plain
       - name: Upload test results
@@ -97,33 +96,19 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - name: Run JS Node tests
-        run: ./gradlew jsNodeTest --continue --console=plain
+        run: |
+          ./gradlew allTests \
+            -x iosSimulatorArm64Test \
+            -x jsBrowserTest \
+            -x wasmJsBrowserTest \
+            -x jvmTest \
+            -x testAndroidHostTest \
+            --continue --console=plain
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: platform-test-results-js
-          path: '**/build/reports/tests/'
-          retention-days: 7
-
-  tests-wasmjs:
-    name: Platform tests — WasmJS Node (ubuntu)
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
-      - name: Run WasmJS Node tests
-        run: ./gradlew wasmJsNodeTest --continue --console=plain
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: platform-test-results-wasmjs
           path: '**/build/reports/tests/'
           retention-days: 7
 
