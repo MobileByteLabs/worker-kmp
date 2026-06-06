@@ -110,12 +110,18 @@ internal fun Project.configureKoverRootReports() = koverGradle {
                     // Tested indirectly through SynchronizerExtensionsTest; Kover sees
                     // the static dispatch helper, not the extension itself.
                     "io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer",
-                    // WorkSchedulerScreenKt + WorkStatusChipKt are @Composable screens.
-                    // The annotatedBy(Composable) filter catches individual @Composable
-                    // methods but not all generated file-class lines (e.g. remember {} lambdas
-                    // outside @Composable scope). Exclude the file classes explicitly.
+                    // @Composable file-classes in cmp-worker-compose.
+                    // The annotatedBy(Composable) filter works per-module but Kover 0.9.8
+                    // does not consistently apply it in the ROOT aggregate koverVerify.
+                    // Exclude all composable-only Kt file classes explicitly so the root
+                    // verify agrees with the HTML report (both show 0 coverable lines).
                     "*WorkSchedulerScreenKt*",
                     "*WorkStatusChipKt*",
+                    "*BackgroundCapabilitiesBannerKt*",
+                    "*WorkCountBadgeKt*",
+                    "*WorkInfoCardKt*",
+                    "*WorkMonitorScreenKt*",
+                    "*WorkProgressIndicatorKt*",
                 )
                 packages(
                     "*.generated.*",
