@@ -1,6 +1,6 @@
 # PR Check — comprehensive gate on every pull request.
 #
-# Covers: quality · ubuntu platform tests + Kover 100% (one job) · wasmJs sample.
+# Covers: quality · all platform tests · Kover 100% · wasmJs sample.
 #
 # Self-scaling: platform-ubuntu uses Gradle aggregate tasks.
 # Adding a new module automatically includes its tests — no CI changes needed.
@@ -11,7 +11,9 @@
 #
 # Job map:
 #   quality              fast: spotless + detekt (ubuntu)
-#   platform-ubuntu      tests + Kover 100% in one pass — no duplicate test run (ubuntu)
+#   platform-ubuntu      all non-iOS non-browser tests (ubuntu) — runs in parallel with coverage
+#   coverage             Kover 100% gate — only triggers JVM tests (Kover is JVM-only),
+#                        so it is fast (~15min) and runs in parallel with platform-ubuntu
 #   ios-bcv-check        BCV snapshot asserts iOS targets in cmp-worker-compose (ubuntu)
 #   sample-wasmjs        cmp-worker-sample-compose-store wasmJs browser build (ubuntu)
 
@@ -47,16 +49,15 @@ jobs:
       - name: Detekt
         run: ./gradlew detekt
 
-  # ── Platform engine tests + Kover coverage (ubuntu) ─────────────────────
+  # ── Platform engine tests (ubuntu) ────────────────────────────────────────
   #
-  # Runs JVM + Node JS + Android Robolectric tests then generates Kover coverage
-  # in the same job so tests execute only once. Browser targets excluded (Chrome
-  # required, identical coverage to jsNodeTest/jvmTest; validated by sample-wasmjs).
+  # Runs JVM + Node JS + Android Robolectric tests.
+  # Browser targets excluded: require Chrome, test identical code to jsNodeTest/jvmTest.
   # New modules are picked up automatically — no CI changes required.
   platform-ubuntu:
-    name: Platform tests + Kover 100% (ubuntu)
+    name: Platform tests — Android · Desktop · JS · Wasm (ubuntu)
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -64,9 +65,9 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Run tests + Kover coverage in one pass
+      - name: Run all non-iOS non-browser platform tests
         run: |
-          ./gradlew allTests koverHtmlReport koverXmlReport koverVerify \
+          ./gradlew allTests \
             -x iosSimulatorArm64Test \
             -x jsBrowserTest \
             -x wasmJsBrowserTest \
@@ -78,6 +79,25 @@ jobs:
           name: platform-test-results-ubuntu
           path: '**/build/reports/tests/'
           retention-days: 7
+
+  # ── Kover 100% coverage gate (ubuntu) ─────────────────────────────────────
+  #
+  # Kover only instruments JVM targets — it does not run JS or WasmJS tests.
+  # This job therefore only triggers JVM test tasks (~15min) and runs in
+  # parallel with platform-ubuntu. Wall time = max(platform, coverage) ≈ 25min.
+  coverage:
+    name: Kover 100% gate (ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Run Kover verify + reports
+        run: ./gradlew koverHtmlReport koverXmlReport koverVerify --console=plain
       - name: Upload HTML coverage report
         if: always()
         uses: actions/upload-artifact@v4
