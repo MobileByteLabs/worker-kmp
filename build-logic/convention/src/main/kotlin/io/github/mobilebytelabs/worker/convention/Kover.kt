@@ -122,6 +122,14 @@ internal fun Project.configureKoverRootReports() = koverGradle {
                     "*WorkInfoCardKt*",
                     "*WorkMonitorScreenKt*",
                     "*WorkProgressIndicatorKt*",
+                    // ForegroundWorker.jvm.kt contains AWT/SystemTray code that is only
+                    // reachable on GUI (non-headless) JVMs. On Linux CI runners,
+                    // SystemTray.isSupported() returns false, leaving the tray-branch and
+                    // dispatchToAndroidBridge() uncovered (~34 lines). The generic *_jvmKt
+                    // pattern above should exclude this class but Kover 0.9.8's root
+                    // aggregate filter does not consistently apply it. Add the explicit
+                    // FQN as a belt-and-suspenders exclusion so CI passes regardless.
+                    "io.github.mobilebytelabs.worker.ForegroundWorker_jvmKt",
                 )
                 packages(
                     "*.generated.*",
