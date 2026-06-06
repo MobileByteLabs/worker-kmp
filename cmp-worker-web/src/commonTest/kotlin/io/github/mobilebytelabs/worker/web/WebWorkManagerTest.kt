@@ -448,6 +448,20 @@ class WebWorkManagerTest {
     }
 
     @Test
+    fun enqueue_workInfoIsInitiallyPresent() = runTest {
+        val wm = WebWorkManager(
+            workerFactory = TestWebWorkerFactory,
+            config = WebWorkManagerConfig(constraintCheckIntervalMs = 50),
+            constraintEvaluator = WebConstraintEvaluator { false },
+        )
+        val req = OneTimeWorkRequestBuilder<SlowWebWorker>(SlowWebWorker::class.simpleName!!).build()
+        val id = wm.enqueue(req)
+        val info = wm.getWorkInfoById(id)
+        assertTrue(info != null, "getWorkInfoById must return non-null immediately after enqueue")
+        wm.shutdown()
+    }
+
+    @Test
     fun isWebWorkManagerSupported_returnsFalseOnJvm() = runTest {
         // JVM actual always returns false — this test only runs on the jvmTest source set.
         // The function returns true on JS/WasmJs targets where it is used in production.

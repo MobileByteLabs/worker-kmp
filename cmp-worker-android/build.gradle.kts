@@ -51,6 +51,10 @@ kotlin {
                 implementation(libs.kotlin.test.junit)
                 implementation(libs.koin.core)
                 implementation(libs.koin.test)
+                implementation(libs.robolectric)
+                implementation(libs.androidx.work.testing)
+                implementation(libs.androidx.test.core)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

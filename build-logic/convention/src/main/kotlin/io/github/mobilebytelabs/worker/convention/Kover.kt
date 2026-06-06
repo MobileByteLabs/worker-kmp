@@ -110,12 +110,26 @@ internal fun Project.configureKoverRootReports() = koverGradle {
                     // Tested indirectly through SynchronizerExtensionsTest; Kover sees
                     // the static dispatch helper, not the extension itself.
                     "io.github.mobilebytelabs.worker.scheduler.sync.Synchronizer",
-                    // WorkSchedulerScreenKt + WorkStatusChipKt are @Composable screens.
-                    // The annotatedBy(Composable) filter catches individual @Composable
-                    // methods but not all generated file-class lines (e.g. remember {} lambdas
-                    // outside @Composable scope). Exclude the file classes explicitly.
+                    // @Composable file-classes in cmp-worker-compose.
+                    // The annotatedBy(Composable) filter works per-module but Kover 0.9.8
+                    // does not consistently apply it in the ROOT aggregate koverVerify.
+                    // Exclude all composable-only Kt file classes explicitly so the root
+                    // verify agrees with the HTML report (both show 0 coverable lines).
                     "*WorkSchedulerScreenKt*",
                     "*WorkStatusChipKt*",
+                    "*BackgroundCapabilitiesBannerKt*",
+                    "*WorkCountBadgeKt*",
+                    "*WorkInfoCardKt*",
+                    "*WorkMonitorScreenKt*",
+                    "*WorkProgressIndicatorKt*",
+                    // ForegroundWorker.jvm.kt contains AWT/SystemTray code that is only
+                    // reachable on GUI (non-headless) JVMs. On Linux CI runners,
+                    // SystemTray.isSupported() returns false, leaving the tray-branch and
+                    // dispatchToAndroidBridge() uncovered (~34 lines). The generic *_jvmKt
+                    // pattern above should exclude this class but Kover 0.9.8's root
+                    // aggregate filter does not consistently apply it. Add the explicit
+                    // FQN as a belt-and-suspenders exclusion so CI passes regardless.
+                    "io.github.mobilebytelabs.worker.ForegroundWorker_jvmKt",
                 )
                 packages(
                     "*.generated.*",

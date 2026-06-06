@@ -42,13 +42,22 @@ internal object AutoShimGenerator {
     /**
      * Emits the per-platform actual `WorkerKmpAuto.kt` for [platform]. Called from the matching
      * platform's codegen task right after `WorkerInitGenerator.run(model, platform, outputDir)`.
+     *
+     * [sourceSetOverride] lets the caller supply a runtime-detected source set name (e.g.
+     * `"jvmMain"` when the consumer declared `jvm { }` instead of `jvm("desktop") { }`).
      */
-    fun runPlatformActual(model: CodegenModel, platform: Platform, outputDir: File) {
+    fun runPlatformActual(
+        model: CodegenModel,
+        platform: Platform,
+        outputDir: File,
+        sourceSetOverride: String? = null,
+    ) {
         val pkgPath = model.packageName.replace('.', '/')
         val template = TemplateEngine.load(platform.templateName)
         val rendered = TemplateEngine.render(template = template, model = model)
+        val effectiveSourceSet = sourceSetOverride ?: platform.sourceSet
         outputDir
-            .resolve("${platform.sourceSet}/kotlin/$pkgPath/generated/WorkerKmpAuto.kt")
+            .resolve("$effectiveSourceSet/kotlin/$pkgPath/generated/WorkerKmpAuto.kt")
             .apply { parentFile.mkdirs() }
             .writeText(rendered)
     }

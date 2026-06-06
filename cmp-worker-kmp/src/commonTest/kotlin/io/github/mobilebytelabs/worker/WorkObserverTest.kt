@@ -17,17 +17,15 @@ import kotlin.uuid.Uuid
 class WorkObserverTest {
 
     @Test
-    fun workObserver_isFunctionalSam_acceptsLambda() {
+    fun workObserver_isFunctionalSam_acceptsLambda() = runTest {
         val recorded = mutableListOf<WorkEvent>()
         val observer = WorkObserver { event -> recorded += event }
 
         val id = Uuid.random()
-        runTest {
-            observer.onEvent(WorkEvent.Enqueued(id = id, tag = "test", inputData = workDataOf()))
-            observer.onEvent(WorkEvent.Started(id = id, attemptCount = 1))
-            observer.onEvent(WorkEvent.Progress(id = id, progress = WorkProgress(50)))
-            observer.onEvent(WorkEvent.Resulted(id = id, result = WorkResult.success(), durationMs = 42L))
-        }
+        observer.onEvent(WorkEvent.Enqueued(id = id, tag = "test", inputData = workDataOf()))
+        observer.onEvent(WorkEvent.Started(id = id, attemptCount = 1))
+        observer.onEvent(WorkEvent.Progress(id = id, progress = WorkProgress(50)))
+        observer.onEvent(WorkEvent.Resulted(id = id, result = WorkResult.success(), durationMs = 42L))
 
         assertEquals(4, recorded.size)
         assertTrue(recorded[0] is WorkEvent.Enqueued)

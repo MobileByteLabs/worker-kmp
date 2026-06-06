@@ -11,6 +11,7 @@ import platform.BackgroundTasks.BGProcessingTaskRequest
 import platform.BackgroundTasks.BGTaskScheduler
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateComponents
+import platform.Foundation.NSProcessInfo
 import platform.Foundation.dateByAddingTimeInterval
 import platform.UIKit.UIDevice
 import platform.UserNotifications.UNMutableNotificationContent
@@ -41,6 +42,15 @@ import platform.UserNotifications.UNUserNotificationCenter
  */
 @ExperimentalForegroundApi
 public actual suspend fun runAsForeground(worker: ForegroundWorker, info: ForegroundInfo) {
+    // In a Kotlin/Native test binary there is no host app: BGTaskScheduler and
+    // UNUserNotificationCenter throw ObjC NSExceptions that Kotlin's runCatching cannot
+    // intercept (they propagate as SIGABRT). Guard before touching any system API.
+    if (isInTestBinary()) {
+        Logger.withTag("worker-kmp.foreground.ios").d {
+            "Foreground scheduling skipped — test binary context, no host app. id=${info.notificationId}"
+        }
+        return
+    }
     // iOS 17+ ContinuedProcessing path — only fires when (a) iOS >= 17, (b) consumer set
     // IosWorkerConfig.continuedProcessingTaskIdentifier, (c) ObjC runtime exposes the class.
     // Always also post a user notification so the user sees what's happening (parity with
@@ -49,7 +59,7 @@ public actual suspend fun runAsForeground(worker: ForegroundWorker, info: Foregr
         postUserNotification(identifier = BgContinuedProcessing.getIdentifier(), info = info)
         return
     }
-    val majorVersion = parseMajorIosVersion(UIDevice.currentDevice.systemVersion)
+    val majorVersion = runCatching { parseMajorIosVersion(UIDevice.currentDevice.systemVersion) }.getOrDefault(0)
     if (majorVersion >= IOS_17 && BgContinuedProcessing.getIdentifier().isEmpty()) {
         Logger.withTag("worker-kmp.foreground.ios").d {
             "iOS $majorVersion — IosWorkerConfig.continuedProcessingTaskIdentifier is empty; " +
@@ -61,6 +71,13 @@ public actual suspend fun runAsForeground(worker: ForegroundWorker, info: Foregr
 }
 
 private const val IOS_17 = 17
+
+// Kotlin/Native test binaries always land under debugTest/ or releaseTest/ in the Gradle
+// output tree. NSProcessInfo.arguments is safe to call without a host app.
+private fun isInTestBinary(): Boolean {
+    val exec = NSProcessInfo.processInfo.arguments.firstOrNull() as? String ?: return false
+    return exec.contains("debugTest") || exec.contains("releaseTest")
+}
 
 internal fun parseMajorIosVersion(systemVersion: String): Int = systemVersion.substringBefore('.').toIntOrNull() ?: 0
 
