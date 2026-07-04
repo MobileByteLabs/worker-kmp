@@ -71,11 +71,14 @@ val generateWorkerAppVersionResource = tasks.register("generateWorkerAppVersionR
         file.writeText("version=$versionValue\n")
     }
 }
+// Pass the TaskProvider (not the plain dir) to srcDir so Gradle wires an implicit
+// task dependency for EVERY consumer of main resources — processResources AND the
+// sourcesJar/publishing tasks. Passing only the directory + a processResources
+// dependsOn left sourcesJar/publish without a declared dependency, which Gradle 9.5
+// rejects as an `implicit_dependency` validation problem at publish time (issue #51
+// follow-up: broke `enableAutomaticMavenCentralPublishing` in the 4.0.1 publish).
 sourceSets.named("main") {
-    resources.srcDir(workerAppVersionResourceDir)
-}
-tasks.named("processResources") {
-    dependsOn(generateWorkerAppVersionResource)
+    resources.srcDir(generateWorkerAppVersionResource)
 }
 
 dependencies {
