@@ -41,10 +41,25 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         // + ksp modules (i.e. the sample inside worker-kmp itself), use project() refs to
         // avoid the mavenLocal-publish prerequisite. External consumers fall back to
         // resolving the published Maven coordinates.
-        val workerVersion = providers.gradleProperty("worker.version").orNull
-            ?: project.version.toString()
+        //
+        // Version resolution (GitHub issue #51, bug 1): prefer an explicit `worker.version`
+        // gradle property override, else the plugin's OWN version baked into a classpath
+        // resource at plugin-build time. We MUST NOT fall back to `project.version` — that
+        // is the *consumer's* project version, which is Gradle's literal "unspecified" for a
+        // normal app project, producing `worker-app-ksp:unspecified` (the reported failure).
+        // Only reach for the coordinate version when the modules aren't in the local tree.
         val annotationsProject = rootProject.findProject(":cmp-worker-app-annotations")
         val kspProject = rootProject.findProject(":cmp-worker-app-ksp")
+        // Resolve the coordinate version lazily — only external consumers (no in-tree
+        // project refs) need it, and only then do we want to fail loudly if it can't
+        // be determined. Precedence: `worker.version` override → the plugin's own baked-in
+        // version. NEVER the consumer's `project.version` (issue #51, bug 1).
+        val workerVersion: String by lazy {
+            WorkerVersionResolver.resolve(
+                propertyOverride = providers.gradleProperty("worker.version").orNull,
+                embedded = WorkerVersionResolver.loadEmbedded(),
+            )
+        }
         val annotationsDep: Any = annotationsProject
             ?: "io.github.mobilebytelabs:worker-app-annotations:$workerVersion"
         val kspDep: Any = kspProject
@@ -97,6 +112,23 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
             )
             doLast {
+                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
+                // registry + install shim; skip the Application/Activity launcher entirely.
+                val workersOnlyModel = CodegenModelLoader.load(target)
+                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                    WorkerInitGenerator.run(
+                        model = workersOnlyModel,
+                        platform = WorkerInitGenerator.Platform.Android,
+                        outputDir = generatedRoot.get().asFile,
+                    )
+                    AutoShimGenerator.runPlatformActual(
+                        model = workersOnlyModel,
+                        platform = AutoShimGenerator.Platform.Android,
+                        outputDir = generatedRoot.get().asFile,
+                    )
+                    logger.lifecycle("worker-kmp-app: Android worker registry (workers-only, no launcher) done")
+                    return@doLast
+                }
                 if (!ext.androidGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: androidGenerator disabled — skipping")
                     return@doLast
@@ -141,11 +173,33 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
             )
             doLast {
+                val desktopSourceSet = if (target.kotlinSourceSetExists("desktopMain")) "desktopMain" else "jvmMain"
+                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
+                // registry + install shim into the detected source set; skip the `main()` launcher.
+                val workersOnlyModel = CodegenModelLoader.load(target)
+                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                    WorkerInitGenerator.run(
+                        model = workersOnlyModel,
+                        platform = WorkerInitGenerator.Platform.Desktop,
+                        outputDir = generatedRoot.get().asFile,
+                        sourceSetOverride = desktopSourceSet,
+                    )
+                    AutoShimGenerator.runPlatformActual(
+                        model = workersOnlyModel,
+                        platform = AutoShimGenerator.Platform.Desktop,
+                        outputDir = generatedRoot.get().asFile,
+                        sourceSetOverride = desktopSourceSet,
+                    )
+                    logger.lifecycle(
+                        "worker-kmp-app: Desktop worker registry (workers-only) done (target=$desktopSourceSet)",
+                    )
+                    return@doLast
+                }
                 if (!ext.desktopGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: desktopGenerator disabled — skipping")
                     return@doLast
                 }
-                val sourceSet = if (target.kotlinSourceSetExists("desktopMain")) "desktopMain" else "jvmMain"
+                val sourceSet = desktopSourceSet
                 if (PreexistingLauncherDetector.warnIfFound(target, sourceSet, listOf("Main\\.kt"))) return@doLast
                 val model = target.requireModel()
                 DesktopLauncherGenerator.run(
@@ -183,6 +237,23 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
             )
             doLast {
+                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
+                // registry + install shim; skip MainViewController + xcodegen spec.
+                val workersOnlyModel = CodegenModelLoader.load(target)
+                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                    WorkerInitGenerator.run(
+                        model = workersOnlyModel,
+                        platform = WorkerInitGenerator.Platform.Ios,
+                        outputDir = generatedRoot.get().asFile,
+                    )
+                    AutoShimGenerator.runPlatformActual(
+                        model = workersOnlyModel,
+                        platform = AutoShimGenerator.Platform.Ios,
+                        outputDir = generatedRoot.get().asFile,
+                    )
+                    logger.lifecycle("worker-kmp-app: iOS worker registry (workers-only, no launcher) done")
+                    return@doLast
+                }
                 if (!ext.iosGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping")
                     return@doLast
@@ -228,6 +299,23 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
             )
             doLast {
+                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
+                // registry + install shim; skip the wasmJs `main()` + index.html launcher.
+                val workersOnlyModel = CodegenModelLoader.load(target)
+                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                    WorkerInitGenerator.run(
+                        model = workersOnlyModel,
+                        platform = WorkerInitGenerator.Platform.Web,
+                        outputDir = generatedRoot.get().asFile,
+                    )
+                    AutoShimGenerator.runPlatformActual(
+                        model = workersOnlyModel,
+                        platform = AutoShimGenerator.Platform.Web,
+                        outputDir = generatedRoot.get().asFile,
+                    )
+                    logger.lifecycle("worker-kmp-app: Web worker registry (workers-only, no launcher) done")
+                    return@doLast
+                }
                 if (!ext.webGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: webGenerator disabled — skipping")
                     return@doLast
@@ -330,6 +418,13 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 "xcodegen runner shells out to user PATH at execution time",
             )
             doLast {
+                // Shape 2 — bring-your-own-Application (issue #51): no iosApp spec is
+                // generated in workers-only mode, so there is nothing for xcodegen to build.
+                val workersOnlyModel = CodegenModelLoader.load(target)
+                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                    logger.lifecycle("worker-kmp-app: workers-only mode — skipping xcodegen (no generated iosApp)")
+                    return@doLast
+                }
                 if (!ext.iosGenerator.get()) {
                     logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping xcodegen")
                     return@doLast

@@ -64,37 +64,43 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
         val workersFns = resolver.getSymbolsWithAnnotation(WORKER_KMP_WORKERS_FQN)
             .filterIsInstance<KSFunctionDeclaration>().toList()
 
-        // Nothing annotated yet (first round of multi-round processing, or consumer hasn't
-        // applied annotations yet). No-op; nothing to defer.
-        if (appFns.isEmpty() && contentFns.isEmpty() && workersFns.isEmpty()) return emptyList()
+        // Decide the integration shape (Shape 1 full-app vs Shape 2 workers-only, issue #51)
+        // purely from annotation counts.
+        val mode = ProcessingModeDecider.decide(appFns.size, contentFns.size, workersFns.size)
+        when (mode) {
+            ProcessingMode.NONE ->
+                // Nothing annotated yet (first round of multi-round processing, or consumer
+                // hasn't applied annotations yet). No-op; nothing to defer.
+                return emptyList()
 
-        if (appFns.size != 1) {
-            logger.error(
-                "worker-kmp-app: expected exactly one @WorkerKmpApp-annotated function; " +
-                    "found ${appFns.size}. Each consumer commonMain must declare a single one.",
-            )
-            return emptyList()
-        }
-        if (contentFns.size != 1) {
-            logger.error(
-                "worker-kmp-app: expected exactly one @WorkerKmpAppContent-annotated function; " +
-                    "found ${contentFns.size}. Each consumer commonMain must declare a single one.",
-            )
-            return emptyList()
+            ProcessingMode.APP -> {
+                // Shape 1 requires exactly one @WorkerKmpApp + one @WorkerKmpAppContent.
+                if (appFns.size != 1) {
+                    logger.error(
+                        "worker-kmp-app: expected exactly one @WorkerKmpApp-annotated function; " +
+                            "found ${appFns.size}. Each consumer commonMain must declare a single one. " +
+                            "(For the bring-your-own-Application shape, declare only @WorkerKmpWorkers " +
+                            "and no @WorkerKmpApp/@WorkerKmpAppContent.)",
+                    )
+                    return emptyList()
+                }
+                if (contentFns.size != 1) {
+                    logger.error(
+                        "worker-kmp-app: expected exactly one @WorkerKmpAppContent-annotated function; " +
+                            "found ${contentFns.size}. Each consumer commonMain must declare a single one.",
+                    )
+                    return emptyList()
+                }
+            }
+
+            ProcessingMode.WORKERS_ONLY -> Unit // validated below; no app/content required
         }
 
-        val appFn = appFns.first()
-        val contentFn = contentFns.first()
-
-        val ann = appFn.annotations.firstOrNull { it.shortName.asString() == "WorkerKmpApp" } ?: run {
-            logger.error(
-                "worker-kmp-app: could not resolve @WorkerKmpApp annotation on ${appFn.qualifiedName?.asString()}",
-            )
-            return emptyList()
-        }
+        val workersOnly = mode == ProcessingMode.WORKERS_ONLY
 
         // Aggregate workers from all @WorkerKmpWorkers annotation sites within this module.
         // D23 (within-module aggregation only per H2 audit finding) + D31 (optional per M1).
+        // Shared by both shapes.
         val aggregatedWorkers = scanWorkerSites(workersFns, resolver)
         val sortedWorkers = aggregatedWorkers.sortedBy { it.fqn }
         // Detect duplicates after sorting (AC-46) — adjacent matches.
@@ -109,44 +115,84 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
             }
         }
 
-        // Detect whether the @WorkerKmpApp function takes the legacy `(WorkManagerFactory) -> List<Module>`
-        // signature, or the v4.0.0 no-arg shorthand. The codegen branches on this so per-platform launchers
-        // pass `platformWorkManagerFactory()` only when the consumer's function actually expects it.
-        val koinFnParams = appFn.parameters
-        val koinFnTakesFactory = when (koinFnParams.size) {
-            0 -> false
+        val model: CodegenModel
+        val depFiles: List<com.google.devtools.ksp.symbol.KSFile>
 
-            1 -> resolveTypeFqn(koinFnParams[0].type) == WORK_MANAGER_FACTORY_FQN
+        if (workersOnly) {
+            // Shape 2 — bring-your-own-Application (GitHub issue #51). No @WorkerKmpApp, so
+            // there is no identity/launcher data; emit ONLY the worker registry + install
+            // shim. The output package is derived from the @WorkerKmpWorkers declaration
+            // site (deterministic: lexicographically-first when multiple sites exist).
+            val packageName = workersFns
+                .map { it.packageName.asString() }
+                .filter { it.isNotBlank() }
+                .minOrNull()
+                ?: return errorUnresolvable("@WorkerKmpWorkers declaration package")
+            model = CodegenModel(
+                title = "",
+                iosBundleId = "",
+                webCanvasId = "composeCanvas",
+                androidApplicationId = "",
+                androidPermissions = emptyList(),
+                packageName = packageName,
+                koinModulesFnFqn = "",
+                koinModulesFnTakesFactory = false,
+                contentFnFqn = "",
+                workers = sortedWorkers,
+                appGeneration = false,
+            )
+            depFiles = buildList { workersFns.forEach { it.containingFile?.let(::add) } }
+        } else {
+            val appFn = appFns.first()
+            val contentFn = contentFns.first()
 
-            else -> {
+            val ann = appFn.annotations.firstOrNull { it.shortName.asString() == "WorkerKmpApp" } ?: run {
                 logger.error(
-                    "worker-kmp-app: @WorkerKmpApp function `${appFn.qualifiedName?.asString()}` must " +
-                        "be either no-arg `() -> List<Module>` or take a single `WorkManagerFactory` " +
-                        "parameter — found ${koinFnParams.size} parameters.",
+                    "worker-kmp-app: could not resolve @WorkerKmpApp annotation on ${appFn.qualifiedName?.asString()}",
                 )
                 return emptyList()
             }
-        }
 
-        val model = CodegenModel(
-            title = argString(ann, "title") ?: return errorMissing("title", appFn),
-            iosBundleId = argString(ann, "iosBundleId") ?: return errorMissing("iosBundleId", appFn),
-            webCanvasId = argString(ann, "webCanvasId") ?: "composeCanvas",
-            androidApplicationId = argString(ann, "androidApplicationId") ?: "",
-            androidPermissions = argStringList(ann, "androidPermissions"),
-            packageName = appFn.packageName.asString(),
-            koinModulesFnFqn = appFn.qualifiedName?.asString() ?: return errorUnresolvable("@WorkerKmpApp function"),
-            koinModulesFnTakesFactory = koinFnTakesFactory,
-            contentFnFqn =
-            contentFn.qualifiedName?.asString() ?: return errorUnresolvable("@WorkerKmpAppContent function"),
-            workers = sortedWorkers,
-        )
+            // Detect whether the @WorkerKmpApp function takes the legacy
+            // `(WorkManagerFactory) -> List<Module>` signature, or the v4.0.0 no-arg shorthand.
+            // The codegen branches on this so per-platform launchers pass
+            // `platformWorkManagerFactory()` only when the consumer's function actually expects it.
+            val koinFnParams = appFn.parameters
+            val koinFnTakesFactory = when (koinFnParams.size) {
+                0 -> false
 
-        // Write the model — single aggregating output so re-runs replace it cleanly.
-        val depFiles = buildList<com.google.devtools.ksp.symbol.KSFile> {
-            appFn.containingFile?.let { add(it) }
-            contentFn.containingFile?.let { add(it) }
-            workersFns.forEach { it.containingFile?.let(::add) }
+                1 -> resolveTypeFqn(koinFnParams[0].type) == WORK_MANAGER_FACTORY_FQN
+
+                else -> {
+                    logger.error(
+                        "worker-kmp-app: @WorkerKmpApp function `${appFn.qualifiedName?.asString()}` must " +
+                            "be either no-arg `() -> List<Module>` or take a single `WorkManagerFactory` " +
+                            "parameter — found ${koinFnParams.size} parameters.",
+                    )
+                    return emptyList()
+                }
+            }
+
+            model = CodegenModel(
+                title = argString(ann, "title") ?: return errorMissing("title", appFn),
+                iosBundleId = argString(ann, "iosBundleId") ?: return errorMissing("iosBundleId", appFn),
+                webCanvasId = argString(ann, "webCanvasId") ?: "composeCanvas",
+                androidApplicationId = argString(ann, "androidApplicationId") ?: "",
+                androidPermissions = argStringList(ann, "androidPermissions"),
+                packageName = appFn.packageName.asString(),
+                koinModulesFnFqn = appFn.qualifiedName?.asString()
+                    ?: return errorUnresolvable("@WorkerKmpApp function"),
+                koinModulesFnTakesFactory = koinFnTakesFactory,
+                contentFnFqn = contentFn.qualifiedName?.asString()
+                    ?: return errorUnresolvable("@WorkerKmpAppContent function"),
+                workers = sortedWorkers,
+                appGeneration = true,
+            )
+            depFiles = buildList {
+                appFn.containingFile?.let { add(it) }
+                contentFn.containingFile?.let { add(it) }
+                workersFns.forEach { it.containingFile?.let(::add) }
+            }
         }
         codeGenerator.createNewFile(
             dependencies = Dependencies(aggregating = true, *depFiles.toTypedArray()),
@@ -157,7 +203,13 @@ public class WorkerKmpAppProcessor(private val codeGenerator: CodeGenerator, pri
             stream.write(Json.encodeToString(model).toByteArray(Charsets.UTF_8))
         }
         logger.info(
-            "worker-kmp-app: emitted codegen-model.json for ${model.koinModulesFnFqn} with ${sortedWorkers.size} workers",
+            if (workersOnly) {
+                "worker-kmp-app: emitted codegen-model.json (workers-only / bring-your-own-Application) " +
+                    "for package ${model.packageName} with ${sortedWorkers.size} workers"
+            } else {
+                "worker-kmp-app: emitted codegen-model.json for ${model.koinModulesFnFqn} " +
+                    "with ${sortedWorkers.size} workers"
+            },
         )
         return emptyList()
     }
