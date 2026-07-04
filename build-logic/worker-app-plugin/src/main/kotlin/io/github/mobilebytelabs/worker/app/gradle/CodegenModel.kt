@@ -23,6 +23,13 @@ internal data class CodegenModel(
     val koinModulesFnTakesFactory: Boolean = false,
     val contentFnFqn: String,
     val workers: List<WorkerDef> = emptyList(),
+    /**
+     * False for the "Shape 2" bring-your-own-Application path (only `@WorkerKmpWorkers`
+     * declared, GitHub issue #51): the plugin emits only the worker registry + install
+     * shim and skips every launcher/app codegen task. True (default) for Shape 1 full-app
+     * codegen. Mirrors `io.github.mobilebytelabs.worker.app.ksp.CodegenModel.appGeneration`.
+     */
+    val appGeneration: Boolean = true,
 ) {
     val koinModulesFnSimpleName: String get() = koinModulesFnFqn.substringAfterLast('.')
     val contentFnSimpleName: String get() = contentFnFqn.substringAfterLast('.')

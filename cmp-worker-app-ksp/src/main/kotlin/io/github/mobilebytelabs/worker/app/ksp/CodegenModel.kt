@@ -41,6 +41,20 @@ public data class CodegenModel(
      * (D31 — `@WorkerKmpWorkers` is optional).
      */
     val workers: List<WorkerDef> = emptyList(),
+    /**
+     * Whether the plugin should generate the per-platform application + launcher files
+     * (Android `Application`/`Activity`, iOS `MainViewController` + xcodegen, Desktop/Web
+     * `main()`).
+     *
+     * `true` — "Shape 1" full-app codegen: the consumer declared `@WorkerKmpApp` +
+     * `@WorkerKmpAppContent`; all identity fields above are populated.
+     *
+     * `false` — "Shape 2" bring-your-own-Application (GitHub issue #51): the consumer
+     * declared only `@WorkerKmpWorkers` and writes their own `Application`. The plugin
+     * emits ONLY the worker registry (`Generated_WorkerKmpInit.kt`) + the `WorkerKmpAuto`
+     * install shim; every launcher/identity field above is left empty and unused.
+     */
+    val appGeneration: Boolean = true,
 )
 
 /**

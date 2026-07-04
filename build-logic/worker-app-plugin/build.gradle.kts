@@ -49,6 +49,35 @@ kotlin {
     }
 }
 
+// ── Self-versioning (GitHub issue #51, bug 1) ────────────────────────────────
+// Bake the plugin's OWN published version into a resource on its classpath so
+// `apply()` can self-identify the coordinate version for the annotations + KSP
+// processor deps. Without this, external consumers had to duplicate the version
+// as `worker.version=X` in gradle.properties, because the `version "X"` in their
+// `plugins { id(...) version "X" }` block is NOT visible to the plugin's apply()
+// code — it only selects the plugin-marker artifact. The plugin build already
+// resolved its version above (from the root gradle.properties, single SoT); we
+// persist it here and read it back via the classloader at apply() time. The
+// `worker.version` gradle property remains an OPTIONAL override.
+val workerAppVersionResourceDir = layout.buildDirectory.dir("generated/worker-app-version")
+val generateWorkerAppVersionResource = tasks.register("generateWorkerAppVersionResource") {
+    val versionValue = version.toString()
+    val outDir = workerAppVersionResourceDir
+    inputs.property("version", versionValue)
+    outputs.dir(outDir)
+    doLast {
+        val file = outDir.get().file("worker-app-version.properties").asFile
+        file.parentFile.mkdirs()
+        file.writeText("version=$versionValue\n")
+    }
+}
+sourceSets.named("main") {
+    resources.srcDir(workerAppVersionResourceDir)
+}
+tasks.named("processResources") {
+    dependsOn(generateWorkerAppVersionResource)
+}
+
 dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:${libs.versions.kotlin.get()}")
