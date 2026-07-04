@@ -115,7 +115,16 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
                 // registry + install shim; skip the Application/Activity launcher entirely.
                 val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                if (workersOnlyModel == null) {
+                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
+                    // nothing to generate here; no-op instead of failing requireModel().
+                    logger.lifecycle(
+                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
+                            "${target.path} — skipping codegen",
+                    )
+                    return@doLast
+                }
+                if (!workersOnlyModel.appGeneration) {
                     WorkerInitGenerator.run(
                         model = workersOnlyModel,
                         platform = WorkerInitGenerator.Platform.Android,
@@ -177,7 +186,16 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
                 // registry + install shim into the detected source set; skip the `main()` launcher.
                 val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                if (workersOnlyModel == null) {
+                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
+                    // nothing to generate here; no-op instead of failing requireModel().
+                    logger.lifecycle(
+                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
+                            "${target.path} — skipping codegen",
+                    )
+                    return@doLast
+                }
+                if (!workersOnlyModel.appGeneration) {
                     WorkerInitGenerator.run(
                         model = workersOnlyModel,
                         platform = WorkerInitGenerator.Platform.Desktop,
@@ -240,7 +258,16 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
                 // registry + install shim; skip MainViewController + xcodegen spec.
                 val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                if (workersOnlyModel == null) {
+                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
+                    // nothing to generate here; no-op instead of failing requireModel().
+                    logger.lifecycle(
+                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
+                            "${target.path} — skipping codegen",
+                    )
+                    return@doLast
+                }
+                if (!workersOnlyModel.appGeneration) {
                     WorkerInitGenerator.run(
                         model = workersOnlyModel,
                         platform = WorkerInitGenerator.Platform.Ios,
@@ -302,7 +329,16 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
                 // registry + install shim; skip the wasmJs `main()` + index.html launcher.
                 val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                if (workersOnlyModel == null) {
+                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
+                    // nothing to generate here; no-op instead of failing requireModel().
+                    logger.lifecycle(
+                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
+                            "${target.path} — skipping codegen",
+                    )
+                    return@doLast
+                }
+                if (!workersOnlyModel.appGeneration) {
                     WorkerInitGenerator.run(
                         model = workersOnlyModel,
                         platform = WorkerInitGenerator.Platform.Web,
@@ -354,7 +390,19 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
             )
             doLast {
-                val model = target.requireModel()
+                // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
+                // the KSP processor wrote no codegen-model.json. A module may apply the
+                // worker-app plugin (e.g. via the worker-compose convention) to get the
+                // runtime deps while its @WorkerKmpApp/@WorkerKmpWorkers declaration lives in
+                // ANOTHER module. There is nothing to generate here; no-op instead of failing.
+                val model = CodegenModelLoader.load(target)
+                if (model == null) {
+                    logger.lifecycle(
+                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
+                            "${target.path} — skipping WorkerKmpAuto shim codegen",
+                    )
+                    return@doLast
+                }
                 // commonMain expect only — the platform actuals are emitted by each
                 // per-platform codegen task (Android/Desktop/iOS/Web) to ensure the actual
                 // only exists when the matching installWorkerKmp{Platform} function exists.
@@ -382,7 +430,12 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             .configureEach { dependsOn(TASK_AUTO_SHIM) }
         tasks.matching {
             it.name.startsWith("compileKotlinAndroid") ||
-                it.name.matches(Regex("compile[A-Z].*KotlinAndroid"))
+                it.name.matches(Regex("compile[A-Z].*KotlinAndroid")) ||
+                // AGP9 `com.android.kotlin.multiplatform.library` names the android
+                // compilation `compileAndroidMain` (+ test variants) — no "Kotlin" token —
+                // so the two patterns above miss it and the android WorkerKmpAuto actual
+                // never gets generated ("Expected WorkerKmpAuto has no actual ... for JVM").
+                it.name.startsWith("compileAndroid")
         }
             .configureEach { dependsOn(TASK_AUTO_SHIM) }
 
@@ -403,7 +456,12 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
             .configureEach { dependsOn(TASK_WEB) }
         tasks.matching {
             it.name.startsWith("compileKotlinAndroid") ||
-                it.name.matches(Regex("compile[A-Z].*KotlinAndroid"))
+                it.name.matches(Regex("compile[A-Z].*KotlinAndroid")) ||
+                // AGP9 `com.android.kotlin.multiplatform.library` names the android
+                // compilation `compileAndroidMain` (+ test variants) — no "Kotlin" token —
+                // so the two patterns above miss it and the android WorkerKmpAuto actual
+                // never gets generated ("Expected WorkerKmpAuto has no actual ... for JVM").
+                it.name.startsWith("compileAndroid")
         }
             .configureEach { dependsOn(TASK_ANDROID) }
         // AndroidManifest merge wiring is left to consumer-side AGP convention
@@ -421,7 +479,16 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                 // Shape 2 — bring-your-own-Application (issue #51): no iosApp spec is
                 // generated in workers-only mode, so there is nothing for xcodegen to build.
                 val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel != null && !workersOnlyModel.appGeneration) {
+                if (workersOnlyModel == null) {
+                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
+                    // nothing to generate here; no-op instead of failing requireModel().
+                    logger.lifecycle(
+                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
+                            "${target.path} — skipping codegen",
+                    )
+                    return@doLast
+                }
+                if (!workersOnlyModel.appGeneration) {
                     logger.lifecycle("worker-kmp-app: workers-only mode — skipping xcodegen (no generated iosApp)")
                     return@doLast
                 }
