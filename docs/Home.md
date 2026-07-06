@@ -17,7 +17,7 @@ description: "WorkManager for Kotlin Multiplatform — one commonMain API across
 | Without worker-kmp | With worker-kmp |
 |---|---|
 | Write 4 different scheduling implementations (WorkManager, BGTaskScheduler, JVM coroutines, Web Workers) | Write **one** `CoroutineWorker` subclass in commonMain |
-| 4 different per-platform init calls before `startKoin` | One `workKoinModule(config, workers, factory)` — done |
+| 4 different per-platform init calls before `startKoin` | One `WorkerKmpAuto.install()` in commonMain — done |
 | Different retry/constraint/observability semantics per platform | One `Constraints` builder, one `RetryConfig`, one `WorkObserver` SAM — works everywhere |
 | Per-platform UI for work monitoring | `WorkSchedulerScreen` + `WorkMonitorScreen` in Compose Multiplatform |
 
@@ -71,22 +71,25 @@ class DataSyncWorker(
 }
 ```
 
-### 3. Wire up Koin (commonMain — one call, every platform)
+### 3. Declare workers + install (commonMain — one call, every platform)
 
 ```kotlin
-startKoin {
-    modules(
-        workKoinModule(
-            config = WorkerConfig(logLevel = LogLevel.INFO),
-            workers = workerRegistry {
-                register<DataSyncWorker> { ctx -> DataSyncWorker(ctx, koin.get()) }
-            },
-            factory = androidWorkManagerFactory(this@Application),  // or iosWorkManagerFactory() / desktopWorkManagerFactory() / webWorkManagerFactory()
-        ),
-        appModule,
-    )
+// declare once — codegen wires every platform (needs the io.github.mobilebytelabs.worker-app plugin)
+@WorkerKmpWorkers(workers = [DataSyncWorker::class])
+fun workerDeclarations() = Unit
+
+// your app's shared init (every platform entry point calls this)
+fun initApp(config: KoinAppDeclaration? = null) {
+    startKoin {
+        config?.invoke(this)     // Android binds androidContext(this@App) here
+        modules(appModule)
+    }
+    WorkerKmpAuto.install()       // ONE line — Android / iOS / Desktop / Web
 }
 ```
+
+See the [Single-API Guide](wiki/single-api-guide.md) for the full setup + multiplatform-placement
+rules (`install()` goes in commonMain, not a single platform's app class).
 
 ### 4. Schedule + observe (commonMain)
 
@@ -122,7 +125,7 @@ All modules ship under the same version. Use the [![Maven Central](https://img.s
 | Module | Coordinates | Purpose |
 |---|---|---|
 | `cmp-worker-kmp` | `io.github.mobilebytelabs:worker-kmp` | Core API — `WorkManager`, `CoroutineWorker`, types |
-| `cmp-worker-koin` | `io.github.mobilebytelabs:worker-koin` | Koin DI module — `workKoinModule(...)` |
+| `cmp-worker-koin` | `io.github.mobilebytelabs:worker-koin` | Koin DI wiring — powers `WorkerKmpAuto.install()` |
 | `cmp-worker-compose` | `io.github.mobilebytelabs:worker-compose` | Compose Multiplatform UI |
 | `cmp-worker-test` | `io.github.mobilebytelabs:worker-test` | Test utilities — `TestWorkManager` |
 | `cmp-worker-android` | `io.github.mobilebytelabs:worker-android` | Android actual (auto-wired) |
