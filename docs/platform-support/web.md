@@ -63,27 +63,33 @@ WebServiceWorkerRegistrar.register(scriptUrl = "/worker-kmp-sw.js", scope = "/")
 The private key MUST live in your framework-managed vault per RULE-SECRETS-VAULT-001.
 **Never** commit it; **never** paste it in chat. See [Security](../operations/security.md) T19-T21.
 
-## Platform factory
+## Web setup (v4 single-API)
+
+Worker wiring lives in your **commonMain** `initApp()` via `WorkerKmpAuto.install()` (see the
+[Quick start](../getting-started/quick-start.md)); the generated Web installer selects
+`webWorkManagerFactory()` for you. The Web `main()` (jsMain / wasmJsMain) just calls `initApp()`:
 
 ```kotlin
 // jsMain or wasmJsMain
-fun startWorkerKoin() {
-    startKoin {
-        modules(
-            workKoinModule(
-                config = WorkerConfig(
-                    logLevel = LogLevel.INFO,
-                    webConfig = WebWorkManagerConfig(
-                        vapidPublicKey = "BNQ...your-public-key-base64url...",
-                        notificationPermissionAutoRequest = false,  // ask explicitly via UI
-                        subscriptionExpiryDays = 90,
-                    ),
-                ),
-                workers = workerRegistry { register<DataSyncWorker> { ctx -> DataSyncWorker(ctx, get()) } },
-                factory = webWorkManagerFactory(),
-            ),
-        )
-    }
+fun main() {
+    initApp()               // commonMain initApp calls WorkerKmpAuto.install()
+    // ... start your Compose Web viewport
+}
+```
+
+Web-specific `WorkerConfig` (VAPID key, notification-permission policy, subscription expiry) is
+supplied via a Koin binding, see [Configuration](../wiki/single-api-guide.md#configuration):
+
+```kotlin
+single {
+    WorkerConfig(
+        logLevel = LogLevel.INFO,
+        webConfig = WebWorkManagerConfig(
+            vapidPublicKey = "BNQ...your-public-key-base64url...",
+            notificationPermissionAutoRequest = false,  // ask explicitly via UI
+            subscriptionExpiryDays = 90,
+        ),
+    )
 }
 ```
 

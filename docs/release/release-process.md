@@ -35,7 +35,7 @@ A fresh reviewer (not the implementer) signs off on each axis:
 - **Performance** — re-run benchmarks on clean machine; compare against published baselines
 - **Backward compatibility** — pull worker-kmp:2.1.0 as classpath dep + run real Mifos Money Toolkit fork against worker-kmp:3.0.0-rc1; report any surprises
 - **API ergonomics** — read public API via BCV snapshots end-to-end; list naming/shape/discoverability concerns
-- **Documentation** — read every doc under `docs/` (operations/security, operations/performance, features/observers, features/foreground-tasks, getting-started/migrating-from-v2, platform-support/platform-api-matrix, platform-support/true-background-matrix); flag inconsistency/missing/stale
+- **Documentation** — read every doc under `docs/` (operations/security, operations/performance, features/observers, features/foreground-tasks, platform-support/platform-api-matrix, platform-support/true-background-matrix); flag inconsistency/missing/stale
 - **Accessibility** — Compose components have Modifier.semantics + content descriptions + ≥4.5:1 color contrast
 - **Internationalization** — strings extracted to commonMain resource files (not hardcoded English)
 

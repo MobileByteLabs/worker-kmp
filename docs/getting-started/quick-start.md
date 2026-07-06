@@ -40,7 +40,6 @@ class DataSyncWorker(
 }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step1-worker.png`
 
 Key points:
 - `CoroutineWorker` is suspendable — call any suspending API from `doWork()`.
@@ -49,55 +48,61 @@ Key points:
 
 ---
 
-## Step 2 — Wire up Koin in `commonMain`
+## Step 2 — Declare your workers + wire Koin in `commonMain`
 
-worker-kmp ships a single Koin DI module. Call it once at app start with your platform factory. **Everything else — work scheduling, persistence, OS APIs — is handled internally by the library.**
+worker-kmp v4 is a **single-API commonMain** setup. You (1) declare your workers with one
+annotation, and (2) call the codegen-emitted `WorkerKmpAuto.install()` from your shared init.
+The per-platform factory selection, worker registry, and Koin wiring are all generated for you —
+**you write zero per-platform worker code.** (Applying the `io.github.mobilebytelabs.worker-app`
+Gradle plugin — see [Installation](installation.md) / [Convention Plugin](convention-plugin.md) —
+is what runs the codegen.)
 
 ```kotlin
-// commonMain/kotlin/com/example/di/AppModule.kt
-import io.github.mobilebytelabs.worker.koin.workKoinModule
-import io.github.mobilebytelabs.worker.koin.workerRegistry
-import io.github.mobilebytelabs.worker.WorkerConfig
+// commonMain — declare the workers once; the annotation drives codegen for every platform.
+import io.github.mobilebytelabs.worker.app.WorkerKmpWorkers
 
-fun appKoinModule(platformFactory: WorkManagerFactory) = module {
-    single { ApiClient() }
-}
+@WorkerKmpWorkers(workers = [DataSyncWorker::class])
+fun workerDeclarations() = Unit
+```
 
-fun startWorkerKoin(platformFactory: WorkManagerFactory) {
+```kotlin
+// commonMain — your app's shared init (the ONE function every platform entry point calls).
+import cmp.shared.generated.WorkerKmpAuto   // codegen'd from @WorkerKmpWorkers into your module
+import org.koin.core.context.startKoin
+import org.koin.dsl.KoinAppDeclaration
+import org.koin.dsl.module
+
+fun initApp(config: KoinAppDeclaration? = null) {
     startKoin {
-        modules(
-            workKoinModule(
-                config = WorkerConfig(logLevel = LogLevel.INFO),
-                workers = workerRegistry {
-                    register<DataSyncWorker> { ctx -> DataSyncWorker(ctx, get()) }
-                },
-                factory = platformFactory,
-            ),
-            appKoinModule(platformFactory),
-        )
+        config?.invoke(this)                 // Android binds androidContext(this@App) here
+        modules(module { single { ApiClient() } })
+    }
+    WorkerKmpAuto.install()                   // ONE line — wires workers on Android/iOS/Desktop/Web
+}
+```
+
+Each platform entry point just calls `initApp()` — **no per-platform worker code:**
+
+```kotlin
+// androidMain — the app class only supplies the Koin context:
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initApp { androidContext(this@MyApp) }
     }
 }
+// desktopMain:        fun main() { initApp(); /* compose window */ }
+// wasmJsMain / jsMain: fun main() { initApp(); /* compose viewport */ }
+// iosMain:            ViewController { initApp(); /* compose UIViewController */ }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step2-koin.png`
+> **Placement matters:** put `WorkerKmpAuto.install()` in the shared commonMain init (as above),
+> **not** in a single platform's app class — otherwise the other platforms compile and run but
+> schedule no workers. See the [Single-API Guide](../wiki/single-api-guide.md) for the full
+> multiplatform-placement rationale.
 
-Each platform's entry-point passes the platform factory:
-
-```kotlin
-// Android (Application.onCreate)
-startWorkerKoin(androidWorkManagerFactory(this))
-
-// iOS (commonMain main viewModel or AppDelegate Kotlin bridge)
-startWorkerKoin(iosWorkManagerFactory())
-
-// Desktop (main.kt)
-startWorkerKoin(desktopWorkManagerFactory())
-
-// Web (commonMain main + JS / Wasm entry)
-startWorkerKoin(webWorkManagerFactory())
-```
-
-The platform factory is the **only** per-platform code you write. Everything else — including foreground-service registration, `BGTaskScheduler` task IDs, daemon installation, and Service Worker registration — is handled by the library.
+Foreground-service registration, `BGTaskScheduler` task IDs, daemon installation, and Service
+Worker registration are all handled by the library — you don't write any of it.
 
 ---
 
@@ -121,7 +126,6 @@ class SyncViewModel(private val workManager: WorkManager) {
 }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step3-enqueue.png`
 
 The `Constraints { … }` DSL produces a builder whose semantics are identical on every platform. On Android they map to `WorkManager.Constraints`; on iOS to `BGTaskScheduler` predicates; on Desktop to in-process reachability + battery checks; on Web to `navigator.connection` + Service Worker `sync` events.
 
@@ -151,7 +155,6 @@ fun SyncDashboard() {
 }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step4-monitor.png`
 
 `WorkMonitorScreen` shows real-time state transitions, retry attempts, and progress events for every worker matching the tag. Drop it anywhere — it's the same composable on Android, iOS, Desktop, and Web.
 
@@ -163,4 +166,3 @@ fun SyncDashboard() {
 - **Long-running tasks** that must keep the OS awake: [Foreground Tasks](../features/foreground-tasks.md)
 - **Telemetry** — observe every worker lifecycle event from your OTel / Sentry / Firebase Perf SDK: [Observers](../features/observers.md)
 - **Web Push** server setup for true-background Web workers: [Web Push Server](../features/web-push-server.md)
-- **Migrating from v2.x**: [migrating-from-v2.md](migrating-from-v2.md)

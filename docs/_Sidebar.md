@@ -18,7 +18,6 @@
 - [Installation](https://github.com/MobileByteLabs/worker-kmp/wiki/Installation)
 - [Quick Start](https://github.com/MobileByteLabs/worker-kmp/wiki/Quick-Start)
 - [Convention Plugin (build-logic)](https://github.com/MobileByteLabs/worker-kmp/wiki/Convention-Plugin)
-- [Migrating from v2](https://github.com/MobileByteLabs/worker-kmp/wiki/Migrating-From-V2)
 
 **Platform Support**
 - [Android](https://github.com/MobileByteLabs/worker-kmp/wiki/Android)
