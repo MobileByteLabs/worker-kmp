@@ -28,21 +28,33 @@ public class DataSyncWorker(
 ```
 
 ```kotlin
-// androidMain (or your app's Application.onCreate)
-class MyApp : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        startKoin {
-            androidContext(this@MyApp)
-            modules(appKoinModules())
-        }
-        WorkerKmpAuto.install()   // single line — codegen handles the rest
+// commonMain — your app's shared init (the function EVERY platform entry point calls).
+// One line wires workers on Android + iOS + Desktop + Web. Do NOT put it in a single
+// platform's app class — the others would silently get no workers.
+fun initApp(config: KoinAppDeclaration? = null) {
+    startKoin {
+        config?.invoke(this)          // Android binds androidContext(this@App) here
+        modules(appKoinModules())
     }
+    WorkerKmpAuto.install()           // single line — codegen handles the rest
 }
 ```
 
+```kotlin
+// androidMain — the app class only supplies the Android Koin context; NO worker code:
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initApp { androidContext(this@MyApp) }
+    }
+}
+// desktopMain: fun main() { initApp(); ... }
+// wasmJsMain / jsMain: fun main() { initApp(); ... }
+// iosMain: ViewController { initApp(); ... }
+```
+
 That's it. iosMain / desktopMain / wasmJsMain source sets have ZERO consumer-written files
-for the worker-kmp domain.
+for the worker-kmp domain — and every platform is wired from the one commonMain `install()`.
 
 ## Two integration shapes
 
@@ -55,10 +67,19 @@ classes needed.
 
 ### Shape 2 — bring-your-own-Application (existing app shell)
 
-Use only `@WorkerKmpWorkers`. The plugin skips launcher generation; consumer writes their own
-`Application.onCreate` and calls `WorkerKmpAuto.install()` after `startKoin { ... }`. The
-samples/kmp-project-template/cmp-android/AndroidApp.kt uses this shape (existing Coil setup,
-language restoration, etc.).
+Use only `@WorkerKmpWorkers`. The plugin skips launcher generation; you keep your own app
+shells and call `WorkerKmpAuto.install()` once from your **commonMain shared init** (exactly as
+the Quick start above shows), **after Koin is started**.
+
+> **⚠️ Placement: commonMain, not a single platform's app class.** `install()` is a no-arg
+> commonMain call, so it goes in the one shared init every platform funnels through. Putting it
+> in `Application.onCreate` **only** leaves Desktop / iOS / Web silently un-wired — they compile
+> and run but schedule no workers, and an Android-only smoke test won't catch it. If your app
+> has no shared commonMain init, add `install()` to each platform entry point.
+
+`samples/kmp-project-template` uses this shape: `@WorkerKmpWorkers` in
+`cmp-shared/WorkerDeclarations.kt`, and `WorkerKmpAuto.install()` in the commonMain
+`cmp-shared/utils/KoinExt.kt#initKoin` — so all five of its platforms are wired from one line.
 
 ## Annotation reference
 
@@ -117,18 +138,19 @@ public class GenericWorker(
 single<Store<String, ExchangeRates>>(named("exchange-rates")) { ... }
 ```
 
-## Calling order discipline (Android)
+## Calling order
 
-`startKoin { androidContext(this) }` MUST run BEFORE `WorkerKmpAuto.install()` — the Android
-actual reads `Context` from the `androidContext()` binding. If called in wrong order, the
-shim throws `IllegalStateException` with a clear message pointing at the fix.
+`startKoin { … }` MUST complete BEFORE `WorkerKmpAuto.install()` — placing `install()` at the
+end of your shared init (after the `startKoin` block) satisfies this on every platform. On
+Android the actual additionally reads `Context` from the `androidContext()` binding, so bind it
+inside your `startKoin` config. Wrong order → the shim throws `IllegalStateException` with a
+clear fix message.
 
 ## `WorkerKmpHost.initialize` is NON-SUSPEND
 
-Pure setup state — safe to call from `Application.onCreate` without `runBlocking` (eliminated
-ANR risk vs v3.1.x's hypothetical suspend approach). No first-sync is enqueued — that's
-consumer's responsibility after `WorkerKmpAuto.install()` returns (e.g.
-`get<WorkManager>().enqueueUniqueWork(...)` from your own bootstrap code).
+Pure setup state — safe to call from your shared init without `runBlocking` (no ANR risk). No
+first-sync is enqueued — that's the consumer's responsibility after `WorkerKmpAuto.install()`
+returns (e.g. `get<WorkManager>().enqueueUniqueWork(...)` from your bootstrap code).
 
 ## Configuration
 
