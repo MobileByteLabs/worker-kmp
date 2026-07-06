@@ -40,7 +40,6 @@ class DataSyncWorker(
 }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step1-worker.png`
 
 Key points:
 - `CoroutineWorker` is suspendable — call any suspending API from `doWork()`.
@@ -127,7 +126,6 @@ class SyncViewModel(private val workManager: WorkManager) {
 }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step3-enqueue.png`
 
 The `Constraints { … }` DSL produces a builder whose semantics are identical on every platform. On Android they map to `WorkManager.Constraints`; on iOS to `BGTaskScheduler` predicates; on Desktop to in-process reachability + battery checks; on Web to `navigator.connection` + Service Worker `sync` events.
 
@@ -157,7 +155,6 @@ fun SyncDashboard() {
 }
 ```
 
-> Screenshot placeholder: `docs/_images/quick-start/step4-monitor.png`
 
 `WorkMonitorScreen` shows real-time state transitions, retry attempts, and progress events for every worker matching the tag. Drop it anywhere — it's the same composable on Android, iOS, Desktop, and Web.
 
@@ -169,4 +166,3 @@ fun SyncDashboard() {
 - **Long-running tasks** that must keep the OS awake: [Foreground Tasks](../features/foreground-tasks.md)
 - **Telemetry** — observe every worker lifecycle event from your OTel / Sentry / Firebase Perf SDK: [Observers](../features/observers.md)
 - **Web Push** server setup for true-background Web workers: [Web Push Server](../features/web-push-server.md)
-- **Migrating from v2.x**: [migrating-from-v2.md](migrating-from-v2.md)

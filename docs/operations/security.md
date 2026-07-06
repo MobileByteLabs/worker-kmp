@@ -72,8 +72,8 @@ rationale referencing security-assumptions.md).
 
 | ID | Surface | Threat class | Status | Mitigation / Rationale |
 |----|---------|--------------|:------:|------------------------|
-| T22 | WorkerRegistry | Spoofing (fake worker registered) | TBD | Phase 10 T30: workKoinModule rejects worker class names containing `..`, `/`, or null bytes. |
-| T23 | WorkerRegistry post-start | Tampering | TBD | Phase 10 T29: registry becomes immutable after workKoinModule loads into Koin; subsequent register<T>() throws WorkerRegistryAlreadyLoadedException. |
+| T22 | WorkerRegistry | Spoofing (fake worker registered) | TBD | Phase 10 T30: the generated worker-registration (`WorkerKmpAuto.install()`) rejects worker class names containing `..`, `/`, or null bytes. |
+| T23 | WorkerRegistry post-start | Tampering | TBD | Phase 10 T29: registry becomes immutable after `WorkerKmpAuto.install()` loads it into Koin; subsequent register<T>() throws WorkerRegistryAlreadyLoadedException. |
 | T24 | registered worker | Elevation (more privileges than expected) | ACCEPTED | Workers run in consumer-app process at consumer-app privilege. Documented in security-assumptions.md §"Worker privilege boundary". |
 
 ### Notifications permission (Phase 7)
