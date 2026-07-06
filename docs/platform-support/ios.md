@@ -52,29 +52,37 @@ The task identifiers in `BGTaskSchedulerPermittedIdentifiers` MUST match the
 `taskIdentifier` you pass through `IosWorkManagerConfig.taskIdentifiers`. Mismatches
 cause the OS to reject submissions silently.
 
-## Platform factory
+## iOS setup (v4 single-API)
+
+Worker wiring lives in your **commonMain** `initApp()` via `WorkerKmpAuto.install()` (see the
+[Quick start](../getting-started/quick-start.md)); the generated iOS installer selects
+`iosWorkManagerFactory()` for you. The iOS entry point (the `ViewController` Kotlin bridge, or an
+`AppDelegate`-invoked function) just calls `initApp()`:
 
 ```kotlin
-// iosMain
-fun startWorkerKoin() {
-    startKoin {
-        modules(
-            workKoinModule(
-                config = WorkerConfig(
-                    logLevel = LogLevel.INFO,
-                    iosConfig = IosWorkManagerConfig(
-                        taskIdentifiers = mapOf(
-                            "DataSyncWorker" to "com.example.app.sync",
-                            "FetchWorker" to "com.example.app.fetch",
-                        ),
-                        defaultTaskType = IosTaskType.PROCESSING,
-                    ),
-                ),
-                workers = workerRegistry { register<DataSyncWorker> { ctx -> DataSyncWorker(ctx, get()) } },
-                factory = iosWorkManagerFactory(),
+// iosMain — e.g. the ComposeUIViewController bridge
+fun MainViewController() = ComposeUIViewController {
+    initApp()               // commonMain initApp calls WorkerKmpAuto.install()
+    App()
+}
+```
+
+iOS-specific `WorkerConfig` — notably the `BGTaskScheduler` task identifiers (which MUST also be
+listed in `Info.plist` under `BGTaskSchedulerPermittedIdentifiers`) — is supplied via a Koin
+binding, see [Configuration](../wiki/single-api-guide.md#configuration):
+
+```kotlin
+single {
+    WorkerConfig(
+        logLevel = LogLevel.INFO,
+        iosConfig = IosWorkManagerConfig(
+            taskIdentifiers = mapOf(
+                "DataSyncWorker" to "com.example.app.sync",
+                "FetchWorker" to "com.example.app.fetch",
             ),
-        )
-    }
+            defaultTaskType = IosTaskType.PROCESSING,
+        ),
+    )
 }
 ```
 

@@ -54,31 +54,28 @@ For **foreground service workers** (long-running tasks), add the following:
 
 See [Foreground Tasks](../features/foreground-tasks.md) for the full per-type matrix.
 
-## Platform factory
+## Android setup (v4 single-API)
+
+The worker wiring lives in your **commonMain** shared init via `WorkerKmpAuto.install()` (see the
+[Quick start](../getting-started/quick-start.md) / [Single-API Guide](../wiki/single-api-guide.md)).
+The Android app class's only worker-related job is to bind the Koin `androidContext` — the
+generated Android installer reads the `Application` from that binding and selects
+`androidWorkManagerFactory` automatically:
 
 ```kotlin
-// Android Application.onCreate
+// androidMain — no worker code; just supply the Koin Android context.
 class App : Application() {
     override fun onCreate() {
         super.onCreate()
-        startKoin {
-            modules(
-                workKoinModule(
-                    config = WorkerConfig(logLevel = LogLevel.INFO),
-                    workers = workerRegistry { register<MyWorker> { ctx -> MyWorker(ctx, get()) } },
-                    factory = androidWorkManagerFactory(this@App),
-                ),
-            )
-        }
+        initApp { androidContext(this@App) }   // commonMain initApp calls WorkerKmpAuto.install()
     }
 }
 ```
 
-`androidWorkManagerFactory(context)` handles:
+Under the hood the generated installer uses `androidWorkManagerFactory(context)`, which handles:
 - `WorkManager.getInstance(context)` lookup
 - Mapping commonMain `Constraints` → `androidx.work.Constraints`
-- Reflection or registry-based worker instantiation (configurable via
-  `WorkerConfig.androidConfig.useReflectionFactory`; defaults to `true` for v2 compat)
+- Registry-based worker instantiation from the `@WorkerKmpWorkers` codegen
 - Wiring `WorkObserver` SAMs through `WorkManager.getWorkInfosByTagFlow(...)`
 
 ## Permissions you may also need

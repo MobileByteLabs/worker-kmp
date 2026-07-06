@@ -32,26 +32,32 @@ api(libs.worker.desktop)
 implementation(libs.worker.desktop.daemon)
 ```
 
-## Platform factory (in-process)
+## Desktop setup (v4 single-API, in-process)
+
+Worker wiring lives in your **commonMain** `initApp()` via `WorkerKmpAuto.install()` (see the
+[Quick start](../getting-started/quick-start.md)); the generated Desktop installer selects
+`desktopWorkManagerFactory()` for you. The Desktop `main()` just calls `initApp()`:
 
 ```kotlin
-// main.kt
+// desktopMain/main.kt
 fun main() {
-    startKoin {
-        modules(
-            workKoinModule(
-                config = WorkerConfig(
-                    logLevel = LogLevel.INFO,
-                    desktopConfig = DesktopWorkManagerConfig(
-                        persistenceDir = Path.of(System.getProperty("user.home"), ".myapp", "work"),
-                    ),
-                ),
-                workers = workerRegistry { register<MyWorker> { ctx -> MyWorker(ctx) } },
-                factory = desktopWorkManagerFactory(),
-            ),
-        )
-    }
+    initApp()               // commonMain initApp calls WorkerKmpAuto.install()
     // ... start your Compose Desktop UI
+}
+```
+
+Desktop-specific `WorkerConfig` (e.g. a custom persistence dir) is supplied via a Koin binding —
+see [Configuration](../wiki/single-api-guide.md#configuration):
+
+```kotlin
+// commonMain (or desktopMain) module wired into initApp's startKoin:
+single {
+    WorkerConfig(
+        logLevel = LogLevel.INFO,
+        desktopConfig = DesktopWorkManagerConfig(
+            persistenceDir = Path.of(System.getProperty("user.home"), ".myapp", "work"),
+        ),
+    )
 }
 ```
 
