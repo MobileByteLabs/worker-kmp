@@ -1,6 +1,6 @@
 /*
  * GENERATED — DO NOT EDIT.
- * Web (wasmJs) actual for WorkerKmpAuto.install() — no-arg, parameterless factory.
+ * Web (wasmJs + js) actual for WorkerKmpAuto.install() — no-arg, parameterless factory.
  */
 package {{packageName}}.generated
 

@@ -92,6 +92,10 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         wireKmpSourceSet("jvmMain", generatedRoot.get().dir("jvmMain/kotlin").asFile)
         wireKmpSourceSet("iosMain", generatedRoot.get().dir("iosMain/kotlin").asFile)
         wireKmpSourceSet("wasmJsMain", generatedRoot.get().dir("wasmJsMain/kotlin").asFile)
+        // The "Web" codegen serves BOTH wasmJs and the plain js(IR) target — a consumer
+        // that declares js() gets the same WorkerKmpAuto actual + worker registry emitted
+        // into jsMain. Wiring is a no-op when the consumer has no js target.
+        wireKmpSourceSet("jsMain", generatedRoot.get().dir("jsMain/kotlin").asFile)
 
         // ── Codegen tasks ──────────────────────────────────────────────────────
         // KSP processor must run before any codegen reads codegen-model.json.
@@ -339,16 +343,24 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                     return@doLast
                 }
                 if (!workersOnlyModel.appGeneration) {
-                    WorkerInitGenerator.run(
-                        model = workersOnlyModel,
-                        platform = WorkerInitGenerator.Platform.Web,
-                        outputDir = generatedRoot.get().asFile,
-                    )
-                    AutoShimGenerator.runPlatformActual(
-                        model = workersOnlyModel,
-                        platform = AutoShimGenerator.Platform.Web,
-                        outputDir = generatedRoot.get().asFile,
-                    )
+                    // Emit the Web worker registry + WorkerKmpAuto actual into BOTH web
+                    // source sets — wasmJsMain and jsMain — so a consumer that declares
+                    // js(IR) alongside wasmJs() also gets a JS actual (else the commonMain
+                    // `expect WorkerKmpAuto` has no actual for JS and compileKotlinJs fails).
+                    for (webSourceSet in WEB_SOURCE_SETS) {
+                        WorkerInitGenerator.run(
+                            model = workersOnlyModel,
+                            platform = WorkerInitGenerator.Platform.Web,
+                            outputDir = generatedRoot.get().asFile,
+                            sourceSetOverride = webSourceSet,
+                        )
+                        AutoShimGenerator.runPlatformActual(
+                            model = workersOnlyModel,
+                            platform = AutoShimGenerator.Platform.Web,
+                            outputDir = generatedRoot.get().asFile,
+                            sourceSetOverride = webSourceSet,
+                        )
+                    }
                     logger.lifecycle("worker-kmp-app: Web worker registry (workers-only, no launcher) done")
                     return@doLast
                 }
@@ -364,18 +376,23 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
                     wasmJsBundleName = ext.wasmJsBundleName.get(),
                 )
                 // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
-                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into wasmJsMain.
-                WorkerInitGenerator.run(
-                    model = model,
-                    platform = WorkerInitGenerator.Platform.Web,
-                    outputDir = generatedRoot.get().asFile,
-                )
-                AutoShimGenerator.runPlatformActual(
-                    model = model,
-                    platform = AutoShimGenerator.Platform.Web,
-                    outputDir = generatedRoot.get().asFile,
-                )
-                logger.lifecycle("worker-kmp-app: Web (wasmJs) codegen done")
+                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into BOTH web
+                // source sets (wasmJsMain + jsMain) so js(IR) consumers also get a JS actual.
+                for (webSourceSet in WEB_SOURCE_SETS) {
+                    WorkerInitGenerator.run(
+                        model = model,
+                        platform = WorkerInitGenerator.Platform.Web,
+                        outputDir = generatedRoot.get().asFile,
+                        sourceSetOverride = webSourceSet,
+                    )
+                    AutoShimGenerator.runPlatformActual(
+                        model = model,
+                        platform = AutoShimGenerator.Platform.Web,
+                        outputDir = generatedRoot.get().asFile,
+                        sourceSetOverride = webSourceSet,
+                    )
+                }
+                logger.lifecycle("worker-kmp-app: Web (wasmJs + js) codegen done")
             }
         }
         // worker-kmp-single-api-completion sub-plan 04 — emit the commonMain WorkerKmpAuto.kt
@@ -583,6 +600,11 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         const val TASK_ALL = "workerKmpAppCodegenAll"
         const val TASK_XCODEGEN = "workerKmpAppXcodegenGenerate"
         const val TASK_AUTO_SHIM = "workerKmpAppCodegenAutoShim"
+
+        // The "Web" codegen platform serves both the wasmJs and the plain js(IR) targets.
+        // A consumer may declare either or both; generated files land in an unwired dir
+        // (harmless) when the matching source set is absent.
+        val WEB_SOURCE_SETS = listOf("wasmJsMain", "jsMain")
 
         @Suppress("unused")
         private fun unusedSourceSetImport(): SourceSet? = null
