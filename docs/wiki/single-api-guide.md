@@ -200,6 +200,47 @@ find your-app/src/{androidMain,iosMain,desktopMain,wasmJsMain} \
 
 Expected output: EMPTY.
 
+## Koin Compiler Plugin — `compileSafety` + `@Provided` ([#61](https://github.com/MobileByteLabs/worker-kmp/issues/61))
+
+If your app uses the **Koin Compiler Plugin** (`io.insert-koin.compiler.plugin`) with
+`koinCompiler { compileSafety = true }` and you inject `WorkManager` into an
+annotation-defined component, the compile-safety checker reports:
+
+```
+[Koin][KOIN-D001] Missing dependency: io.github.mobilebytelabs.worker.WorkManager
+  required by: SyncViewModel (parameter 'workManager')
+```
+
+This is **expected, and correct** — `WorkManager` is bound at **runtime** by
+`WorkerKmpAuto.install()` (which calls `loadKoinModules(...)`), so it is deliberately
+**not** part of the compile-time annotation graph. It is an externally-provided
+dependency, exactly like Android's `Context`/`SavedStateHandle`.
+
+**Fix — mark the injection `@Provided`** (Koin's designed escape for
+runtime/externally-supplied types). No worker-kmp change is needed:
+
+```kotlin
+import org.koin.core.annotation.Provided
+import org.koin.core.annotation.KoinViewModel
+import io.github.mobilebytelabs.worker.WorkManager
+
+@KoinViewModel
+class SyncViewModel(
+    @Provided private val workManager: WorkManager,   // supplied at runtime by WorkerKmpAuto.install()
+) : ViewModel()
+```
+
+`@Provided` tells the checker "this type is supplied externally at runtime" and
+suppresses `KOIN-D001` — while the real binding is still owned by
+`WorkerKmpAuto.install()`. Do this at every site that injects a worker-kmp
+runtime-provided type (`WorkManager`, and any other type bound only via `install()`).
+
+> Do **not** set `compileSafety = false` to work around this — that disables the
+> whole safety net. `@Provided` is the targeted, idiomatic fix.
+
+A worked proof lives in the sample: `samples/kmp-project-template`
+(`cmp-shared/.../workerprobe/WorkManagerProbe.kt`).
+
 ## Related
 
 - [worker-kmp on GitHub](https://github.com/MobileByteLabs/worker-kmp)
