@@ -238,9 +238,6 @@ runtime-provided type (`WorkManager`, and any other type bound only via `install
 > Do **not** set `compileSafety = false` to work around this — that disables the
 > whole safety net. `@Provided` is the targeted, idiomatic fix.
 
-A worked proof lives in the sample: `samples/kmp-project-template`
-(`cmp-shared/.../workerprobe/WorkManagerProbe.kt`).
-
 ## Related
 
 - [worker-kmp on GitHub](https://github.com/MobileByteLabs/worker-kmp)
