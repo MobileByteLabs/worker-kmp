@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Docs
+
+- **Koin Compiler Plugin `compileSafety` guidance ([#61](https://github.com/MobileByteLabs/worker-kmp/issues/61)).** Consumers using `io.insert-koin.compiler.plugin` with `koinCompiler { compileSafety = true }` who inject `WorkManager` into an annotation-defined component get `[KOIN-D001] Missing dependency: WorkManager` — because `WorkManager` is bound at runtime by `WorkerKmpAuto.install()`, not in the compile-time annotation graph (an externally-provided type, like Android's `Context`). Fix: mark the injection `@Provided` (Koin's idiomatic escape for runtime-supplied types) — **not** `compileSafety = false`. Documented in the [Single-API Guide](docs/wiki/single-api-guide.md#koin-compiler-plugin--compilesafety--provided-61) with a worked proof in `samples/kmp-project-template`. No library code change required.
+
 ### Changed
 
 - **Kover bumped 0.9.1 → 0.9.8.** Fixes [#772](https://github.com/Kotlin/kotlinx-kover/issues/772) — `variantName null` crash when applying Kover to AGP 9 `android.kotlin.multiplatform.library` modules.
