@@ -1,6 +1,7 @@
 package io.github.mobilebytelabs.worker.app.gradle
 
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
 import java.io.File
 
 /**
@@ -16,8 +17,31 @@ internal object PreexistingLauncherDetector {
      *   consumer's source-set directory (recursive). Logs a warning when a
      *   match is found — codegen for this source set is then skipped.
      */
-    fun warnIfFound(project: Project, sourceSetName: String, filenamePatterns: List<String>): Boolean {
-        val srcDirs = project.findKotlinSrcDirs(sourceSetName)
+    fun warnIfFound(project: Project, sourceSetName: String, filenamePatterns: List<String>): Boolean = warnIfFound(
+        srcDirs = project.findKotlinSrcDirs(sourceSetName),
+        projectDir = project.projectDir,
+        sourceSetName = sourceSetName,
+        filenamePatterns = filenamePatterns,
+        logger = project.logger,
+    )
+
+    /**
+     * Configuration-cache-safe overload — the caller resolves [srcDirs] (via
+     * [Project.findKotlinSrcDirs]) + [projectDir] + [logger] at CONFIGURATION time and passes
+     * only serializable values in, so the scan runs at execution time without capturing
+     * `Project`. Behavior is identical to the `Project`-based overload.
+     *
+     * @return true if any of [filenamePatterns] (regex) match files inside [srcDirs]
+     *   (recursive). Logs a warning when a match is found — codegen for this source set is
+     *   then skipped.
+     */
+    fun warnIfFound(
+        srcDirs: List<File>,
+        projectDir: File,
+        sourceSetName: String,
+        filenamePatterns: List<String>,
+        logger: Logger,
+    ): Boolean {
         if (srcDirs.isEmpty()) return false
         val regexes = filenamePatterns.map { Regex(it) }
         val matches = srcDirs.flatMap { dir ->
@@ -28,27 +52,33 @@ internal object PreexistingLauncherDetector {
             }
         }
         if (matches.isNotEmpty()) {
-            project.logger.warn(
+            logger.warn(
                 "worker-kmp-app: skipping ${'$'}sourceSetName codegen — pre-existing launcher file(s) detected: " +
-                    matches.joinToString { it.relativeTo(project.projectDir).path },
+                    matches.joinToString { it.relativeTo(projectDir).path },
             )
             return true
         }
         return false
     }
+}
 
-    private fun Project.findKotlinSrcDirs(sourceSetName: String): List<File> {
-        // Use reflection to walk KotlinProjectExtension → sourceSets[name] → kotlin.srcDirs.
-        // Avoids a hard compile-time dep on kotlin-gradle-plugin-api's KotlinSourceSet type.
-        val kotlinExt = extensions.findByName("kotlin") ?: return emptyList()
-        return runCatching {
-            val sourceSets = kotlinExt.javaClass.getMethod(
-                "getSourceSets",
-            ).invoke(kotlinExt) as? org.gradle.api.NamedDomainObjectCollection<*>
-            val sourceSet = sourceSets?.findByName(sourceSetName) ?: return emptyList()
-            val kotlin = sourceSet.javaClass.getMethod("getKotlin").invoke(sourceSet)
-            @Suppress("UNCHECKED_CAST")
-            (kotlin.javaClass.getMethod("getSrcDirs").invoke(kotlin) as? Set<File>)?.toList().orEmpty()
-        }.getOrElse { emptyList() }
-    }
+/**
+ * Resolves the `kotlin.srcDirs` for [sourceSetName] via reflection (no hard dep on
+ * kotlin-gradle-plugin-api's KotlinSourceSet type). Called at CONFIGURATION time by the
+ * typed codegen tasks so the resulting `List<File>` can be wired as a lazy task input
+ * (a serializable `List<File>` — configuration-cache safe).
+ *
+ * Top-level so the plugin can call it directly on the consumer `Project` while wiring tasks.
+ */
+internal fun Project.findKotlinSrcDirs(sourceSetName: String): List<File> {
+    val kotlinExt = extensions.findByName("kotlin") ?: return emptyList()
+    return runCatching {
+        val sourceSets = kotlinExt.javaClass.getMethod(
+            "getSourceSets",
+        ).invoke(kotlinExt) as? org.gradle.api.NamedDomainObjectCollection<*>
+        val sourceSet = sourceSets?.findByName(sourceSetName) ?: return emptyList()
+        val kotlin = sourceSet.javaClass.getMethod("getKotlin").invoke(sourceSet)
+        @Suppress("UNCHECKED_CAST")
+        (kotlin.javaClass.getMethod("getSrcDirs").invoke(kotlin) as? Set<File>)?.toList().orEmpty()
+    }.getOrElse { emptyList() }
 }

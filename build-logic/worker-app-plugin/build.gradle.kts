@@ -93,6 +93,25 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
 }
 
+// ── TestKit consumer-build classpath (config-cache compatibility test) ────────
+// ConfigCacheCompatTest applies a REAL kotlin-multiplatform + ksp consumer build via
+// GradleRunner. `withPluginClasspath()` alone only exposes this plugin + its runtime
+// deps (which include `kotlin-gradle-plugin-api` + the KSP marker) — NOT the full
+// `kotlin-gradle-plugin` that carries `KotlinBasePluginWrapper` (referenced by KSP at
+// apply time). Resolve the full KMP + KSP Gradle plugins into a test-only classpath and
+// hand both (plugin-under-test + these) to the runner as ONE classloader so the injected
+// consumer build can apply `org.jetbrains.kotlin.multiplatform` + KSP by id.
+val kmpTestPluginClasspath: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
+dependencies {
+    kmpTestPluginClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin.get()}")
+    kmpTestPluginClasspath(
+        "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:${libs.versions.ksp.get()}",
+    )
+}
+
 gradlePlugin {
     website.set("https://github.com/MobileByteLabs/worker-kmp")
     vcsUrl.set("https://github.com/MobileByteLabs/worker-kmp.git")
@@ -111,6 +130,15 @@ gradlePlugin {
 tasks.test {
     useJUnit()
     testLogging { events("passed", "skipped", "failed") }
+    // Expose the plugin-under-test classpath + the full KMP/KSP plugin classpath so
+    // ConfigCacheCompatTest can hand a single unified classloader to GradleRunner.
+    val workerClasspath = sourceSets.main.get().runtimeClasspath
+    val kmpClasspath = kmpTestPluginClasspath
+    inputs.files(workerClasspath, kmpClasspath)
+    doFirst {
+        systemProperty("worker.plugin.classpath", workerClasspath.asPath)
+        systemProperty("kmp.plugin.classpath", kmpClasspath.asPath)
+    }
 }
 
 mavenPublishing {

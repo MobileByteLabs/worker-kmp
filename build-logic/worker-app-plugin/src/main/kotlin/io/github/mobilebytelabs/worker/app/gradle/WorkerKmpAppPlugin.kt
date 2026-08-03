@@ -1,16 +1,10 @@
 package io.github.mobilebytelabs.worker.app.gradle
 
-import io.github.mobilebytelabs.worker.app.gradle.codegen.AndroidLauncherGenerator
-import io.github.mobilebytelabs.worker.app.gradle.codegen.AutoShimGenerator
-import io.github.mobilebytelabs.worker.app.gradle.codegen.DesktopLauncherGenerator
-import io.github.mobilebytelabs.worker.app.gradle.codegen.IosLauncherGenerator
-import io.github.mobilebytelabs.worker.app.gradle.codegen.WebLauncherGenerator
-import io.github.mobilebytelabs.worker.app.gradle.codegen.WorkerInitGenerator
-import io.github.mobilebytelabs.worker.app.gradle.codegen.XcodegenRunner
 import org.gradle.api.NamedDomainObjectCollection
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
+import org.gradle.kotlin.dsl.register
 import java.io.File
 
 /**
@@ -26,6 +20,12 @@ import java.io.File
  *  - Register 4 per-platform codegen tasks (one task per platform) + an
  *    xcodegen-generate task that materializes iosApp.xcodeproj.
  *  - Wire generated source dirs into the consumer's KMP source sets.
+ *
+ * Configuration-cache: every codegen task is a typed [AbstractWorkerCodegenTask] with lazy,
+ * serializable inputs captured at CONFIGURATION time (see [WorkerCodegenTasks]). No task
+ * references `Project`/the extension at execution time, so consumer builds REUSE the
+ * configuration cache — these tasks are auto-wired into every `compile*` chain, so a single
+ * `notCompatibleWithConfigurationCache` opt-out previously poisoned the whole build's cache.
  */
 public class WorkerKmpAppPlugin : Plugin<Project> {
 
@@ -82,20 +82,35 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
 
         // Generated dirs root — wired into source sets below so generated files
         // participate in compilation transparently.
-        val generatedRoot = layout.buildDirectory.dir("generated/worker-kmp-app")
+        val generatedRootDir = layout.buildDirectory.dir("generated/worker-kmp-app")
 
         // Wire generated source dirs into KMP source sets (those that exist).
         // commonMain wires the codegen-emitted WorkerKmpAuto.kt (expect) per AC-49.
-        wireKmpSourceSet("commonMain", generatedRoot.get().dir("commonMain/kotlin").asFile)
-        wireKmpSourceSet("androidMain", generatedRoot.get().dir("androidMain/kotlin").asFile)
-        wireKmpSourceSet("desktopMain", generatedRoot.get().dir("desktopMain/kotlin").asFile)
-        wireKmpSourceSet("jvmMain", generatedRoot.get().dir("jvmMain/kotlin").asFile)
-        wireKmpSourceSet("iosMain", generatedRoot.get().dir("iosMain/kotlin").asFile)
-        wireKmpSourceSet("wasmJsMain", generatedRoot.get().dir("wasmJsMain/kotlin").asFile)
+        wireKmpSourceSet("commonMain", generatedRootDir.get().dir("commonMain/kotlin").asFile)
+        wireKmpSourceSet("androidMain", generatedRootDir.get().dir("androidMain/kotlin").asFile)
+        wireKmpSourceSet("desktopMain", generatedRootDir.get().dir("desktopMain/kotlin").asFile)
+        wireKmpSourceSet("jvmMain", generatedRootDir.get().dir("jvmMain/kotlin").asFile)
+        wireKmpSourceSet("iosMain", generatedRootDir.get().dir("iosMain/kotlin").asFile)
+        wireKmpSourceSet("wasmJsMain", generatedRootDir.get().dir("wasmJsMain/kotlin").asFile)
         // The "Web" codegen serves BOTH wasmJs and the plain js(IR) target — a consumer
         // that declares js() gets the same WorkerKmpAuto actual + worker registry emitted
         // into jsMain. Wiring is a no-op when the consumer has no js target.
-        wireKmpSourceSet("jsMain", generatedRoot.get().dir("jsMain/kotlin").asFile)
+        wireKmpSourceSet("jsMain", generatedRootDir.get().dir("jsMain/kotlin").asFile)
+
+        // ── Config-time captures for the typed codegen tasks (all serializable → CC-safe) ──
+        // The consumer project path (":", ":sample") for lifecycle logging — captured here
+        // because inside a task-config lambda `path` would resolve to the TASK's path.
+        val consumerProjectPath = path
+        val consumerProjectDir = layout.projectDirectory
+        val iosAppDirProvider = layout.projectDirectory.dir("iosApp")
+        // Lazy Providers for the canonical KSP `codegen-model.json` output candidates — NO
+        // filesystem read at config time (that would churn the config-cache fingerprint);
+        // resolved at execution AFTER kspCommonMainKotlinMetadata via the retained dependsOn.
+        val modelCandidateFiles = CodegenModelLoader.MODEL_CANDIDATE_PATHS
+            .map { layout.buildDirectory.file(it) }
+        // Desktop source set is jvmMain unless the consumer declared jvm("desktop"); resolved
+        // once at config time (was computed at execution via the Project before).
+        val desktopSourceSetName = if (kotlinSourceSetExists("desktopMain")) "desktopMain" else "jvmMain"
 
         // ── Codegen tasks ──────────────────────────────────────────────────────
         // KSP processor must run before any codegen reads codegen-model.json.
@@ -104,328 +119,65 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         // and each platform's `compile*` task in turn dependsOn the matching codegen.
         val kspTask = "kspCommonMainKotlinMetadata"
 
-        tasks.register(TASK_ANDROID) {
+        tasks.register<WorkerCodegenAndroidTask>(TASK_ANDROID) {
             group = TASK_GROUP
             description = "Codegens Android Application + Activity + AndroidManifest.xml"
             dependsOn(kspTask)
-            // Tasks read codegen-model.json + scan source-set dirs at execution time
-            // (data isn't known until KSP runs + user's kotlin{} block resolves).
-            // Both are fundamentally Project-backed lookups → opt out of config cache
-            // for these tasks specifically. Rest of the build still caches.
-            notCompatibleWithConfigurationCache(
-                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
-            )
-            doLast {
-                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
-                // registry + install shim; skip the Application/Activity launcher entirely.
-                val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel == null) {
-                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
-                    // nothing to generate here; no-op instead of failing requireModel().
-                    logger.lifecycle(
-                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
-                            "${target.path} — skipping codegen",
-                    )
-                    return@doLast
-                }
-                if (!workersOnlyModel.appGeneration) {
-                    WorkerInitGenerator.run(
-                        model = workersOnlyModel,
-                        platform = WorkerInitGenerator.Platform.Android,
-                        outputDir = generatedRoot.get().asFile,
-                    )
-                    AutoShimGenerator.runPlatformActual(
-                        model = workersOnlyModel,
-                        platform = AutoShimGenerator.Platform.Android,
-                        outputDir = generatedRoot.get().asFile,
-                    )
-                    logger.lifecycle("worker-kmp-app: Android worker registry (workers-only, no launcher) done")
-                    return@doLast
-                }
-                if (!ext.androidGenerator.get()) {
-                    logger.lifecycle("worker-kmp-app: androidGenerator disabled — skipping")
-                    return@doLast
-                }
-                if (PreexistingLauncherDetector.warnIfFound(
-                        target,
-                        "androidMain",
-                        listOf("Application\\.kt", "MainActivity\\.kt"),
-                    )
-                ) {
-                    return@doLast
-                }
-                val model = target.requireModel()
-                AndroidLauncherGenerator.run(
-                    model = model,
-                    outputDir = generatedRoot.get().dir("androidMain").asFile,
-                )
-                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
-                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into androidMain.
-                WorkerInitGenerator.run(
-                    model = model,
-                    platform = WorkerInitGenerator.Platform.Android,
-                    outputDir = generatedRoot.get().asFile,
-                )
-                AutoShimGenerator.runPlatformActual(
-                    model = model,
-                    platform = AutoShimGenerator.Platform.Android,
-                    outputDir = generatedRoot.get().asFile,
-                )
-                logger.lifecycle("worker-kmp-app: Android codegen done")
-            }
+            codegenModel.from(modelCandidateFiles)
+            sourceSetDirs.from(target.findKotlinSrcDirs("androidMain"))
+            generatedRoot.set(generatedRootDir)
+            projectPath.set(consumerProjectPath)
+            projectRootDir.set(consumerProjectDir)
+            generatorEnabled.set(ext.androidGenerator.get())
         }
-        tasks.register(TASK_DESKTOP) {
+        tasks.register<WorkerCodegenDesktopTask>(TASK_DESKTOP) {
             group = TASK_GROUP
             description = "Codegens jvmMain/desktopMain fun main()"
             dependsOn(kspTask)
-            // Tasks read codegen-model.json + scan source-set dirs at execution time
-            // (data isn't known until KSP runs + user's kotlin{} block resolves).
-            // Both are fundamentally Project-backed lookups → opt out of config cache
-            // for these tasks specifically. Rest of the build still caches.
-            notCompatibleWithConfigurationCache(
-                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
-            )
-            doLast {
-                val desktopSourceSet = if (target.kotlinSourceSetExists("desktopMain")) "desktopMain" else "jvmMain"
-                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
-                // registry + install shim into the detected source set; skip the `main()` launcher.
-                val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel == null) {
-                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
-                    // nothing to generate here; no-op instead of failing requireModel().
-                    logger.lifecycle(
-                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
-                            "${target.path} — skipping codegen",
-                    )
-                    return@doLast
-                }
-                if (!workersOnlyModel.appGeneration) {
-                    WorkerInitGenerator.run(
-                        model = workersOnlyModel,
-                        platform = WorkerInitGenerator.Platform.Desktop,
-                        outputDir = generatedRoot.get().asFile,
-                        sourceSetOverride = desktopSourceSet,
-                    )
-                    AutoShimGenerator.runPlatformActual(
-                        model = workersOnlyModel,
-                        platform = AutoShimGenerator.Platform.Desktop,
-                        outputDir = generatedRoot.get().asFile,
-                        sourceSetOverride = desktopSourceSet,
-                    )
-                    logger.lifecycle(
-                        "worker-kmp-app: Desktop worker registry (workers-only) done (target=$desktopSourceSet)",
-                    )
-                    return@doLast
-                }
-                if (!ext.desktopGenerator.get()) {
-                    logger.lifecycle("worker-kmp-app: desktopGenerator disabled — skipping")
-                    return@doLast
-                }
-                val sourceSet = desktopSourceSet
-                if (PreexistingLauncherDetector.warnIfFound(target, sourceSet, listOf("Main\\.kt"))) return@doLast
-                val model = target.requireModel()
-                DesktopLauncherGenerator.run(
-                    model = model,
-                    outputDir = generatedRoot.get().dir(sourceSet).asFile,
-                )
-                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
-                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual.
-                // Use sourceSet (jvmMain or desktopMain) so actuals land in the correct
-                // source set regardless of whether the consumer uses jvm { } or jvm("desktop") { }.
-                WorkerInitGenerator.run(
-                    model = model,
-                    platform = WorkerInitGenerator.Platform.Desktop,
-                    outputDir = generatedRoot.get().asFile,
-                    sourceSetOverride = sourceSet,
-                )
-                AutoShimGenerator.runPlatformActual(
-                    model = model,
-                    platform = AutoShimGenerator.Platform.Desktop,
-                    outputDir = generatedRoot.get().asFile,
-                    sourceSetOverride = sourceSet,
-                )
-                logger.lifecycle("worker-kmp-app: Desktop codegen done (target=$sourceSet)")
-            }
+            codegenModel.from(modelCandidateFiles)
+            sourceSetDirs.from(target.findKotlinSrcDirs(desktopSourceSetName))
+            generatedRoot.set(generatedRootDir)
+            projectPath.set(consumerProjectPath)
+            projectRootDir.set(consumerProjectDir)
+            generatorEnabled.set(ext.desktopGenerator.get())
+            desktopSourceSet.set(desktopSourceSetName)
         }
-        tasks.register(TASK_IOS) {
+        tasks.register<WorkerCodegenIosTask>(TASK_IOS) {
             group = TASK_GROUP
             description = "Codegens iosMain MainViewController + iosApp xcodegen spec + Swift wrappers"
             dependsOn(kspTask)
-            // Tasks read codegen-model.json + scan source-set dirs at execution time
-            // (data isn't known until KSP runs + user's kotlin{} block resolves).
-            // Both are fundamentally Project-backed lookups → opt out of config cache
-            // for these tasks specifically. Rest of the build still caches.
-            notCompatibleWithConfigurationCache(
-                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
-            )
-            doLast {
-                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
-                // registry + install shim; skip MainViewController + xcodegen spec.
-                val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel == null) {
-                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
-                    // nothing to generate here; no-op instead of failing requireModel().
-                    logger.lifecycle(
-                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
-                            "${target.path} — skipping codegen",
-                    )
-                    return@doLast
-                }
-                if (!workersOnlyModel.appGeneration) {
-                    WorkerInitGenerator.run(
-                        model = workersOnlyModel,
-                        platform = WorkerInitGenerator.Platform.Ios,
-                        outputDir = generatedRoot.get().asFile,
-                    )
-                    AutoShimGenerator.runPlatformActual(
-                        model = workersOnlyModel,
-                        platform = AutoShimGenerator.Platform.Ios,
-                        outputDir = generatedRoot.get().asFile,
-                    )
-                    logger.lifecycle("worker-kmp-app: iOS worker registry (workers-only, no launcher) done")
-                    return@doLast
-                }
-                if (!ext.iosGenerator.get()) {
-                    logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping")
-                    return@doLast
-                }
-                if (PreexistingLauncherDetector.warnIfFound(
-                        target,
-                        "iosMain",
-                        listOf("MainViewController\\.kt"),
-                    )
-                ) {
-                    return@doLast
-                }
-                val model = target.requireModel()
-                IosLauncherGenerator.run(
-                    model = model,
-                    kotlinOutputDir = generatedRoot.get().dir("iosMain").asFile,
-                    iosAppDir = layout.projectDirectory.dir("iosApp").asFile,
-                )
-                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
-                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into iosMain.
-                WorkerInitGenerator.run(
-                    model = model,
-                    platform = WorkerInitGenerator.Platform.Ios,
-                    outputDir = generatedRoot.get().asFile,
-                )
-                AutoShimGenerator.runPlatformActual(
-                    model = model,
-                    platform = AutoShimGenerator.Platform.Ios,
-                    outputDir = generatedRoot.get().asFile,
-                )
-                logger.lifecycle("worker-kmp-app: iOS codegen done")
-            }
+            codegenModel.from(modelCandidateFiles)
+            sourceSetDirs.from(target.findKotlinSrcDirs("iosMain"))
+            generatedRoot.set(generatedRootDir)
+            projectPath.set(consumerProjectPath)
+            projectRootDir.set(consumerProjectDir)
+            generatorEnabled.set(ext.iosGenerator.get())
+            iosAppDir.set(iosAppDirProvider)
         }
-        tasks.register(TASK_WEB) {
+        tasks.register<WorkerCodegenWebTask>(TASK_WEB) {
             group = TASK_GROUP
             description = "Codegens wasmJsMain fun main() + resources/index.html"
             dependsOn(kspTask)
-            // Tasks read codegen-model.json + scan source-set dirs at execution time
-            // (data isn't known until KSP runs + user's kotlin{} block resolves).
-            // Both are fundamentally Project-backed lookups → opt out of config cache
-            // for these tasks specifically. Rest of the build still caches.
-            notCompatibleWithConfigurationCache(
-                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
-            )
-            doLast {
-                // Shape 2 — bring-your-own-Application (issue #51): emit only the worker
-                // registry + install shim; skip the wasmJs `main()` + index.html launcher.
-                val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel == null) {
-                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
-                    // nothing to generate here; no-op instead of failing requireModel().
-                    logger.lifecycle(
-                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
-                            "${target.path} — skipping codegen",
-                    )
-                    return@doLast
-                }
-                if (!workersOnlyModel.appGeneration) {
-                    // Emit the Web worker registry + WorkerKmpAuto actual into BOTH web
-                    // source sets — wasmJsMain and jsMain — so a consumer that declares
-                    // js(IR) alongside wasmJs() also gets a JS actual (else the commonMain
-                    // `expect WorkerKmpAuto` has no actual for JS and compileKotlinJs fails).
-                    for (webSourceSet in WEB_SOURCE_SETS) {
-                        WorkerInitGenerator.run(
-                            model = workersOnlyModel,
-                            platform = WorkerInitGenerator.Platform.Web,
-                            outputDir = generatedRoot.get().asFile,
-                            sourceSetOverride = webSourceSet,
-                        )
-                        AutoShimGenerator.runPlatformActual(
-                            model = workersOnlyModel,
-                            platform = AutoShimGenerator.Platform.Web,
-                            outputDir = generatedRoot.get().asFile,
-                            sourceSetOverride = webSourceSet,
-                        )
-                    }
-                    logger.lifecycle("worker-kmp-app: Web worker registry (workers-only, no launcher) done")
-                    return@doLast
-                }
-                if (!ext.webGenerator.get()) {
-                    logger.lifecycle("worker-kmp-app: webGenerator disabled — skipping")
-                    return@doLast
-                }
-                if (PreexistingLauncherDetector.warnIfFound(target, "wasmJsMain", listOf("Main\\.kt"))) return@doLast
-                val model = target.requireModel()
-                WebLauncherGenerator.run(
-                    model = model,
-                    outputDir = generatedRoot.get().dir("wasmJsMain").asFile,
-                    wasmJsBundleName = ext.wasmJsBundleName.get(),
-                )
-                // worker-kmp-single-api-completion sub-plan 04 — emit worker registry
-                // Generated_WorkerKmpInit.kt + matching WorkerKmpAuto actual into BOTH web
-                // source sets (wasmJsMain + jsMain) so js(IR) consumers also get a JS actual.
-                for (webSourceSet in WEB_SOURCE_SETS) {
-                    WorkerInitGenerator.run(
-                        model = model,
-                        platform = WorkerInitGenerator.Platform.Web,
-                        outputDir = generatedRoot.get().asFile,
-                        sourceSetOverride = webSourceSet,
-                    )
-                    AutoShimGenerator.runPlatformActual(
-                        model = model,
-                        platform = AutoShimGenerator.Platform.Web,
-                        outputDir = generatedRoot.get().asFile,
-                        sourceSetOverride = webSourceSet,
-                    )
-                }
-                logger.lifecycle("worker-kmp-app: Web (wasmJs + js) codegen done")
-            }
+            codegenModel.from(modelCandidateFiles)
+            sourceSetDirs.from(target.findKotlinSrcDirs("wasmJsMain"))
+            generatedRoot.set(generatedRootDir)
+            projectPath.set(consumerProjectPath)
+            projectRootDir.set(consumerProjectDir)
+            generatorEnabled.set(ext.webGenerator.get())
+            wasmJsBundleName.set(ext.wasmJsBundleName.get())
         }
         // worker-kmp-single-api-completion sub-plan 04 — emit the commonMain WorkerKmpAuto.kt
         // expect declaration + 4 platform actuals dispatching to `installWorkerKmp{Platform}`.
         // Per AC-49 — emitted into the consumer app module `build/generated/...`, NOT into
         // any published worker-kmp module. Per AC-21/D10 — no-arg `install()`.
-        tasks.register(TASK_AUTO_SHIM) {
+        tasks.register<WorkerCodegenAutoShimTask>(TASK_AUTO_SHIM) {
             group = TASK_GROUP
             description = "Codegens commonMain WorkerKmpAuto.kt (expect) + 4 platform actuals"
             dependsOn(kspTask)
-            notCompatibleWithConfigurationCache(
-                "worker-app codegen reads codegen-model.json + source-set dirs at execution time",
-            )
-            doLast {
-                // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
-                // the KSP processor wrote no codegen-model.json. A module may apply the
-                // worker-app plugin (e.g. via the worker-compose convention) to get the
-                // runtime deps while its @WorkerKmpApp/@WorkerKmpWorkers declaration lives in
-                // ANOTHER module. There is nothing to generate here; no-op instead of failing.
-                val model = CodegenModelLoader.load(target)
-                if (model == null) {
-                    logger.lifecycle(
-                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
-                            "${target.path} — skipping WorkerKmpAuto shim codegen",
-                    )
-                    return@doLast
-                }
-                // commonMain expect only — the platform actuals are emitted by each
-                // per-platform codegen task (Android/Desktop/iOS/Web) to ensure the actual
-                // only exists when the matching installWorkerKmp{Platform} function exists.
-                AutoShimGenerator.runCommon(model = model, outputDir = generatedRoot.get().asFile)
-                logger.lifecycle("worker-kmp-app: WorkerKmpAuto.kt commonMain expect codegen done")
-            }
+            codegenModel.from(modelCandidateFiles)
+            generatedRoot.set(generatedRootDir)
+            projectPath.set(consumerProjectPath)
+            projectRootDir.set(consumerProjectDir)
         }
         // The platform-init generators piggyback on the per-platform codegen tasks above
         // (Android/Desktop/iOS/Web each call `WorkerInitGenerator.run` after the existing
@@ -485,52 +237,21 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         // (point manifest at build/generated/worker-kmp-app/androidMain/AndroidManifest.xml).
 
         // xcodegen materialization — depends on iOS codegen producing project.yml.
-        tasks.register(TASK_XCODEGEN) {
+        tasks.register<WorkerXcodegenTask>(TASK_XCODEGEN) {
             group = TASK_GROUP
             description = "Materializes iosApp.xcodeproj via xcodegen (depends on $TASK_IOS)"
             dependsOn(TASK_IOS)
-            notCompatibleWithConfigurationCache(
-                "xcodegen runner shells out to user PATH at execution time",
-            )
-            doLast {
-                // Shape 2 — bring-your-own-Application (issue #51): no iosApp spec is
-                // generated in workers-only mode, so there is nothing for xcodegen to build.
-                val workersOnlyModel = CodegenModelLoader.load(target)
-                if (workersOnlyModel == null) {
-                    // No annotations in THIS module (issue #51 follow-up: ProcessingMode.NONE) —
-                    // nothing to generate here; no-op instead of failing requireModel().
-                    logger.lifecycle(
-                        "worker-kmp-app: no @WorkerKmpApp/@WorkerKmpWorkers annotations in " +
-                            "${target.path} — skipping codegen",
-                    )
-                    return@doLast
-                }
-                if (!workersOnlyModel.appGeneration) {
-                    logger.lifecycle("worker-kmp-app: workers-only mode — skipping xcodegen (no generated iosApp)")
-                    return@doLast
-                }
-                if (!ext.iosGenerator.get()) {
-                    logger.lifecycle("worker-kmp-app: iosGenerator disabled — skipping xcodegen")
-                    return@doLast
-                }
-                val iosAppDir = layout.projectDirectory.dir("iosApp").asFile
-                if (!iosAppDir.exists()) {
-                    logger.warn("worker-kmp-app: $iosAppDir not found; iOS codegen may have been skipped")
-                    return@doLast
-                }
-                val exit = XcodegenRunner.run(iosAppDir, ext.xcodegenPath.get())
-                check(exit == 0) { "worker-kmp-app: xcodegen exited with code $exit" }
-            }
+            codegenModel.from(modelCandidateFiles)
+            generatedRoot.set(generatedRootDir)
+            projectPath.set(consumerProjectPath)
+            projectRootDir.set(consumerProjectDir)
+            iosGeneratorEnabled.set(ext.iosGenerator.get())
+            xcodegenPath.set(ext.xcodegenPath.get())
+            iosAppDir.set(iosAppDirProvider)
         }
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────
-
-    private fun Project.requireModel(): CodegenModel = CodegenModelLoader.load(this)
-        ?: error(
-            "worker-kmp-app: codegen-model.json not found in build/generated/ksp/... — " +
-                "ensure KSP processor ran (run :kspCommonMainMetadata first or invoke codegen as part of a build).",
-        )
 
     /**
      * Adds [generatedDir] as an extra src dir on `[sourceSetName].kotlin` REACTIVELY —
@@ -600,11 +321,6 @@ public class WorkerKmpAppPlugin : Plugin<Project> {
         const val TASK_ALL = "workerKmpAppCodegenAll"
         const val TASK_XCODEGEN = "workerKmpAppXcodegenGenerate"
         const val TASK_AUTO_SHIM = "workerKmpAppCodegenAutoShim"
-
-        // The "Web" codegen platform serves both the wasmJs and the plain js(IR) targets.
-        // A consumer may declare either or both; generated files land in an unwired dir
-        // (harmless) when the matching source set is absent.
-        val WEB_SOURCE_SETS = listOf("wasmJsMain", "jsMain")
 
         @Suppress("unused")
         private fun unusedSourceSetImport(): SourceSet? = null
