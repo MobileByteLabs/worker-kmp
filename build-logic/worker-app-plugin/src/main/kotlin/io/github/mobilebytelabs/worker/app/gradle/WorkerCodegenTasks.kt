@@ -15,7 +15,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
@@ -61,8 +60,17 @@ internal abstract class AbstractWorkerCodegenTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val sourceSetDirs: ConfigurableFileCollection
 
-    /** `build/generated/worker-kmp-app` — root the generators write into. */
-    @get:OutputDirectory
+    /**
+     * `build/generated/worker-kmp-app` — root the generators write into. Deliberately NOT an
+     * `@OutputDirectory`: every codegen task (per-platform + AutoShim + xcodegen) writes into this
+     * SAME shared root (each into its own source-set sub-dir), so declaring it as a tracked output
+     * makes Gradle flag a false "task X consumes task Y's output without a dependency" validation
+     * error (Gradle 8+/9 strict). These tasks were never up-to-date-cacheable before this refactor
+     * (ad-hoc `doLast`, no declared outputs) so `@Internal` restores that always-run behavior; it stays
+     * configuration-cache compatible (the DirectoryProperty is captured + serialized at config time).
+     * The compile→codegen ordering is carried by the plugin's `dependsOn` wiring, not by output tracking.
+     */
+    @get:Internal
     abstract val generatedRoot: DirectoryProperty
 
     /** The consumer project's Gradle path (e.g. `:sample`) — for lifecycle logging only. */
