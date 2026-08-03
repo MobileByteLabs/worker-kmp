@@ -24,8 +24,28 @@ internal object CodegenModelLoader {
 
     fun load(project: Project): CodegenModel? {
         val file = locate(project) ?: return null
-        return json.decodeFromString(CodegenModel.serializer(), file.readText())
+        return load(file)
     }
+
+    /**
+     * Configuration-cache-safe overload: decode a model from an already-resolved [modelFile]
+     * (the input file resolved at CONFIG time + read at execution time by the typed codegen
+     * tasks). Returns null when the file is absent or empty — i.e. the KSP processor wrote no
+     * `codegen-model.json` because this module has no `@WorkerKmpApp`/`@WorkerKmpWorkers`
+     * annotations (ProcessingMode.NONE), in which case the caller no-ops.
+     */
+    fun load(modelFile: File): CodegenModel? {
+        if (!modelFile.exists()) return null
+        return json.decodeFromString(CodegenModel.serializer(), modelFile.readText())
+    }
+
+    /** Canonical KSP output locations for `codegen-model.json`, tried in order at execution time. */
+    val MODEL_CANDIDATE_PATHS: List<String> = listOf(
+        "generated/ksp/metadata/commonMain/resources/$MODEL_RELATIVE",
+        "generated/ksp/metadata/commonMain/resources/$FALLBACK_RELATIVE",
+        "generated/ksp/main/resources/$MODEL_RELATIVE",
+        "generated/ksp/main/resources/$FALLBACK_RELATIVE",
+    )
 
     fun locate(project: Project): File? {
         val candidates = listOf(
