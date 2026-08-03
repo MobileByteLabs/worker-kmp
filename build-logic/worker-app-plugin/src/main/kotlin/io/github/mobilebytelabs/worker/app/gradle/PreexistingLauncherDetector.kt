@@ -17,14 +17,13 @@ internal object PreexistingLauncherDetector {
      *   consumer's source-set directory (recursive). Logs a warning when a
      *   match is found — codegen for this source set is then skipped.
      */
-    fun warnIfFound(project: Project, sourceSetName: String, filenamePatterns: List<String>): Boolean =
-        warnIfFound(
-            srcDirs = project.findKotlinSrcDirs(sourceSetName),
-            projectDir = project.projectDir,
-            sourceSetName = sourceSetName,
-            filenamePatterns = filenamePatterns,
-            logger = project.logger,
-        )
+    fun warnIfFound(project: Project, sourceSetName: String, filenamePatterns: List<String>): Boolean = warnIfFound(
+        srcDirs = project.findKotlinSrcDirs(sourceSetName),
+        projectDir = project.projectDir,
+        sourceSetName = sourceSetName,
+        filenamePatterns = filenamePatterns,
+        logger = project.logger,
+    )
 
     /**
      * Configuration-cache-safe overload — the caller resolves [srcDirs] (via

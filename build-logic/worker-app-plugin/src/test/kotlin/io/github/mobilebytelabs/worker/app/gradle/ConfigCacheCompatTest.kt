@@ -94,11 +94,10 @@ class ConfigCacheCompatTest {
     }
 
     private fun pluginClasspath(): List<File> {
-        fun prop(name: String): List<File> =
-            (System.getProperty(name) ?: "")
-                .split(File.pathSeparator)
-                .filter { it.isNotBlank() }
-                .map(::File)
+        fun prop(name: String): List<File> = (System.getProperty(name) ?: "")
+            .split(File.pathSeparator)
+            .filter { it.isNotBlank() }
+            .map(::File)
         // worker-app plugin (+ its runtime deps: kotlin-gradle-plugin-api, KSP marker,
         // serialization) UNIFIED with the full kotlin-multiplatform + KSP Gradle plugins so
         // the injected consumer build applies them from ONE classloader (KSP's
@@ -106,12 +105,11 @@ class ConfigCacheCompatTest {
         return (prop("worker.plugin.classpath") + prop("kmp.plugin.classpath")).distinct()
     }
 
-    private fun runner(vararg args: String): GradleRunner =
-        GradleRunner.create()
-            .withProjectDir(projectDir)
-            .withPluginClasspath(pluginClasspath())
-            .withArguments(*args)
-            .forwardOutput()
+    private fun runner(vararg args: String): GradleRunner = GradleRunner.create()
+        .withProjectDir(projectDir)
+        .withPluginClasspath(pluginClasspath())
+        .withArguments(*args)
+        .forwardOutput()
 
     @AfterTest
     fun tearDown() {

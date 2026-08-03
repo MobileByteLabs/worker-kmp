@@ -94,7 +94,10 @@ internal abstract class AbstractWorkerPlatformCodegenTask : AbstractWorkerCodege
 internal abstract class WorkerCodegenAndroidTask : AbstractWorkerPlatformCodegenTask() {
     @TaskAction
     fun run() {
-        val model = loadModel() ?: run { logNoAnnotations(); return }
+        val model = loadModel() ?: run {
+            logNoAnnotations()
+            return
+        }
         val root = generatedRoot.get()
         if (!model.appGeneration) {
             WorkerInitGenerator.run(model, WorkerInitGenerator.Platform.Android, root.asFile)
@@ -130,7 +133,10 @@ internal abstract class WorkerCodegenDesktopTask : AbstractWorkerPlatformCodegen
 
     @TaskAction
     fun run() {
-        val model = loadModel() ?: run { logNoAnnotations(); return }
+        val model = loadModel() ?: run {
+            logNoAnnotations()
+            return
+        }
         val root = generatedRoot.get()
         val sourceSet = desktopSourceSet.get()
         if (!model.appGeneration) {
@@ -167,7 +173,10 @@ internal abstract class WorkerCodegenIosTask : AbstractWorkerPlatformCodegenTask
 
     @TaskAction
     fun run() {
-        val model = loadModel() ?: run { logNoAnnotations(); return }
+        val model = loadModel() ?: run {
+            logNoAnnotations()
+            return
+        }
         val root = generatedRoot.get()
         if (!model.appGeneration) {
             WorkerInitGenerator.run(model, WorkerInitGenerator.Platform.Ios, root.asFile)
@@ -207,7 +216,10 @@ internal abstract class WorkerCodegenWebTask : AbstractWorkerPlatformCodegenTask
 
     @TaskAction
     fun run() {
-        val model = loadModel() ?: run { logNoAnnotations(); return }
+        val model = loadModel() ?: run {
+            logNoAnnotations()
+            return
+        }
         val root = generatedRoot.get()
         if (!model.appGeneration) {
             // Emit into BOTH web source sets so a js(IR) consumer also gets a JS actual.
@@ -249,7 +261,10 @@ internal abstract class WorkerCodegenWebTask : AbstractWorkerPlatformCodegenTask
 internal abstract class WorkerCodegenAutoShimTask : AbstractWorkerCodegenTask() {
     @TaskAction
     fun run() {
-        val model = loadModel() ?: run { logNoAnnotations("skipping WorkerKmpAuto shim codegen"); return }
+        val model = loadModel() ?: run {
+            logNoAnnotations("skipping WorkerKmpAuto shim codegen")
+            return
+        }
         AutoShimGenerator.runCommon(model = model, outputDir = generatedRoot.get().asFile)
         logger.lifecycle("worker-kmp-app: WorkerKmpAuto.kt commonMain expect codegen done")
     }
@@ -268,7 +283,10 @@ internal abstract class WorkerXcodegenTask : AbstractWorkerCodegenTask() {
 
     @TaskAction
     fun run() {
-        val model = loadModel() ?: run { logNoAnnotations(); return }
+        val model = loadModel() ?: run {
+            logNoAnnotations()
+            return
+        }
         if (!model.appGeneration) {
             logger.lifecycle("worker-kmp-app: workers-only mode — skipping xcodegen (no generated iosApp)")
             return
