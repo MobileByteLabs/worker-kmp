@@ -54,10 +54,21 @@ internal abstract class AbstractWorkerCodegenTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val codegenModel: ConfigurableFileCollection
 
-    /** Consumer source-set dirs scanned by [PreexistingLauncherDetector] (resolved at config time). */
-    @get:InputFiles
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    /**
+     * Consumer source-set dirs scanned by [PreexistingLauncherDetector] (resolved at config time).
+     *
+     * Deliberately `@Internal`, NOT `@InputFiles`: a source set's `srcDirs` INCLUDE Compose
+     * Multiplatform's generated resource dirs (`build/generated/compose/resourceGenerator/kotlin/
+     * <ss>ResourceAccessors` + `…<ss>ResourceCollectors`, produced by
+     * `generateResourceAccessorsFor<SS>` / `generateActualResourceCollectorsFor<SS>`). Tracking
+     * those as an input without a producer dependency makes Gradle 8+/9 fail every
+     * `workerKmpAppCodegen*` task with an "uses this output … without declaring a dependency"
+     * validation error. This collection only feeds a best-effort *warning* scan, and these tasks
+     * are always-run (`@Internal generatedRoot`, no declared outputs), so input tracking buys no
+     * incrementality — `@Internal` drops it from Gradle's input-validation set while staying
+     * configuration-cache safe (the FileCollection is captured + serialized at config time).
+     */
+    @get:Internal
     abstract val sourceSetDirs: ConfigurableFileCollection
 
     /**
