@@ -30,6 +30,42 @@ class AndroidForegroundBridgeTest {
     }
 
     @Test
+    fun notificationCustomizer_appliesIconChannelAndActions_withTheWorkerId() {
+        val workerId = kotlin.uuid.Uuid.random()
+        var seenId: kotlin.uuid.Uuid? = null
+        AndroidForegroundBridge.notificationCustomizer = AndroidForegroundBridge.NotificationCustomizer { _, id, _, b ->
+            seenId = id
+            b.setSmallIcon(android.R.drawable.stat_sys_download)
+                .setChannelId("app.downloads")
+                .addAction(0, "Pause", null)
+        }
+        try {
+            val n = AndroidForegroundBridge.buildNotification(
+                context,
+                workerId,
+                io.github.mobilebytelabs.worker.ForegroundInfo(notificationId = 1, title = "t", message = "m"),
+            )
+            kotlin.test.assertEquals(workerId, seenId)
+            kotlin.test.assertEquals(android.R.drawable.stat_sys_download, n.smallIcon.resId)
+            kotlin.test.assertEquals("app.downloads", n.channelId)
+            kotlin.test.assertEquals("Pause", n.actions.single().title)
+        } finally {
+            AndroidForegroundBridge.notificationCustomizer = null
+        }
+    }
+
+    @Test
+    fun noCustomizer_keepsTheDefaults() {
+        val n = AndroidForegroundBridge.buildNotification(
+            context,
+            kotlin.uuid.Uuid.random(),
+            io.github.mobilebytelabs.worker.ForegroundInfo(notificationId = 1, title = "t", message = "m"),
+        )
+        kotlin.test.assertEquals(AndroidForegroundBridge.DEFAULT_CHANNEL_ID, n.channelId)
+        kotlin.test.assertEquals(android.R.drawable.stat_notify_sync, n.smallIcon.resId)
+    }
+
+    @Test
     fun defaultChannelId_isNonEmpty() {
         val channelId = AndroidForegroundBridge.DEFAULT_CHANNEL_ID
         assertNotNull(channelId)

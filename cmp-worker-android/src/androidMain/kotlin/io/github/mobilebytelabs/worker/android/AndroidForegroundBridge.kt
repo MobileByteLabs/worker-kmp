@@ -47,6 +47,26 @@ public object AndroidForegroundBridge {
     private val activeWorkers = ConcurrentHashMap<Uuid, KmpAndroidWorker>()
 
     /**
+     * Android-only hook over the foreground notification, applied after the defaults. The defaults are a
+     * stock icon on a fixed channel with no actions, which a user-controllable job (a download with
+     * pause / cancel) cannot ship — so set this once from the app's `Application.onCreate` to change the
+     * small icon, move it to your own channel (`builder.setChannelId(...)`, after creating that channel), or
+     * add actions whose `PendingIntent`s carry `workerId` back to your receiver.
+     */
+    @Volatile
+    public var notificationCustomizer: NotificationCustomizer? = null
+
+    /** See [notificationCustomizer]. */
+    public fun interface NotificationCustomizer {
+        public fun customize(
+            context: Context,
+            workerId: Uuid,
+            info: ForegroundInfo,
+            builder: NotificationCompat.Builder,
+        )
+    }
+
+    /**
      * Called by [KmpAndroidWorker] before it delegates to the user's KMP worker.
      * Pairs with [unregister] in a try/finally.
      */
@@ -83,7 +103,7 @@ public object AndroidForegroundBridge {
         val context = androidWorker.applicationContext
         runCatching {
             ensureNotificationChannel(context)
-            val notification = buildNotification(context, info)
+            val notification = buildNotification(context, worker.id, info)
             val androidInfo = buildAndroidForegroundInfo(info.notificationId, notification, info.serviceType)
             androidWorker.setForegroundAsync(androidInfo)
             Logger.withTag("worker-kmp.foreground.android").d {
@@ -111,7 +131,7 @@ public object AndroidForegroundBridge {
         manager.createNotificationChannel(channel)
     }
 
-    private fun buildNotification(context: Context, info: ForegroundInfo): Notification {
+    internal fun buildNotification(context: Context, workerId: Uuid, info: ForegroundInfo): Notification {
         val builder = NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
             .setContentTitle(info.title)
             .setContentText(info.message)
@@ -124,6 +144,7 @@ public object AndroidForegroundBridge {
         } else if (pct == 0) {
             builder.setProgress(PROGRESS_MAX, 0, true)
         }
+        notificationCustomizer?.customize(context, workerId, info, builder)
         return builder.build()
     }
 
