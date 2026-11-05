@@ -58,7 +58,12 @@ public object AndroidForegroundBridge {
 
     /** See [notificationCustomizer]. */
     public fun interface NotificationCustomizer {
-        public fun customize(context: Context, workerId: Uuid, info: ForegroundInfo, builder: NotificationCompat.Builder)
+        public fun customize(
+            context: Context,
+            workerId: Uuid,
+            info: ForegroundInfo,
+            builder: NotificationCompat.Builder,
+        )
     }
 
     /**
